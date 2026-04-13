@@ -885,7 +885,7 @@ function animateLoadingSteps() {
 // AI REPORT GENERATION — via Netlify function
 // ══════════════════════════════════════
 async function generateReport(typeNum, typeName, subtype, scores, sortedScores) {
-  const response = await fetch('/.netlify/functions/generate-report', {
+  const response = await fetch('/api/generate-report', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
