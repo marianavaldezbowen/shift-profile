@@ -59,8 +59,17 @@ ${tieNote}
 
 Context: ${userName} completed The Shift, a program for mothers in post-motherhood identity transition.
 
-Return ONLY this JSON (no markdown, no backticks):
-{"typeLens":"2 paragraphs: how Type ${typeNum} sees the world, fear/desire, how this shaped career identity before motherhood","howYouExperiencedTheShift":"2 paragraphs: how Type ${typeNum} ${subtype} experienced the post-motherhood shift — what broke, confused her, felt like betrayal","subtypeLayer":"2 paragraphs: what ${subtype} subtype means for Type ${typeNum} specifically","typeBlend":"2 paragraphs: first on Type ${secondType.type} influence, second on Type ${thirdType.type} influence","yourStrengths":"2 paragraphs: specific gifts Type ${typeNum} brings to this transition","whereYoullGetStuck":"2 paragraphs: the specific loop for Type ${typeNum} named clearly","breakthroughPath":"2 paragraphs: the internal shift that unlocks Type ${typeNum} — end with a gift","invitationToBLN":"2 paragraphs: warm bridge to Your Best Life Now, mention Module 2"}`;
+Return ONLY a JSON object with exactly these 8 keys. No markdown, no backticks, no explanation before or after:
+{
+  "typeLens": "2 paragraphs about how Type ${typeNum} sees the world and shaped career identity before motherhood",
+  "howYouExperiencedTheShift": "2 paragraphs about how Type ${typeNum} ${subtype} experienced the post-motherhood shift",
+  "subtypeLayer": "2 paragraphs about what ${subtype} subtype means for Type ${typeNum} specifically",
+  "typeBlend": "2 paragraphs: first about Type ${secondType.type} influence, second about Type ${thirdType.type} influence",
+  "yourStrengths": "2 paragraphs about specific gifts Type ${typeNum} brings to this transition",
+  "whereYoullGetStuck": "2 paragraphs about the specific loop for Type ${typeNum}",
+  "breakthroughPath": "2 paragraphs about the internal shift that unlocks Type ${typeNum}",
+  "invitationToBLN": "2 paragraphs bridging to Your Best Life Now program"
+}`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -83,11 +92,20 @@ Return ONLY this JSON (no markdown, no backticks):
       return res.status(500).json({ error: 'Anthropic error', details: data });
     }
 
-    const text = data.content[0].text.trim();
-    const clean = text.replace(/```json|```/g, '').trim();
-    JSON.parse(clean);
+    const rawText = data.content[0].text.trim();
+    
+    // Robust JSON extraction — find the first { and last }
+    const firstBrace = rawText.indexOf('{');
+    const lastBrace = rawText.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1) {
+      return res.status(500).json({ error: 'No JSON found in response', raw: rawText.substring(0, 200) });
+    }
+    
+    const jsonStr = rawText.substring(firstBrace, lastBrace + 1);
+    const parsed = JSON.parse(jsonStr);
 
-    return res.status(200).json(JSON.parse(clean));
+    return res.status(200).json(parsed);
 
   } catch (err) {
     return res.status(500).json({ error: err.message });
