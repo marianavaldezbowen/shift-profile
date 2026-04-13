@@ -37,6 +37,12 @@ export default async function handler(req, res) {
     5:"The Investigator", 6:"The Loyalist", 7:"The Enthusiast", 8:"The Challenger", 9:"The Peacemaker"
   };
 
+  // True wings — only adjacent types on the Enneagram circle
+  const WINGS = {
+    1: [9, 2], 2: [1, 3], 3: [2, 4], 4: [3, 5], 5: [4, 6],
+    6: [5, 7], 7: [6, 8], 8: [7, 9], 9: [8, 1]
+  };
+
   const SUBTYPE_CONTEXT = {
     "Self-Preservation": "directs energy toward personal safety, comfort, and resources",
     "Social": "directs energy toward belonging, community, and group contribution",
@@ -49,13 +55,23 @@ export default async function handler(req, res) {
     ? `NOTE: ${userName} tied between ${tiedTypes.map(t=>`Type ${t.type}`).join(' and ')} — acknowledge this dual pull.`
     : '';
 
+  // Determine if 2nd/3rd types are true wings or just secondary influences
+  const trueWings = WINGS[typeNum] || [];
+  const secondIsWing = trueWings.includes(secondType.type);
+  const thirdIsWing = trueWings.includes(thirdType.type);
+
+  const secondLabel = secondIsWing ? `Type ${secondType.type} wing (${secondName})` : `Type ${secondType.type} (${secondName}) secondary influence`;
+  const thirdLabel = thirdIsWing ? `Type ${thirdType.type} wing (${thirdName})` : `Type ${thirdType.type} (${thirdName}) secondary influence`;
+
   const prompt = `Write a personalized Enneagram Shift Profile report for ${userName}.
 
 Primary: Type ${typeNum} — ${typeName}. This type ${TYPE_CONTEXT[typeNum]}.
 Subtype: ${subtype} — ${SUBTYPE_CONTEXT[subtype]}.
-2nd: Type ${secondType.type} — ${secondName} (${secondType.score}/30). ${TYPE_CONTEXT[secondType.type]}.
-3rd: Type ${thirdType.type} — ${thirdName} (${thirdType.score}/30). ${TYPE_CONTEXT[thirdType.type]}.
+Second highest score: ${secondLabel} (${secondType.score}/30). ${TYPE_CONTEXT[secondType.type]}.
+Third highest score: ${thirdLabel} (${thirdType.score}/30). ${TYPE_CONTEXT[thirdType.type]}.
 ${tieNote}
+
+IMPORTANT ENNEAGRAM ACCURACY NOTE: Wings are ONLY the adjacent types on the Enneagram circle. Type ${typeNum}'s true wings are Types ${trueWings.join(' and ')}. ${secondIsWing ? `Type ${secondType.type} IS a true wing.` : `Type ${secondType.type} is NOT a wing — it is a secondary scoring influence. Never call it a wing.`} ${thirdIsWing ? `Type ${thirdType.type} IS a true wing.` : `Type ${thirdType.type} is NOT a wing — it is a secondary scoring influence. Never call it a wing.`} Use the words "influence," "energy," or "pattern" instead of "wing" when referring to non-adjacent types.
 
 Context: ${userName} completed The Shift, a program for mothers in post-motherhood identity transition.
 
@@ -64,11 +80,11 @@ Return ONLY a JSON object with exactly these 8 keys. No markdown, no backticks, 
   "typeLens": "2 paragraphs about how Type ${typeNum} sees the world and shaped career identity before motherhood",
   "howYouExperiencedTheShift": "2 paragraphs about how Type ${typeNum} ${subtype} experienced the post-motherhood shift",
   "subtypeLayer": "2 paragraphs about what ${subtype} subtype means for Type ${typeNum} specifically",
-  "typeBlend": "2 paragraphs: first about Type ${secondType.type} influence, second about Type ${thirdType.type} influence",
+  "typeBlend": "2 paragraphs: first about the ${secondLabel} influence on her transition, second about the ${thirdLabel} influence. Never use the word 'wing' unless the type is truly adjacent.",
   "yourStrengths": "2 paragraphs about specific gifts Type ${typeNum} brings to this transition",
   "whereYoullGetStuck": "2 paragraphs about the specific loop for Type ${typeNum}",
-  "breakthroughPath": "2 paragraphs about the internal shift that unlocks Type ${typeNum}",
-  "invitationToBLN": "2 paragraphs bridging to Your Best Life Now program"
+  "breakthroughPath": "2 paragraphs about the internal shift that unlocks Type ${typeNum} — end with something that feels like a gift",
+  "invitationToBLN": "MAXIMUM 3 sentences total. Warm, direct, specific to this type. One sentence on what she's ready for, one sentence on what Your Best Life Now offers her specifically (mention Module 2 and Enneagram work), one sentence invitation. No more than 3 sentences."
 }`;
 
   try {
@@ -93,15 +109,15 @@ Return ONLY a JSON object with exactly these 8 keys. No markdown, no backticks, 
     }
 
     const rawText = data.content[0].text.trim();
-    
-    // Robust JSON extraction — find the first { and last }
+
+    // Robust JSON extraction
     const firstBrace = rawText.indexOf('{');
     const lastBrace = rawText.lastIndexOf('}');
-    
+
     if (firstBrace === -1 || lastBrace === -1) {
-      return res.status(500).json({ error: 'No JSON found in response', raw: rawText.substring(0, 200) });
+      return res.status(500).json({ error: 'No JSON found', raw: rawText.substring(0, 200) });
     }
-    
+
     const jsonStr = rawText.substring(firstBrace, lastBrace + 1);
     const parsed = JSON.parse(jsonStr);
 
