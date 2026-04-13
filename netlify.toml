@@ -1,12 +1,6 @@
 [build]
-  functions = "netlify/functions"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-[functions."generate-report"]
-  timeout = 26
+  edge_functions = "netlify/edge-functions"
+  publish = "."
 
 [[headers]]
   for = "/*"
