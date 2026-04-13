@@ -915,11 +915,24 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report) {
 
   let scoreBars = sortedScores.map((s, i) => {
     const pct = Math.round((s.score / maxScore) * 100);
-    const cls = i === 0 ? 'primary' : i === 1 ? 'secondary' : '';
+    // 9 distinct colors fading from strong to subtle as rank decreases
+    const barColors = [
+      '#C4714A', // 1st — terra
+      '#C9A96E', // 2nd — gold
+      '#7A8C7E', // 3rd — sage
+      '#B08A6E', // 4th — warm brown
+      '#9B8BB4', // 5th — soft purple
+      '#7EA8A8', // 6th — teal
+      '#C4A882', // 7th — sand
+      '#A89B8A', // 8th — muted warm
+      '#B8B0A8', // 9th — light grey-warm
+    ];
+    const barColor = barColors[i] || '#DDD5CB';
+    const cls = '';
     return `
       <div class="score-row">
         <div class="score-label">Type ${s.type} — ${s.name.split(' ').slice(1).join(' ')}</div>
-        <div class="score-bar-wrap"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
         <div class="score-num">${s.score}</div>
       </div>
     `;
