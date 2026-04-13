@@ -5,16 +5,33 @@ export default async function handler(request) {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
+  // Vercel edge runtime env access
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+  
   if (!ANTHROPIC_API_KEY) {
-    return new Response(JSON.stringify({ error: 'No API key' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'No API key configured' }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   let body;
   try { body = await request.json(); }
-  catch { return new Response(JSON.stringify({ error: 'Bad JSON' }), { status: 400 }); }
+  catch (e) { 
+    return new Response(JSON.stringify({ error: 'Bad JSON: ' + e.message }), { 
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    }); 
+  }
 
   const { typeNum, typeName, subtype, sortedScores, userName } = body;
+
+  if (!typeNum || !sortedScores || !userName) {
+    return new Response(JSON.stringify({ error: 'Missing required fields' }), { 
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
   const topScore = sortedScores[0].score;
   const tiedTypes = sortedScores.filter(s => s.score === topScore);
@@ -53,17 +70,17 @@ export default async function handler(request) {
 
 Primary: Type ${typeNum} — ${typeName}. This type ${TYPE_CONTEXT[typeNum]}.
 Subtype: ${subtype} — ${SUBTYPE_CONTEXT[subtype]}.
-2nd: Type ${secondType.type} — ${secondName} (${secondType.score}/30). ${TYPE_CONTEXT[secondType.type]}.
-3rd: Type ${thirdType.type} — ${thirdName} (${thirdType.score}/30). ${TYPE_CONTEXT[thirdType.type]}.
+2nd highest: Type ${secondType.type} — ${secondName} (${secondType.score}/30). ${TYPE_CONTEXT[secondType.type]}.
+3rd highest: Type ${thirdType.type} — ${thirdName} (${thirdType.score}/30). ${TYPE_CONTEXT[thirdType.type]}.
 ${tieNote}
 
 Context: ${userName} just completed The Shift, a program for mothers in post-motherhood identity transition.
 
-Return ONLY this JSON (no markdown):
-{"typeLens":"2 paragraphs: how Type ${typeNum} sees the world, their fear/desire, how this shaped career identity before motherhood","howYouExperiencedTheShift":"2 paragraphs: how Type ${typeNum} ${subtype} specifically experienced the post-motherhood shift — what broke, confused her, felt like betrayal","subtypeLayer":"2 paragraphs: what ${subtype} subtype means for Type ${typeNum} — how it makes her different from other ${typeNum}s","typeBlend":"2 paragraphs: first para on Type ${secondType.type} influence, second para on Type ${thirdType.type} influence — how each colors her experience","yourStrengths":"2 paragraphs: specific gifts Type ${typeNum} brings to this transition — earned advantages that make her proud","whereYoullGetStuck":"2 paragraphs: the specific loop for Type ${typeNum} — name it clearly and compassionately","breakthroughPath":"2 paragraphs: the specific internal shift that unlocks Type ${typeNum} — end with something that feels like a gift","invitationToBLN":"2 paragraphs: warm bridge to Your Best Life Now, mention Module 2 goes deep on this type's patterns"}`;
+Return ONLY this JSON object (absolutely no markdown, no backticks, no preamble):
+{"typeLens":"2 paragraphs: how Type ${typeNum} sees the world, their fear and desire, how this shaped career identity before motherhood","howYouExperiencedTheShift":"2 paragraphs: how Type ${typeNum} ${subtype} experienced the post-motherhood shift — what broke, confused her, felt like betrayal","subtypeLayer":"2 paragraphs: what ${subtype} subtype means for Type ${typeNum} specifically","typeBlend":"2 paragraphs: first on Type ${secondType.type} influence, second on Type ${thirdType.type} influence on her experience","yourStrengths":"2 paragraphs: specific gifts Type ${typeNum} brings to this transition","whereYoullGetStuck":"2 paragraphs: the specific loop for Type ${typeNum} named clearly and compassionately","breakthroughPath":"2 paragraphs: the internal shift that unlocks Type ${typeNum} — end with something that feels like a gift","invitationToBLN":"2 paragraphs: warm bridge to Your Best Life Now, mention Module 2"}`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -77,15 +94,18 @@ Return ONLY this JSON (no markdown):
       })
     });
 
-    const data = await response.json();
+    const data = await apiResponse.json();
 
-    if (!response.ok) {
-      return new Response(JSON.stringify({ error: 'API error', details: data }), { status: 500 });
+    if (!apiResponse.ok) {
+      return new Response(JSON.stringify({ error: 'Anthropic error', details: data }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const text = data.content[0].text.trim();
     const clean = text.replace(/```json|```/g, '').trim();
-    JSON.parse(clean);
+    JSON.parse(clean); // validate
 
     return new Response(clean, {
       status: 200,
@@ -93,6 +113,9 @@ Return ONLY this JSON (no markdown):
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: err.message, stack: err.stack }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
