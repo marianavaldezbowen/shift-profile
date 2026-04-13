@@ -162,6 +162,12 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
 .report-box.stuck { background: var(--warm-white); border-left: 4px solid var(--terra); }
 .report-box.breakthrough { background: var(--sage-bg); border-left: 4px solid var(--sage); }
 .report-box.invitation { background: var(--deep); }
+.report-box.strengths { background: var(--gold-bg); border-left: 4px solid var(--gold); }
+.report-box.strengths .report-box-label { color: var(--gold); }
+.report-box.strengths .report-box-body { color: var(--deep); }
+.report-box.blend { background: #F3F0F8; border-left: 4px solid #9B8BB4; }
+.report-box.blend .report-box-label { color: #9B8BB4; }
+.report-box.blend .report-box-body { color: var(--deep); }
 .report-box-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; font-weight: 500; display: block; margin-bottom: 10px; }
 .report-box.stuck .report-box-label { color: var(--terra); }
 .report-box.breakthrough .report-box-label { color: var(--sage); }
@@ -784,14 +790,16 @@ async function submitQuiz() {
     .sort((a, b) => b.score - a.score);
 
   let report;
+  let reportError = null;
   try {
     report = await generateReport(dominantType, typeName, subtype, scores, sortedScores);
   } catch (err) {
-    console.error('Report generation failed, using fallback:', err);
+    console.error('Report generation failed:', err);
+    reportError = err.message;
     report = getFallbackReport(dominantType, typeName, subtype);
   }
 
-  displayReport(dominantType, typeName, subtype, sortedScores, report);
+  displayReport(dominantType, typeName, subtype, sortedScores, report, reportError);
 
   // Send email in background (non-blocking)
   sendReportEmail(dominantType, typeName, subtype, report).catch(e =>
@@ -901,12 +909,33 @@ async function generateReport(typeNum, typeName, subtype, scores, sortedScores) 
 // ══════════════════════════════════════
 // DISPLAY REPORT
 // ══════════════════════════════════════
-function displayReport(typeNum, typeName, subtype, sortedScores, report) {
+function displayReport(typeNum, typeName, subtype, sortedScores, report, reportError) {
   // Update header
   document.getElementById('report-name').textContent = `${userName}'s Profile`;
-  document.getElementById('report-type-label').textContent = `Type ${typeNum}`;
-  document.getElementById('report-type-name').textContent = typeName;
+
+  // Check for ties
+  const topScore = sortedScores[0].score;
+  const tiedTypes = sortedScores.filter(s => s.score === topScore);
+  const isTied = tiedTypes.length > 1;
+
+  if (isTied) {
+    document.getElementById('report-type-label').textContent =
+      tiedTypes.map(t => `Type ${t.type}`).join(' + ');
+    document.getElementById('report-type-name').textContent =
+      tiedTypes.map(t => t.name).join(' / ');
+  } else {
+    document.getElementById('report-type-label').textContent = `Type ${typeNum}`;
+    document.getElementById('report-type-name').textContent = typeName;
+  }
   document.getElementById('report-subtype-label').textContent = `${subtype} Subtype`;
+
+  // Show debug error banner if AI failed
+  if (reportError) {
+    const errBanner = document.createElement('div');
+    errBanner.style.cssText = 'background:#FFF3ED;border:1px solid #C4714A;border-radius:4px;padding:12px 20px;font-size:13px;color:#C4714A;margin-bottom:24px;font-family:monospace;';
+    errBanner.textContent = '⚠ AI report error (showing template): ' + reportError;
+    document.getElementById('report-content').prepend(errBanner);
+  }
 
   // Build score bars
   const maxScore = 30;
@@ -966,6 +995,28 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report) {
       <span class="report-section-label">Your Subtype</span>
       <h2 class="report-section-title">The ${subtype} Layer — Why You Show Up the Way You Do</h2>
       <div class="report-section-body">${formatParagraphs(report.subtypeLayer)}</div>
+    </div>
+
+    <hr class="report-divider">
+
+    <div class="report-section">
+      <span class="report-section-label">Your Type Blend</span>
+      <h2 class="report-section-title">The Full Picture — Your Unique Energy Mix</h2>
+      <div class="report-box blend">
+        <span class="report-box-label">How your secondary types shape your experience</span>
+        <div class="report-box-body">${formatParagraphs(report.typeBlend)}</div>
+      </div>
+    </div>
+
+    <hr class="report-divider">
+
+    <div class="report-section">
+      <span class="report-section-label">Your Strengths</span>
+      <h2 class="report-section-title">What You Bring to This Transition</h2>
+      <div class="report-box strengths">
+        <span class="report-box-label">Your earned advantages</span>
+        <div class="report-box-body">${formatParagraphs(report.yourStrengths)}</div>
+      </div>
     </div>
 
     <hr class="report-divider">
