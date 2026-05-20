@@ -84,7 +84,7 @@ Return ONLY a JSON object with exactly these 8 keys. No markdown, no backticks, 
   "yourStrengths": "2 paragraphs about specific gifts Type ${typeNum} brings to this transition",
   "whereYoullGetStuck": "2 paragraphs about the specific loop for Type ${typeNum}",
   "breakthroughPath": "2 paragraphs about the internal shift that unlocks Type ${typeNum} — end with something that feels like a gift",
-  "invitationToBLN": "MAXIMUM 3 sentences total. Warm, direct, specific to this type. One sentence on what she's ready for, one sentence on what Your Best Life Now offers her specifically (mention Module 2 and Enneagram work), one sentence invitation. No more than 3 sentences."
+  "invitationToBLN": "MAXIMUM 3 sentences total. Warm, direct, specific to this type. Sentence 1: Remind her the real work now happens inside The Shift's 5 videos, and that everything she just read will deepen as she moves through them. Sentence 2: Mention that if she feels ready to go deeper — working through her Enneagram type fully and dismantling unconscious patterns — Your Best Life Now at marianavaldez.com/your-best-life-now is built exactly for that. Sentence 3: Let her know a special discount for Your Best Life Now will be waiting for her at the end of The Shift."
 }`;
 
   try {
