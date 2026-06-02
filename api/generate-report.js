@@ -1,147 +1,1209 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Shift Profile — Discover Your Enneagram Type</title>
+
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1309711794380173');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1309711794380173&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel -->
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root {
+  --cream: #F7F3EE;
+  --warm-white: #FDFAF7;
+  --deep: #1C1814;
+  --terra: #C4714A;
+  --terra-light: #E8956F;
+  --terra-bg: #FFF3ED;
+  --sage: #7A8C7E;
+  --sage-bg: #EFF3F0;
+  --gold: #C9A96E;
+  --gold-light: #E8D5B0;
+  --gold-bg: #FDF7EC;
+  --muted: #8A7E74;
+  --rule: #DDD5CB;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; min-height: 100vh; }
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── WELCOME SCREEN ── */
+#screen-welcome {
+  background: var(--deep);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 40px;
+  position: relative;
+  overflow: hidden;
+}
+#screen-welcome::before {
+  content: '';
+  position: absolute;
+  top: -150px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(196,113,74,0.15) 0%, transparent 65%);
+  pointer-events: none;
+}
+.welcome-badge { display: inline-block; border: 1px solid rgba(196,113,74,0.4); color: var(--terra-light); font-size: 10px; letter-spacing: 4px; text-transform: uppercase; padding: 6px 18px; border-radius: 100px; margin-bottom: 32px; }
+.welcome-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(44px, 8vw, 80px); font-weight: 300; line-height: 1.0; color: var(--warm-white); margin-bottom: 20px; }
+.welcome-title em { font-style: italic; color: var(--terra-light); }
+.welcome-sub { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-style: italic; color: var(--gold-light); max-width: 520px; margin: 0 auto 40px; line-height: 1.6; }
+.welcome-meta { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+.welcome-meta-item { text-align: center; }
+.welcome-meta-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+.welcome-meta-value { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold); }
+
+/* ── INTAKE FORM ── */
+.intake-form { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 32px; max-width: 440px; width: 100%; margin: 0 auto 32px; text-align: left; }
+.intake-form label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
+.intake-form input { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 3px; padding: 12px 16px; color: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 15px; margin-bottom: 20px; outline: none; transition: border-color 0.2s; }
+.intake-form input:focus { border-color: var(--terra); }
+.intake-form input::placeholder { color: rgba(255,255,255,0.3); }
+
+/* ── BUTTONS ── */
+.btn-primary { background: var(--terra); color: white; border: none; border-radius: 3px; padding: 16px 40px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; cursor: pointer; transition: background 0.2s; display: inline-block; }
+.btn-primary:hover { background: var(--terra-light); }
+.btn-secondary { background: transparent; color: var(--warm-white); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 3px; padding: 14px 32px; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s; display: inline-block; }
+.btn-secondary:hover { border-color: rgba(255,255,255,0.6); }
+.btn-dark { background: var(--deep); color: var(--warm-white); border: none; border-radius: 3px; padding: 14px 32px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.btn-dark:hover { background: #2C2420; }
+
+/* ── INSTRUCTIONS ── */
+.instructions { max-width: 540px; margin: 0 auto; }
+.instructions p { color: rgba(253,250,247,0.6); font-size: 14px; line-height: 1.8; }
+
+/* ── QUIZ SCREEN ── */
+#screen-quiz { background: var(--cream); }
+.quiz-header { background: var(--deep); padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.quiz-logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--warm-white); font-style: italic; }
+.quiz-progress-wrap { flex: 1; max-width: 300px; margin: 0 40px; }
+.quiz-progress-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; margin-bottom: 6px; }
+.quiz-progress-bar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+.quiz-progress-fill { height: 100%; background: var(--terra); border-radius: 100px; transition: width 0.4s ease; }
+.quiz-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 60px 40px; max-width: 720px; margin: 0 auto; width: 100%; }
+.section-intro { margin-bottom: 48px; }
+.section-intro .eyebrow { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--terra); font-weight: 500; display: block; margin-bottom: 10px; }
+.section-intro h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px, 4vw, 42px); font-weight: 300; line-height: 1.2; margin-bottom: 12px; }
+.section-intro p { font-size: 15px; color: var(--muted); line-height: 1.7; }
+.question-card { background: var(--warm-white); border-radius: 4px; padding: 36px 40px; margin-bottom: 16px; }
+.question-num { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 12px; }
+.question-text { font-family: 'Cormorant Garamond', serif; font-size: clamp(20px, 3vw, 26px); font-weight: 300; line-height: 1.4; margin-bottom: 28px; color: var(--deep); }
+.likert { display: flex; gap: 8px; flex-wrap: wrap; }
+.likert-option { flex: 1; min-width: 80px; }
+.likert-option input[type="radio"] { display: none; }
+.likert-option label { display: block; text-align: center; padding: 10px 8px; border: 1.5px solid var(--rule); border-radius: 3px; cursor: pointer; transition: all 0.15s; font-size: 12px; line-height: 1.3; color: var(--muted); }
+.likert-option input:checked + label { border-color: var(--terra); background: var(--terra-bg); color: var(--terra); font-weight: 500; }
+.likert-option label:hover { border-color: var(--terra-light); color: var(--deep); }
+.likert-labels { display: flex; justify-content: space-between; padding: 0 4px; margin-top: 6px; }
+.likert-labels span { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
+
+/* Ranking */
+.rank-instructions { font-size: 13px; color: var(--muted); margin-bottom: 20px; font-style: italic; }
+.rank-items { display: flex; flex-direction: column; gap: 10px; }
+.rank-item { background: var(--cream); border: 1.5px solid var(--rule); border-radius: 3px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: grab; transition: all 0.15s; user-select: none; }
+.rank-item:active { cursor: grabbing; }
+.rank-item.dragging { opacity: 0.5; border-color: var(--terra); }
+.rank-item.drag-over { border-color: var(--terra); background: var(--terra-bg); }
+.rank-num { width: 28px; height: 28px; border-radius: 50%; background: var(--terra); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.rank-text { font-size: 15px; line-height: 1.5; color: var(--deep); flex: 1; }
+.rank-handle { color: var(--rule); font-size: 16px; flex-shrink: 0; }
+.quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+.quiz-nav-back { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; padding: 8px 0; }
+.quiz-nav-back:hover { color: var(--deep); }
+.question-error { color: var(--terra); font-size: 13px; margin-top: 8px; display: none; }
+
+/* ── LOADING SCREEN ── */
+#screen-loading { background: var(--deep); justify-content: center; align-items: center; text-align: center; padding: 60px 40px; }
+.loading-icon { width: 64px; height: 64px; border: 2px solid rgba(196,113,74,0.3); border-top-color: var(--terra); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 32px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-title { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--warm-white); margin-bottom: 12px; }
+.loading-sub { font-size: 15px; color: var(--muted); max-width: 400px; margin: 0 auto; }
+.loading-steps { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 40px auto 0; }
+.loading-step { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); text-align: left; }
+.loading-step .step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); flex-shrink: 0; transition: background 0.3s; }
+.loading-step.done .step-dot { background: var(--terra); }
+.loading-step.active .step-dot { background: var(--terra-light); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ── STREAMING LOADING ── */
+.streaming-preview {
+  max-width: 520px;
+  margin: 32px auto 0;
+  text-align: left;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 20px 24px;
+  min-height: 80px;
+}
+.streaming-preview-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--terra-light);
+  margin-bottom: 10px;
+  display: block;
+}
+.streaming-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: rgba(253,250,247,0.7);
+  line-height: 1.7;
+  font-style: italic;
+}
+.streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: var(--terra);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 0.8s infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ── REPORT SCREEN ── */
+#screen-report { background: var(--cream); }
+.report-header { background: var(--deep); padding: 48px 40px 40px; text-align: center; position: relative; overflow: hidden; }
+.report-header::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(196,113,74,0.12) 0%, transparent 65%); pointer-events: none; }
+.report-eyebrow { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--terra-light); display: block; margin-bottom: 12px; position: relative; }
+.report-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 6vw, 60px); font-weight: 300; color: var(--warm-white); margin-bottom: 8px; position: relative; }
+.report-type-badge { display: inline-flex; gap: 12px; align-items: center; background: rgba(196,113,74,0.2); border: 1px solid rgba(196,113,74,0.4); border-radius: 100px; padding: 8px 24px; margin-top: 16px; position: relative; }
+.report-type-badge span { font-size: 13px; color: var(--terra-light); letter-spacing: 1px; }
+.report-type-badge strong { font-size: 13px; color: var(--warm-white); }
+.report-content { max-width: 760px; margin: 0 auto; padding: 56px 40px 80px; }
+
+/* ── REPORT SECTIONS ── */
+.report-section { margin-bottom: 56px; }
+.report-section-label { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--terra); font-weight: 500; display: block; margin-bottom: 10px; }
+.report-section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(24px, 3.5vw, 34px); font-weight: 300; line-height: 1.2; margin-bottom: 20px; }
+.report-section-body { font-size: 16px; line-height: 1.95; color: var(--deep); }
+.report-section-body p { margin-bottom: 18px; }
+.report-section-body p:last-child { margin-bottom: 0; }
+.report-section-body strong { font-weight: 500; color: var(--terra); }
+.report-divider { border: none; border-top: 1px solid var(--rule); margin: 56px 0; }
+
+/* ── REPORT BOXES ── */
+.report-box { border-radius: 4px; padding: 32px 36px; margin-top: 20px; }
+.report-box.stuck { background: var(--warm-white); border-left: 4px solid var(--terra); }
+.report-box.breakthrough { background: var(--sage-bg); border-left: 4px solid var(--sage); }
+.report-box.invitation { background: var(--deep); }
+.report-box.strengths { background: var(--gold-bg); border-left: 4px solid var(--gold); }
+.report-box.strengths .report-box-label { color: var(--gold); }
+.report-box.strengths .report-box-body { color: var(--deep); }
+.report-box.blend { background: #F3F0F8; border-left: 4px solid #9B8BB4; }
+.report-box.blend .report-box-label { color: #9B8BB4; }
+.report-box.blend .report-box-body { color: var(--deep); }
+.report-box.intro { background: var(--warm-white); border-left: 4px solid var(--gold); }
+.report-box.intro .report-box-label { color: var(--gold); }
+.report-box.inner-world { background: #EDF0F8; border-left: 4px solid #7B8FBF; }
+.report-box.inner-world .report-box-label { color: #7B8FBF; }
+.report-box.blindspot { background: #FDF0EF; border-left: 4px solid #C47A7A; }
+.report-box.blindspot .report-box-label { color: #C47A7A; }
+.report-box.relationships { background: var(--sage-bg); border-left: 4px solid var(--sage); }
+.report-box.relationships .report-box-label { color: var(--sage); }
+.report-box.growth { background: var(--gold-bg); border-left: 4px solid var(--terra); }
+.report-box.growth .report-box-label { color: var(--terra); }
+.report-box-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; font-weight: 500; display: block; margin-bottom: 12px; }
+.report-box.stuck .report-box-label { color: var(--terra); }
+.report-box.breakthrough .report-box-label { color: var(--sage); }
+.report-box.invitation .report-box-label { color: var(--terra-light); }
+.report-box-body { font-size: 15px; line-height: 1.9; }
+.report-box.stuck .report-box-body { color: var(--deep); }
+.report-box.breakthrough .report-box-body { color: var(--deep); }
+.report-box.invitation .report-box-body { color: var(--gold-light); }
+.report-box.inner-world .report-box-body { color: var(--deep); }
+.report-box.blindspot .report-box-body { color: var(--deep); }
+.report-box.relationships .report-box-body { color: var(--deep); }
+.report-box.growth .report-box-body { color: var(--deep); }
+.report-box-body p { margin-bottom: 16px; }
+.report-box-body p:last-child { margin-bottom: 0; }
+
+/* ── REFLECTION QUESTIONS ── */
+.questions-box { background: var(--deep); border-radius: 4px; padding: 36px 40px; }
+.questions-box .report-box-label { color: var(--terra-light); }
+.question-item { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
+.question-item:last-child { margin-bottom: 0; }
+.question-num-badge { width: 28px; height: 28px; border-radius: 50%; background: rgba(196,113,74,0.25); border: 1px solid rgba(196,113,74,0.4); color: var(--terra-light); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; margin-top: 2px; }
+.question-text-display { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--gold-light); line-height: 1.6; font-style: italic; }
+
+/* Type score bar */
+.scores-section { background: var(--warm-white); border-radius: 4px; padding: 28px 32px; margin-bottom: 56px; }
+.scores-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+.score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.score-label { font-size: 12px; color: var(--muted); width: 90px; flex-shrink: 0; }
+.score-bar-wrap { flex: 1; height: 6px; background: var(--rule); border-radius: 100px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 100px; background: var(--rule); transition: width 0.8s ease; }
+.score-num { font-size: 12px; color: var(--muted); width: 32px; text-align: right; flex-shrink: 0; }
+
+/* Report actions */
+.report-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--rule); }
+
+/* ── ERROR ── */
+.error-msg { background: var(--terra-bg); border: 1px solid var(--terra-light); border-radius: 3px; padding: 12px 16px; font-size: 13px; color: var(--terra); margin-top: 12px; display: none; }
+
+/* ── ACCESS LOCKED SCREEN ── */
+#screen-locked {
+  background: var(--deep);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 40px;
+}
+.locked-icon { font-size: 48px; margin-bottom: 24px; opacity: 0.6; }
+.locked-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 5vw, 52px); font-weight: 300; color: var(--warm-white); margin-bottom: 16px; line-height: 1.1; }
+.locked-title em { font-style: italic; color: var(--terra-light); }
+.locked-sub { font-size: 16px; color: var(--muted); max-width: 440px; margin: 0 auto 40px; line-height: 1.8; }
+.locked-link { font-size: 13px; color: var(--muted); margin-top: 20px; }
+.locked-link a { color: var(--terra-light); text-decoration: none; }
+.locked-link a:hover { text-decoration: underline; }
+
+/* ── THANK YOU SCREEN ── */
+#screen-thankyou {
+  background: var(--deep);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 40px;
+  position: relative;
+  overflow: hidden;
+}
+#screen-thankyou::before {
+  content: '';
+  position: absolute;
+  top: -120px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(122,140,126,0.15) 0%, transparent 65%);
+  pointer-events: none;
+}
+.thankyou-badge { display: inline-block; border: 1px solid rgba(122,140,126,0.4); color: #A8BEA9; font-size: 10px; letter-spacing: 4px; text-transform: uppercase; padding: 6px 18px; border-radius: 100px; margin-bottom: 28px; }
+.thankyou-icon { font-size: 52px; margin-bottom: 20px; display: block; }
+.thankyou-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 6vw, 64px); font-weight: 300; line-height: 1.05; color: var(--warm-white); margin-bottom: 16px; }
+.thankyou-title em { font-style: italic; color: #A8BEA9; }
+.thankyou-sub { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-style: italic; color: var(--gold-light); max-width: 520px; margin: 0 auto 48px; line-height: 1.6; }
+.thankyou-steps { display: flex; flex-direction: column; gap: 16px; max-width: 480px; margin: 0 auto 48px; text-align: left; }
+.thankyou-step { display: flex; gap: 16px; align-items: flex-start; background: rgba(255,255,255,0.05); border-radius: 4px; padding: 16px 20px; }
+.thankyou-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--terra); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; margin-top: 1px; }
+.thankyou-step-text { font-size: 14px; color: rgba(253,250,247,0.8); line-height: 1.6; }
+.thankyou-step-text strong { color: var(--warm-white); display: block; margin-bottom: 2px; font-size: 15px; }
+.thankyou-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.bln-callout { background: rgba(196,113,74,0.12); border: 1px solid rgba(196,113,74,0.3); border-radius: 4px; padding: 24px 32px; max-width: 480px; margin: 32px auto 0; }
+.bln-callout p { font-size: 14px; color: var(--gold-light); line-height: 1.8; }
+.bln-callout a { color: var(--terra-light); font-weight: 500; text-decoration: none; }
+.bln-callout a:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .quiz-header { padding: 16px 20px; }
+  .quiz-progress-wrap { display: none; }
+  .quiz-body { padding: 32px 20px; }
+  .question-card { padding: 24px 20px; }
+  .likert { gap: 4px; }
+  .likert-option label { padding: 8px 4px; font-size: 10px; }
+  .report-content { padding: 32px 20px 60px; }
+  .report-header { padding: 36px 24px 32px; }
+  .report-box { padding: 24px 20px; }
+  .questions-box { padding: 24px 20px; }
+  .streaming-preview { margin: 24px 16px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SCREEN 0: ACCESS LOCKED
+══════════════════════════════════════ -->
+<div id="screen-locked" class="screen">
+  <div class="locked-icon">🔒</div>
+  <h1 class="locked-title">This profile is for<br><em>buyers only</em></h1>
+  <p class="locked-sub">The Shift Profile is available exclusively to women who have purchased it. If you've already bought access, please use the link from your purchase confirmation email.</p>
+  <a href="https://marianavaldez.com/shift-profile" class="btn-primary" style="text-decoration:none;">Get Access →</a>
+  <div class="locked-link" style="margin-top:24px;">
+    Already purchased? <a href="mailto:hello@marianavaldez.com">Contact support</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1: WELCOME
+══════════════════════════════════════ -->
+<div id="screen-welcome" class="screen active">
+  <span class="welcome-badge">The Shift Profile</span>
+  <h1 class="welcome-title">Discover who you<br><em>actually are</em></h1>
+  <p class="welcome-sub">A personalized Enneagram report built for women in the middle of becoming someone new</p>
+  <div class="welcome-meta">
+    <div class="welcome-meta-item">
+      <span class="welcome-meta-label">Questions</span>
+      <span class="welcome-meta-value">57</span>
+    </div>
+    <div class="welcome-meta-item">
+      <span class="welcome-meta-label">Time</span>
+      <span class="welcome-meta-value">~10 min</span>
+    </div>
+    <div class="welcome-meta-item">
+      <span class="welcome-meta-label">Result</span>
+      <span class="welcome-meta-value">Instant Report</span>
+    </div>
+  </div>
+  <div class="intake-form">
+    <label>Your First Name</label>
+    <input type="text" id="user-name" placeholder="e.g. Sofia" autocomplete="given-name">
+    <label>Your Email Address</label>
+    <input type="email" id="user-email" placeholder="sofia@example.com" autocomplete="email">
+    <div class="error-msg" id="intake-error">Please enter your name and a valid email address.</div>
+  </div>
+  <button class="btn-primary" onclick="startQuiz()">Begin My Profile →</button>
+  <div class="instructions" style="margin-top: 32px;">
+    <p>As you read each statement, go with your first instinct — the answer that feels most true to who you are <em>most of the time</em>, not just on your best day.</p>
+    <p style="margin-top: 8px;">There are no right or wrong answers. No type is better than another. This is about awareness, not judgment.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2: QUIZ
+══════════════════════════════════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-logo">The Shift Profile</div>
+    <div class="quiz-progress-wrap">
+      <div class="quiz-progress-label">
+        <span id="progress-section">Section 1 of 2</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="quiz-progress-bar">
+        <div class="quiz-progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="quiz-body" id="quiz-body"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3: LOADING
+══════════════════════════════════════ -->
+<div id="screen-loading" class="screen">
+  <div class="loading-icon"></div>
+  <div class="loading-title">Building your profile...</div>
+  <div class="loading-sub">We're reading your answers and writing something just for you.</div>
+  <div class="loading-steps">
+    <div class="loading-step active" id="step-1"><div class="step-dot"></div><span>Calculating your Enneagram type</span></div>
+    <div class="loading-step" id="step-2"><div class="step-dot"></div><span>Identifying your subtype</span></div>
+    <div class="loading-step" id="step-3"><div class="step-dot"></div><span>Writing your personalized report</span></div>
+    <div class="loading-step" id="step-4"><div class="step-dot"></div><span>Almost there...</span></div>
+  </div>
+  <div class="streaming-preview" id="streaming-preview" style="display:none;">
+    <span class="streaming-preview-label">A glimpse of your report</span>
+    <div class="streaming-text" id="streaming-text"><span class="streaming-cursor"></span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 4: REPORT
+══════════════════════════════════════ -->
+<div id="screen-report" class="screen">
+  <div class="report-header">
+    <span class="report-eyebrow">Your Shift Profile</span>
+    <div class="report-name" id="report-name">Loading...</div>
+    <div style="position:relative;">
+      <div class="report-type-badge">
+        <span id="report-type-label">Type</span>
+        <strong id="report-type-name">—</strong>
+        <span>·</span>
+        <span id="report-subtype-label">Subtype</span>
+      </div>
+    </div>
+  </div>
+  <div class="report-content" id="report-content"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 5: THANK YOU
+══════════════════════════════════════ -->
+<div id="screen-thankyou" class="screen">
+  <span class="thankyou-badge">You did it</span>
+  <span class="thankyou-icon">✦</span>
+  <h1 class="thankyou-title">Your report is<br><em>on its way</em></h1>
+  <p class="thankyou-sub">Check your inbox — your personalized Shift Profile has been sent to you.</p>
+  <div class="thankyou-steps">
+    <div class="thankyou-step">
+      <div class="thankyou-step-num">1</div>
+      <div class="thankyou-step-text">
+        <strong>Check your email</strong>
+        Your full report is waiting in your inbox. Check spam if you don't see it in a few minutes.
+      </div>
+    </div>
+    <div class="thankyou-step">
+      <div class="thankyou-step-num">2</div>
+      <div class="thankyou-step-text">
+        <strong>Read slowly</strong>
+        Your report was written specifically for your type and subtype. Give yourself quiet time with it — don't rush.
+      </div>
+    </div>
+    <div class="thankyou-step">
+      <div class="thankyou-step-num">3</div>
+      <div class="thankyou-step-text">
+        <strong>Notice what lands</strong>
+        Write down the one thing that surprised you most. That's usually the most important thing.
+      </div>
+    </div>
+  </div>
+  <div class="thankyou-buttons">
+    <button class="btn-primary" onclick="showScreen('screen-report'); window.scrollTo(0,0);">View My Report Again</button>
+  </div>
+  <div class="bln-callout">
+    <p>Ready to go deeper? In <strong>Your Best Life Now</strong>, we explore your Enneagram type fully — the subconscious patterns, the sticking points, and exactly how to move through them. <a href="https://marianavaldez.com/your-best-life-now" target="_blank">Learn more →</a></p>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// EMAILJS CONFIG
+// ══════════════════════════════════════
+const EMAILJS_PUBLIC_KEY  = 'Hbh_HwtgRTKQhMroG';
+const EMAILJS_SERVICE_ID  = 'service_tpldbbn';
+const EMAILJS_TEMPLATE_ID = 'template_um5yh7s';
+
+window.addEventListener('load', function() {
+  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  }
+  checkAccess();
+});
+
+// ══════════════════════════════════════
+// ACCESS PROTECTION
+// ══════════════════════════════════════
+const ACCESS_TOKEN = 'shiftprofile2024';
+
+function checkAccess() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (!token || token !== ACCESS_TOKEN) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-locked').classList.add('active');
+  }
+}
+
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const LIKERT_OPTIONS = [
+  { value: 1, label: "Strongly\nDisagree" },
+  { value: 2, label: "Disagree" },
+  { value: 3, label: "Neutral" },
+  { value: 4, label: "Agree" },
+  { value: 5, label: "Strongly\nAgree" },
+];
+
+const TYPE_NAMES = {
+  1: "The Reformer", 2: "The Helper", 3: "The Achiever", 4: "The Individualist",
+  5: "The Investigator", 6: "The Loyalist", 7: "The Enthusiast", 8: "The Challenger", 9: "The Peacemaker"
+};
+
+const SCORED_QUESTIONS = [
+  { id: "1a", type: 1, text: "I have a strong sense of what's right and feel responsible for upholding it — even when it's inconvenient." },
+  { id: "1b", type: 1, text: "I find it genuinely difficult to relax when I know something could be done better." },
+  { id: "1c", type: 1, text: "I hold myself to standards I rarely share out loud — but feel when I fall short of them." },
+  { id: "1d", type: 1, text: "I believe there's a right way to do things, and it bothers me when people cut corners." },
+  { id: "1e", type: 1, text: "I want to be good — not just look good. My integrity matters to me more than my image." },
+  { id: "1f", type: 1, text: "A small inner critic often notices what I did wrong before anyone else does." },
+  { id: "2a", type: 2, text: "I feel most like myself when I'm genuinely useful to someone I care about." },
+  { id: "2b", type: 2, text: "I sometimes realize I've spent so much time on others that I don't know what I actually need." },
+  { id: "2c", type: 2, text: "Being loved and being needed feel deeply connected for me." },
+  { id: "2d", type: 2, text: "I can sense what others need before they ask — and it's hard not to respond to that." },
+  { id: "2e", type: 2, text: "I struggle to ask for help because it feels like I should be the one giving it." },
+  { id: "2f", type: 2, text: "My sense of worth is quietly tied to whether the people in my life are okay." },
+  { id: "3a", type: 3, text: "I'm aware of how I'm perceived and adjust naturally — not to be fake, but to succeed." },
+  { id: "3b", type: 3, text: "My identity has been deeply tied to what I achieve and how I'm seen achieving it." },
+  { id: "3c", type: 3, text: "Failure — or even the appearance of it — hits me harder than I usually let on." },
+  { id: "3d", type: 3, text: "I've spent a lot of energy becoming someone impressive. The shift toward 'meaningful' has been disorienting." },
+  { id: "3e", type: 3, text: "I'm efficient, goal-oriented, and uncomfortable when I don't have something to show for my time." },
+  { id: "3f", type: 3, text: "I sometimes wonder if the version of me everyone admires is actually the real me." },
+  { id: "4a", type: 4, text: "I've always felt a little different — like I experience things more intensely than most people around me." },
+  { id: "4b", type: 4, text: "I'd rather be authentic than well-liked. Fitting in at the cost of my truth feels like a kind of death." },
+  { id: "4c", type: 4, text: "There's a recurring sense that something essential is missing in me that others seem to have naturally." },
+  { id: "4d", type: 4, text: "My emotional life is rich and complex — I feel things deeply and often need space to process them." },
+  { id: "4e", type: 4, text: "I envy those who seem content. I want depth and meaning, but it often comes with a quiet ache." },
+  { id: "4f", type: 4, text: "I want to be truly seen — not for what I do, but for who I actually am underneath all of it." },
+  { id: "5a", type: 5, text: "I need time and space to think before I'm ready to engage — with people, decisions, or emotions." },
+  { id: "5b", type: 5, text: "Being around people for too long drains me. Solitude isn't loneliness — it's where I restore." },
+  { id: "5c", type: 5, text: "I want to understand things deeply before I commit to them or talk about them." },
+  { id: "5d", type: 5, text: "I can feel anxious about having enough — enough time, energy, privacy, resources — to function well." },
+  { id: "5e", type: 5, text: "I tend to observe more than I participate, and I'm more comfortable with knowledge than with feelings." },
+  { id: "5f", type: 5, text: "I protect my inner world carefully — not everyone earns the right to know what I really think." },
+  { id: "6a", type: 6, text: "I scan for what could go wrong — not because I'm negative, but because being prepared feels safe." },
+  { id: "6b", type: 6, text: "I value loyalty above almost everything. When trust is broken, it's hard to rebuild." },
+  { id: "6c", type: 6, text: "I've noticed I can be skeptical of things that seem too good — I look for the catch." },
+  { id: "6d", type: 6, text: "Before big decisions, I tend to overthink and seek reassurance from people I trust." },
+  { id: "6e", type: 6, text: "Feeling supported and knowing others have my back matters more to me than most people realize." },
+  { id: "6f", type: 6, text: "I've questioned my own judgment enough times that I sometimes doubt myself more than I should." },
+  { id: "7a", type: 7, text: "I move toward what's exciting and tend to reframe difficulty into opportunity — sometimes too quickly." },
+  { id: "7b", type: 7, text: "Staying with painful emotions for too long feels like a kind of trap I need to escape." },
+  { id: "7c", type: 7, text: "I can start more things than I finish because the beginning of something always feels the most alive." },
+  { id: "7d", type: 7, text: "Boredom, repetition, and limitation feel genuinely suffocating to me." },
+  { id: "7e", type: 7, text: "I want my life to feel expansive — full of possibility, experience, and joy." },
+  { id: "7f", type: 7, text: "The version of myself I most resist is the one who has to sit still and face what hurts." },
+  { id: "8a", type: 8, text: "I lead instinctively — not because I seek power, but because someone has to and I trust myself to do it." },
+  { id: "8b", type: 8, text: "Vulnerability feels dangerous. I protect myself by staying strong, even when I'm not." },
+  { id: "8c", type: 8, text: "I have little patience for weakness, injustice, or being controlled by others." },
+  { id: "8d", type: 8, text: "I can be too much for some people — too direct, too intense — and I've learned to live with that." },
+  { id: "8e", type: 8, text: "My anger comes up fast and signals when something feels wrong or when someone is being treated unfairly." },
+  { id: "8f", type: 8, text: "What I want more than almost anything is to be respected — and to never be seen as weak." },
+  { id: "9a", type: 9, text: "I go along with what others want more often than I speak up — and I tell myself it's because I don't mind." },
+  { id: "9b", type: 9, text: "I struggle to know what I really want, especially when it might create tension with someone I love." },
+  { id: "9c", type: 9, text: "Conflict feels like such a threat to connection that I'll absorb a lot of discomfort to avoid it." },
+  { id: "9d", type: 9, text: "I can numb out or distract myself when things get too hard to face directly." },
+  { id: "9e", type: 9, text: "People describe me as calming to be around — but inside I'm often more uncertain than I appear." },
+  { id: "9f", type: 9, text: "My needs have a habit of going last — not because I'm selfless, but because asserting them feels risky." },
+];
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+const SHUFFLED_QUESTIONS = shuffleArray(SCORED_QUESTIONS);
+
+const SUBTYPE_ITEMS = [
+  { id: "sp", subtype: "Self-Preservation", text: "My energy goes most toward securing my personal safety, health, comfort, and resources — I need my foundations to feel stable before I can give fully to anything else." },
+  { id: "so", subtype: "Social", text: "My energy goes most toward my place in groups — belonging, contributing, being valued by my community. I'm aware of social dynamics and motivated by being part of something meaningful." },
+  { id: "sx", subtype: "One-on-One", text: "My energy goes most toward deep, intense one-on-one connection — I'm drawn to people and experiences that feel electric, transformative, and completely real." }
+];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let userName = '';
+let userEmail = '';
+let answers = {};
+let subtypeRanking = ['sp', 'so', 'sx'];
+let currentBatch = 0;
+const BATCH_SIZE = 6;
+const TOTAL_BATCHES = 9;
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  userName = document.getElementById('user-name').value.trim();
+  userEmail = document.getElementById('user-email').value.trim();
+  const err = document.getElementById('intake-error');
+  if (!userName || !userEmail || !userEmail.includes('@')) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+
+  // Fire Meta Pixel lead event
+  if (typeof fbq !== 'undefined') {
+    fbq('track', 'Lead');
   }
 
-  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'No API key configured' });
+  currentBatch = 0;
+  showScreen('screen-quiz');
+  renderBatch(0);
+}
+
+function updateProgress() {
+  const total = TOTAL_BATCHES + 1;
+  const done = currentBatch;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  if (currentBatch < TOTAL_BATCHES) {
+    document.getElementById('progress-section').textContent = `Section 1 of 2 — Part ${currentBatch + 1} of ${TOTAL_BATCHES}`;
+  } else {
+    document.getElementById('progress-section').textContent = 'Section 2 of 2';
+  }
+}
+
+// ══════════════════════════════════════
+// RENDER QUIZ
+// ══════════════════════════════════════
+function renderBatch(batchIndex) {
+  updateProgress();
+  const body = document.getElementById('quiz-body');
+  const start = batchIndex * BATCH_SIZE;
+  const questions = SHUFFLED_QUESTIONS.slice(start, start + BATCH_SIZE);
+  let html = `
+    <div class="section-intro">
+      <span class="eyebrow">Section 1 of 2 · Part ${batchIndex + 1} of ${TOTAL_BATCHES}</span>
+      <h2>How much does each statement<br>resonate with you?</h2>
+      <p>Go with your first instinct — the version of you that shows up most of the time, not your ideal self.</p>
+    </div>
+  `;
+  questions.forEach((q, i) => {
+    const globalNum = start + i + 1;
+    html += `
+      <div class="question-card">
+        <span class="question-num">Statement ${globalNum} of ${SCORED_QUESTIONS.length}</span>
+        <div class="question-text">"${q.text}"</div>
+        <div class="likert">
+    `;
+    LIKERT_OPTIONS.forEach(opt => {
+      const checked = answers[q.id] === opt.value ? 'checked' : '';
+      html += `
+        <div class="likert-option">
+          <input type="radio" name="q_${q.id}" id="q_${q.id}_${opt.value}" value="${opt.value}" ${checked} onchange="setAnswer('${q.id}', ${opt.value})">
+          <label for="q_${q.id}_${opt.value}">${opt.label}</label>
+        </div>
+      `;
+    });
+    html += `</div></div>`;
+  });
+  html += `
+    <div class="question-error" id="batch-error">Please answer all statements before continuing.</div>
+    <div class="quiz-nav">
+      ${batchIndex > 0 ? `<button class="quiz-nav-back" onclick="goBackBatch()">← Back</button>` : '<div></div>'}
+      <button class="btn-primary" onclick="nextBatch()">Continue →</button>
+    </div>
+  `;
+  body.innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function renderSubtypeSection() {
+  updateProgress();
+  const body = document.getElementById('quiz-body');
+  let itemsHtml = '';
+  subtypeRanking.forEach((id, idx) => {
+    const item = SUBTYPE_ITEMS.find(s => s.id === id);
+    itemsHtml += `
+      <div class="rank-item" draggable="true" data-id="${id}"
+        ondragstart="dragStart(event)" ondragover="dragOver(event)"
+        ondrop="dropItem(event)" ondragleave="dragLeave(event)">
+        <div class="rank-num">${idx + 1}</div>
+        <div class="rank-text"><strong>${item.subtype}</strong><br>${item.text}</div>
+        <div class="rank-handle">⠿</div>
+      </div>
+    `;
+  });
+  body.innerHTML = `
+    <div class="section-intro">
+      <span class="eyebrow">Section 2 of 2 · Final Step</span>
+      <h2>Which energy drives<br>you most?</h2>
+      <p>Drag these three descriptions into order — most like you at the top, least like you at the bottom. Go with your gut.</p>
+    </div>
+    <p class="rank-instructions">Drag to reorder — #1 is most like you</p>
+    <div class="rank-items" id="rank-container">${itemsHtml}</div>
+    <div class="quiz-nav">
+      <button class="quiz-nav-back" onclick="goBackToLastBatch()">← Back</button>
+      <button class="btn-primary" onclick="submitQuiz()">Generate My Profile →</button>
+    </div>
+  `;
+  window.scrollTo(0, 0);
+}
+
+function setAnswer(qId, value) { answers[qId] = value; }
+
+function nextBatch() {
+  const start = currentBatch * BATCH_SIZE;
+  const questions = SHUFFLED_QUESTIONS.slice(start, start + BATCH_SIZE);
+  const unanswered = questions.filter(q => !answers[q.id]);
+  if (unanswered.length > 0) {
+    document.getElementById('batch-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('batch-error').style.display = 'none';
+  currentBatch++;
+  if (currentBatch < TOTAL_BATCHES) {
+    renderBatch(currentBatch);
+  } else {
+    renderSubtypeSection();
+  }
+}
+
+function goBackBatch() {
+  if (currentBatch > 0) { currentBatch--; renderBatch(currentBatch); }
+}
+function goBackToLastBatch() {
+  currentBatch = TOTAL_BATCHES - 1;
+  renderBatch(currentBatch);
+}
+
+// ══════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════
+let draggedId = null;
+function dragStart(e) { draggedId = e.currentTarget.dataset.id; e.currentTarget.classList.add('dragging'); }
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dropItem(e) {
+  e.preventDefault();
+  const targetId = e.currentTarget.dataset.id;
+  e.currentTarget.classList.remove('drag-over');
+  if (draggedId && draggedId !== targetId) {
+    const dragIdx = subtypeRanking.indexOf(draggedId);
+    const targetIdx = subtypeRanking.indexOf(targetId);
+    subtypeRanking.splice(dragIdx, 1);
+    subtypeRanking.splice(targetIdx, 0, draggedId);
+    renderSubtypeSection();
+  }
+  draggedId = null;
+}
+
+// ══════════════════════════════════════
+// SCORING
+// ══════════════════════════════════════
+function calculateScores() {
+  const typeScores = {};
+  for (let t = 1; t <= 9; t++) typeScores[t] = 0;
+  SHUFFLED_QUESTIONS.forEach(q => {
+    typeScores[q.type] += (answers[q.id] || 3);
+  });
+  return typeScores;
+}
+function getDominantType(scores) {
+  let maxType = 1, maxScore = 0;
+  for (let t = 1; t <= 9; t++) {
+    if (scores[t] > maxScore) { maxScore = scores[t]; maxType = t; }
+  }
+  return maxType;
+}
+function getSubtypeName(ranking) {
+  const map = { sp: "Self-Preservation", so: "Social", sx: "One-on-One" };
+  return map[ranking[0]];
+}
+
+// ══════════════════════════════════════
+// SUBMIT & GENERATE — STREAMING
+// ══════════════════════════════════════
+async function submitQuiz() {
+  showScreen('screen-loading');
+  animateLoadingSteps();
+
+  const scores = calculateScores();
+  const dominantType = getDominantType(scores);
+  const typeName = TYPE_NAMES[dominantType];
+  const subtype = getSubtypeName(subtypeRanking);
+  const sortedScores = Object.entries(scores)
+    .map(([t, s]) => ({ type: parseInt(t), name: TYPE_NAMES[parseInt(t)], score: s }))
+    .sort((a, b) => b.score - a.score);
+
+  let report = null;
+  let reportError = null;
+
+  try {
+    report = await generateReportStreaming(dominantType, typeName, subtype, sortedScores);
+  } catch (err) {
+    console.error('Report generation failed:', err);
+    reportError = err.message;
+    report = getFallbackReport(dominantType, typeName, subtype);
   }
 
-  const { typeNum, typeName, subtype, sortedScores, userName } = req.body;
-  if (!typeNum || !sortedScores || !userName) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  // Fire Meta Pixel purchase/complete event
+  if (typeof fbq !== 'undefined') {
+    fbq('track', 'CompleteRegistration');
   }
+
+  displayReport(dominantType, typeName, subtype, sortedScores, report, reportError);
+
+  sendReportEmail(dominantType, typeName, subtype, report).catch(e =>
+    console.warn('Email send failed (non-critical):', e)
+  );
+}
+
+// ══════════════════════════════════════
+// SIMPLE FETCH (non-streaming)
+// ══════════════════════════════════════
+async function generateReportStreaming(typeNum, typeName, subtype, sortedScores) {
+  const response = await fetch('/api/generate-report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ typeNum, typeName, subtype, sortedScores, userName })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`HTTP ${response.status} — ${err}`);
+  }
+
+  const report = await response.json();
+
+  if (report.error) {
+    throw new Error(report.error);
+  }
+
+  return report;
+}
+
+// ══════════════════════════════════════
+// LOADING ANIMATION
+// ══════════════════════════════════════
+function animateLoadingSteps() {
+  const steps = ['step-1', 'step-2', 'step-3', 'step-4'];
+  let current = 0;
+  const advance = () => {
+    if (current > 0) {
+      document.getElementById(steps[current - 1]).classList.remove('active');
+      document.getElementById(steps[current - 1]).classList.add('done');
+    }
+    if (current < steps.length) {
+      document.getElementById(steps[current]).classList.add('active');
+      current++;
+      setTimeout(advance, current === steps.length ? 8000 : 3000);
+    }
+  };
+  advance();
+}
+
+// ══════════════════════════════════════
+// EMAIL
+// ══════════════════════════════════════
+async function sendReportEmail(typeNum, typeName, subtype, report) {
+  if (typeof emailjs === 'undefined' || EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') return;
+  const templateParams = {
+    to_name: userName,
+    to_email: userEmail,
+    type_number: typeNum,
+    type_name: typeName,
+    subtype: subtype,
+    what_is_enneagram: report.whatIsTheEnneagram || '',
+    getting_to_know: report.gettingToKnowYourType || '',
+    you_as_mother: report.youAsMother || '',
+    inner_world: report.yourInnerWorld || '',
+    blind_spots: report.yourBlindSpots || '',
+    strengths: report.yourStrengths || '',
+    stuck: report.whereYouGetStuck || '',
+    relationships: report.yourRelationships || '',
+    growth_edge: report.yourGrowthEdge || '',
+    questions: report.questionsToSitWith || '',
+    invitation: report.invitationToBLN || '',
+    site_url: window.location.origin,
+  };
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+}
+
+// ══════════════════════════════════════
+// DISPLAY REPORT
+// ══════════════════════════════════════
+function displayReport(typeNum, typeName, subtype, sortedScores, report, reportError) {
+  document.getElementById('report-name').textContent = `${userName}'s Profile`;
 
   const topScore = sortedScores[0].score;
   const tiedTypes = sortedScores.filter(s => s.score === topScore);
   const isTied = tiedTypes.length > 1;
-  const secondType = sortedScores[1];
-  const thirdType = sortedScores[2];
 
-  const TYPE_CONTEXT = {
-    1: "fears being corrupt or wrong, desires integrity, built identity around responsibility and doing things right",
-    2: "fears being unloved, desires to feel needed, built identity around helping and being indispensable to others",
-    3: "fears being worthless without achievement, desires to feel valuable, built identity around success and how she looks to the world",
-    4: "fears having no identity, desires authentic self-expression, built identity around being unique and emotionally deep",
-    5: "fears being overwhelmed or depleted, desires competence, built identity around mastery and independent thinking",
-    6: "fears having no support or guidance, desires security, built identity around loyalty, preparedness, and being trustworthy",
-    7: "fears being trapped in pain or limitation, desires joy and freedom, built identity around excitement and keeping life expansive",
-    8: "fears being controlled or betrayed, desires autonomy, built identity around strength, directness, and protecting what matters",
-    9: "fears conflict and disconnection, desires inner peace, built identity around harmony and making space for everyone else"
-  };
-
-  const TYPE_NAMES = {
-    1: "The Reformer", 2: "The Helper", 3: "The Achiever", 4: "The Individualist",
-    5: "The Investigator", 6: "The Loyalist", 7: "The Enthusiast", 8: "The Challenger", 9: "The Peacemaker"
-  };
-
-  const WINGS = {
-    1: [9, 2], 2: [1, 3], 3: [2, 4], 4: [3, 5], 5: [4, 6],
-    6: [5, 7], 7: [6, 8], 8: [7, 9], 9: [8, 1]
-  };
-
-  const SUBTYPE_CONTEXT = {
-    "Self-Preservation": "channels energy toward personal safety, physical comfort, health, and having enough resources",
-    "Social": "channels energy toward her place in groups — belonging, contributing, being valued by community",
-    "One-on-One": "channels energy toward deep, intense one-on-one connection — drawn to people and experiences that feel transformative"
-  };
-
-  const TYPE_MOTHERHOOD_LENS = {
-    1: "becoming a mother activates the inner critic in overdrive — there are suddenly infinite ways to do it wrong",
-    2: "becoming a mother can feel like the role she was always meant for — and also the place where her own needs completely disappear",
-    3: "becoming a mother disrupts the achievement engine — there's no metric for 'good enough mom,' no promotion, no applause",
-    4: "becoming a mother brings an identity earthquake — who am I if I'm now 'just mom'?",
-    5: "becoming a mother is an assault on the boundaries and solitude that made her feel safe",
-    6: "becoming a mother amplifies every anxiety — the stakes are so much higher now",
-    7: "becoming a mother means accepting limitation and repetition — the exact opposite of what her type craves",
-    8: "becoming a mother cracks open a vulnerability she has spent her whole life protecting",
-    9: "becoming a mother can cause her to lose herself completely — her needs and voice quietly slip to the bottom"
-  };
-
-  const secondName = TYPE_NAMES[secondType.type] || "";
-  const thirdName = TYPE_NAMES[thirdType.type] || "";
-  const tieNote = isTied
-    ? `IMPORTANT: ${userName} tied between ${tiedTypes.map(t => `Type ${t.type}`).join(' and ')} — acknowledge this dual pull naturally.`
-    : '';
-
-  const trueWings = WINGS[typeNum] || [];
-  const secondIsWing = trueWings.includes(secondType.type);
-  const thirdIsWing = trueWings.includes(thirdType.type);
-  const secondLabel = secondIsWing ? `Type ${secondType.type} wing (${secondName})` : `Type ${secondType.type} (${secondName}) secondary influence`;
-  const thirdLabel = thirdIsWing ? `Type ${thirdType.type} wing (${thirdName})` : `Type ${thirdType.type} (${thirdName}) secondary influence`;
-
-  const prompt = `You're writing a personalized Enneagram report for ${userName}, who completed The Shift — a program for mothers navigating post-motherhood identity transition.
-
-TONE: Warm, direct, conversational — like a really smart friend who knows the Enneagram deeply. NOT clinical or formal. Write in second person. Speak directly to her.
-
-MOTHERHOOD LENS: Every section written through the lens of this type as a mother in identity transition.
-
-HER PROFILE:
-- Primary type: Type ${typeNum} — ${typeName}
-- Core pattern: ${TYPE_CONTEXT[typeNum]}
-- In motherhood: ${TYPE_MOTHERHOOD_LENS[typeNum]}
-- Subtype: ${subtype} — she ${SUBTYPE_CONTEXT[subtype]}
-- Second highest: ${secondLabel} (${secondType.score}/30)
-- Third highest: ${thirdLabel} (${thirdType.score}/30)
-${tieNote}
-
-WING RULE: Type ${typeNum}'s only true wings are Types ${trueWings.join(' and ')}. Never call non-adjacent types "wings."
-
-Return ONLY a valid JSON object. No markdown, no backticks, no text outside the JSON:
-
-{
-  "whatIsTheEnneagram": "3 paragraphs separated by \\n\\n. Warm plain-language intro to what the Enneagram is — not academic. What it is and why it matters. Why it's different from other systems. A warm note that this isn't about boxing her in.",
-  "gettingToKnowYourType": "4 paragraphs separated by \\n\\n. Deep dive on Type ${typeNum} — core fear, core desire, worldview, how this played out before motherhood. Specific and surprising. Write like you've known her for years.",
-  "youAsMother": "4 paragraphs separated by \\n\\n. How becoming a mother specifically shook up Type ${typeNum}. What broke, what got activated, what stopped working. End with something that feels like relief.",
-  "yourInnerWorld": "3 paragraphs separated by \\n\\n. How Type ${typeNum} thinks, feels, moves through daily life. What she notices, what she misses. How the ${subtype} subtype shapes this.",
-  "yourBlindSpots": "3 paragraphs separated by \\n\\n. The things she genuinely cannot see about herself. Loving but unflinching. The 'oh god that's me' section.",
-  "yourStrengths": "3 paragraphs separated by \\n\\n. Real earned advantages specific to Type ${typeNum} in this transition. Not generic — specific superpowers from her type.",
-  "whereYouGetStuck": "3 paragraphs separated by \\n\\n. The specific loop for Type ${typeNum} in the motherhood identity shift. Precise — name the exact pattern. End making her feel seen not criticized.",
-  "yourRelationships": "3 paragraphs separated by \\n\\n. How Type ${typeNum} shows up with partner, kids, friends, her own mother. What she gives easily, struggles to receive, needs but rarely asks for.",
-  "yourGrowthEdge": "3 paragraphs separated by \\n\\n. What integration looks like for Type ${typeNum} as a mother. Real and practical. End with something genuinely hopeful.",
-  "questionsToSitWith": "1. [question]\\n2. [question]\\n3. [question]\\n4. [question]\\n5. [question]\\n6. [question]",
-  "invitationToBLN": "3 sentences max. Warm and direct. Acknowledge what she just read. Tell her everything comes alive in The Shift's 5 videos. Mention Your Best Life Now at marianavaldez.com/your-best-life-now for deeper work, with a discount waiting at the end of The Shift."
-}`;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(500).json({ error: 'Anthropic error', details: data });
-    }
-
-    const rawText = data.content[0].text.trim();
-    const firstBrace = rawText.indexOf('{');
-    const lastBrace = rawText.lastIndexOf('}');
-
-    if (firstBrace === -1 || lastBrace === -1) {
-      return res.status(500).json({ error: 'No JSON found', raw: rawText.substring(0, 200) });
-    }
-
-    const jsonStr = rawText.substring(firstBrace, lastBrace + 1);
-    const parsed = JSON.parse(jsonStr);
-    return res.status(200).json(parsed);
-
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+  if (isTied) {
+    document.getElementById('report-type-label').textContent = tiedTypes.map(t => `Type ${t.type}`).join(' + ');
+    document.getElementById('report-type-name').textContent = tiedTypes.map(t => t.name).join(' / ');
+  } else {
+    document.getElementById('report-type-label').textContent = `Type ${typeNum}`;
+    document.getElementById('report-type-name').textContent = typeName;
   }
+  document.getElementById('report-subtype-label').textContent = `${subtype} Subtype`;
+
+  // Score bars
+  const barColors = ['#C4714A','#C9A96E','#7A8C7E','#B08A6E','#9B8BB4','#7EA8A8','#C4A882','#A89B8A','#B8B0A8'];
+  const scoreBars = sortedScores.map((s, i) => {
+    const pct = Math.round((s.score / 30) * 100);
+    return `
+      <div class="score-row">
+        <div class="score-label">Type ${s.type} — ${s.name.split(' ').slice(1).join(' ')}</div>
+        <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%; background:${barColors[i] || '#DDD5CB'};"></div></div>
+        <div class="score-num">${s.score}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Parse reflection questions
+  const questionsHtml = parseReflectionQuestions(report.questionsToSitWith || '');
+
+  const content = document.getElementById('report-content');
+
+  if (reportError) {
+    const errBanner = document.createElement('div');
+    errBanner.style.cssText = 'background:#FFF3ED;border:1px solid #C4714A;border-radius:4px;padding:12px 20px;font-size:13px;color:#C4714A;margin-bottom:24px;font-family:monospace;';
+    errBanner.textContent = '⚠ AI report error (showing template): ' + reportError;
+    content.prepend(errBanner);
+  }
+
+  content.innerHTML = `
+    <!-- SCORE BARS -->
+    <div class="scores-section">
+      <div class="scores-title">Your Type Scores — out of 30</div>
+      ${scoreBars}
+    </div>
+
+    <!-- WHAT IS THE ENNEAGRAM -->
+    <div class="report-section">
+      <span class="report-section-label">First Things First</span>
+      <h2 class="report-section-title">What Even Is the Enneagram?</h2>
+      <div class="report-box intro">
+        <span class="report-box-label">A quick grounding before we dive in</span>
+        <div class="report-box-body">${formatParagraphs(report.whatIsTheEnneagram)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- GETTING TO KNOW YOUR TYPE -->
+    <div class="report-section">
+      <span class="report-section-label">Getting to Know You</span>
+      <h2 class="report-section-title">Type ${typeNum} — ${typeName}</h2>
+      <div class="report-section-body">${formatParagraphs(report.gettingToKnowYourType)}</div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- YOU AS A MOTHER -->
+    <div class="report-section">
+      <span class="report-section-label">The Heart of It</span>
+      <h2 class="report-section-title">You as a Mother — What Actually Happened</h2>
+      <div class="report-section-body">${formatParagraphs(report.youAsMother)}</div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- INNER WORLD -->
+    <div class="report-section">
+      <span class="report-section-label">Your Inner World</span>
+      <h2 class="report-section-title">How You Think, Feel & Move Through Life</h2>
+      <div class="report-box inner-world">
+        <span class="report-box-label">What's happening inside — including the parts you don't say out loud</span>
+        <div class="report-box-body">${formatParagraphs(report.yourInnerWorld)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- BLIND SPOTS -->
+    <div class="report-section">
+      <span class="report-section-label">The Stuff You Can't See</span>
+      <h2 class="report-section-title">Your Blind Spots</h2>
+      <div class="report-box blindspot">
+        <span class="report-box-label">Obvious to everyone else, invisible to you</span>
+        <div class="report-box-body">${formatParagraphs(report.yourBlindSpots)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- STRENGTHS -->
+    <div class="report-section">
+      <span class="report-section-label">What You Bring</span>
+      <h2 class="report-section-title">Your Real Strengths in This Season</h2>
+      <div class="report-box strengths">
+        <span class="report-box-label">The actual superpowers — earned, not generic</span>
+        <div class="report-box-body">${formatParagraphs(report.yourStrengths)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- WHERE YOU GET STUCK -->
+    <div class="report-section">
+      <span class="report-section-label">The Loop</span>
+      <h2 class="report-section-title">Where You Get Stuck</h2>
+      <div class="report-box stuck">
+        <span class="report-box-label">The specific pattern that keeps recurring</span>
+        <div class="report-box-body">${formatParagraphs(report.whereYouGetStuck)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- RELATIONSHIPS -->
+    <div class="report-section">
+      <span class="report-section-label">Your People</span>
+      <h2 class="report-section-title">How You Show Up in Your Relationships</h2>
+      <div class="report-box relationships">
+        <span class="report-box-label">Partner, kids, friends, your own mother</span>
+        <div class="report-box-body">${formatParagraphs(report.yourRelationships)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- GROWTH EDGE -->
+    <div class="report-section">
+      <span class="report-section-label">The Way Forward</span>
+      <h2 class="report-section-title">Your Growth Edge</h2>
+      <div class="report-box growth">
+        <span class="report-box-label">What integration actually looks like for you — real and specific</span>
+        <div class="report-box-body">${formatParagraphs(report.yourGrowthEdge)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- REFLECTION QUESTIONS -->
+    <div class="report-section">
+      <span class="report-section-label">Go Deeper</span>
+      <h2 class="report-section-title">Questions to Sit With</h2>
+      <div class="questions-box">
+        <span class="report-box-label">For journaling, for stillness, for the car ride when no one's talking</span>
+        ${questionsHtml}
+      </div>
+    </div>
+    <hr class="report-divider">
+
+    <!-- INVITATION -->
+    <div class="report-section">
+      <div class="report-box invitation">
+        <span class="report-box-label">What's Next</span>
+        <div class="report-box-body">${formatParagraphs(report.invitationToBLN)}</div>
+      </div>
+    </div>
+
+    <div class="email-notice" style="background:var(--sage-bg);border-left:3px solid var(--sage);border-radius:0 3px 3px 0;padding:12px 18px;font-size:13px;color:var(--sage);margin-top:32px;">
+      ✦ A copy of this report has been sent to <strong>${userEmail}</strong>
+    </div>
+
+    <div class="report-actions">
+      <button class="btn-primary" onclick="downloadPDF()">Download PDF</button>
+      <button class="btn-dark" onclick="window.print()">Print</button>
+      <button class="btn-secondary" style="border-color:var(--rule);color:var(--muted);" onclick="goToThankYou()">I'm Done Reading →</button>
+    </div>
+  `;
+
+  showScreen('screen-report');
+
+  // Animate score bars
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => bar.style.width = w, 100);
+    });
+  }, 300);
 }
 
-export const config = {
-  maxDuration: 60
-};
+function formatParagraphs(text) {
+  if (!text) return '';
+  return text.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+}
+
+function parseReflectionQuestions(text) {
+  if (!text) return '';
+  const lines = text.split('\n').filter(l => l.trim());
+  return lines.map(line => {
+    const cleaned = line.replace(/^\d+[\.\)]\s*/, '').trim();
+    const num = line.match(/^(\d+)/)?.[1] || '';
+    if (!cleaned) return '';
+    return `
+      <div class="question-item">
+        <div class="question-num-badge">${num}</div>
+        <div class="question-text-display">${cleaned}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// PDF DOWNLOAD
+// ══════════════════════════════════════
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentW = pageW - margin * 2;
+  let y = 0;
+
+  function addPage() { doc.addPage(); y = margin; }
+  function checkY(needed = 10) { if (y + needed > pageH - margin) addPage(); }
+
+  // Cover
+  doc.setFillColor(28, 24, 20);
+  doc.rect(0, 0, pageW, pageH, 'F');
+  doc.setFontSize(10); doc.setTextColor(196, 113, 74);
+  doc.text('THE SHIFT PROFILE', pageW / 2, 70, { align: 'center', charSpace: 2 });
+  doc.setFontSize(32); doc.setTextColor(253, 250, 247);
+  doc.text(`${userName}'s`, pageW / 2, 100, { align: 'center' });
+  doc.text('Shift Profile', pageW / 2, 116, { align: 'center' });
+  doc.setFontSize(14); doc.setTextColor(201, 169, 110);
+  const typeLabel = document.getElementById('report-type-label').textContent;
+  const typeName2 = document.getElementById('report-type-name').textContent;
+  const subtypeLabel = document.getElementById('report-subtype-label').textContent;
+  doc.text(`${typeLabel} — ${typeName2}  ·  ${subtypeLabel}`, pageW / 2, 140, { align: 'center' });
+  doc.setFontSize(11); doc.setTextColor(138, 126, 116);
+  doc.text('marianavaldez.com', pageW / 2, pageH - 20, { align: 'center' });
+
+  addPage();
+  const sections = document.querySelectorAll('.report-section');
+  sections.forEach((section, idx) => {
+    const label = section.querySelector('.report-section-label')?.textContent || '';
+    const title = section.querySelector('.report-section-title')?.textContent || '';
+    const body = section.querySelector('.report-section-body, .report-box-body, .questions-box');
+    const bodyText = body ? body.innerText : '';
+    if (!bodyText) return;
+
+    checkY(30);
+    doc.setFontSize(8); doc.setTextColor(196, 113, 74); doc.setFont('helvetica', 'bold');
+    doc.text(label.toUpperCase(), margin, y); y += 6;
+    if (title) {
+      doc.setFontSize(16); doc.setTextColor(28, 24, 20);
+      const titleLines = doc.splitTextToSize(title, contentW);
+      checkY(titleLines.length * 8 + 4);
+      doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
+    }
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 50, 44);
+    const bodyLines = doc.splitTextToSize(bodyText, contentW);
+    bodyLines.forEach(line => { checkY(6); doc.text(line, margin, y); y += 5.5; });
+    y += 10;
+    if (idx < sections.length - 1) {
+      checkY(4);
+      doc.setDrawColor(221, 213, 203);
+      doc.line(margin, y, pageW - margin, y);
+      y += 10;
+    }
+  });
+
+  doc.save(`Shift-Profile-${userName.replace(/\s+/g, '-')}.pdf`);
+}
+
+// ══════════════════════════════════════
+// FALLBACK REPORT
+// ══════════════════════════════════════
+function getFallbackReport(typeNum, typeName, subtype) {
+  return {
+    whatIsTheEnneagram: `The Enneagram is a personality system — but not like the ones you've probably seen before. It's not about behavior. It's about motivation. It explains why you do what you do, not just what you do. And that distinction changes everything.\n\nMost personality systems tell you what you're like. The Enneagram tells you what you're afraid of, what you're secretly trying to prove, and what you've built your whole identity around. It's the map of the subconscious operating system that's been running your life.\n\nThis isn't about putting you in a box. It's about finally having words for something you've always felt but never quite been able to name.`,
+    gettingToKnowYourType: `As a Type ${typeNum} — ${typeName} — there's a specific lens you've been looking through your whole life. A way of seeing the world, a set of fears driving you, a desire at the core of everything. This is the pattern that shaped your career, your relationships, and your sense of self before motherhood changed everything.\n\nYour type isn't your personality — it's the strategy your psyche built to feel safe and valuable in the world. And it worked, for a long time. Understanding it is the beginning of choosing whether to keep using it.`,
+    youAsMother: `Becoming a mother didn't just add a new role to your life. For a Type ${typeNum}, it disrupted the entire operating system. The strategies that built your identity before — the ones that worked, that kept you safe, that made you feel like you — suddenly stopped fitting.\n\nThat disorientation you've been feeling? That's not a sign something went wrong. That's the earthquake doing its necessary work. The old identity is loosening. Something more real is trying to come through.`,
+    yourInnerWorld: `Inside, you're running a very specific internal weather system. There are things you notice that others walk right past. There are things you miss that everyone else sees clearly. Your ${subtype} subtype shapes all of this — it's the filter through which your Type ${typeNum} patterns get expressed in daily life.\n\nUnderstanding your inner world isn't self-indulgent. It's the foundation of everything that changes next.`,
+    yourBlindSpots: `Every type has patterns that are completely invisible from the inside but obvious from the outside. These aren't flaws — they're the cost of the strategy your type built. Seeing them clearly, even when it's uncomfortable, is how you start to have a choice about them.\n\nThe recognition IS the gift. You can't change what you can't see.`,
+    yourStrengths: `Your type comes with real, earned strengths — not generic positivity, but specific advantages that come from exactly the way your mind and heart work. These matter especially right now, in this transition, in this season of becoming.\n\nDon't dismiss them. They're part of what you're bringing forward.`,
+    whereYouGetStuck: `There's a specific loop for Type ${typeNum} in the middle of an identity transition. A pattern that keeps recurring, a way of getting pulled back into the old operating system even when you can feel yourself trying to move forward.\n\nNaming it is the first step to stepping out of it.`,
+    yourRelationships: `How you show up in your closest relationships — with your partner, your kids, your friends, your own mother — is deeply shaped by your type. What you give naturally, what you struggle to receive, what you need that you rarely ask for.\n\nMotherhood has shifted all of this. Understanding how is part of the work.`,
+    yourGrowthEdge: `Integration for Type ${typeNum} isn't about becoming a different person. It's about having more access to yourself — the parts that got buried, the capacities that got underdeveloped, the freedom that comes from not being run by your fears.\n\nIt's possible. And it starts right here, with exactly this kind of awareness.`,
+    questionsToSitWith: `1. What am I most afraid people would see if I stopped performing?\n2. What part of who I was before motherhood am I still trying to hold onto — and why?\n3. What would I do differently if I wasn't worried about how it looked?\n4. What do I actually need right now that I haven't asked for?\n5. Where am I living from fear instead of desire?\n6. What would it feel like to let the old version of me go — and who might I become?`,
+    invitationToBLN: `The fact that you're here, doing this work, says everything. Everything you just read comes alive inside The Shift's 5 videos — that's where the real movement happens. And if you're ready to go even deeper — to work through your type fully and dismantle the patterns underneath — Your Best Life Now at marianavaldez.com/your-best-life-now was built exactly for this, and a special discount will be waiting for you at the end of The Shift.`
+  };
+}
+
+// ══════════════════════════════════════
+// THANK YOU
+// ══════════════════════════════════════
+function goToThankYou() {
+  showScreen('screen-thankyou');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
