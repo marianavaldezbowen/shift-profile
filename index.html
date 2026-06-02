@@ -1154,8 +1154,22 @@ function downloadPDF() {
   sections.forEach((section, idx) => {
     const label = section.querySelector('.report-section-label')?.textContent || '';
     const title = section.querySelector('.report-section-title')?.textContent || '';
-    const body = section.querySelector('.report-section-body, .report-box-body, .questions-box');
-    const bodyText = body ? body.innerText : '';
+    const body = section.querySelector('.report-section-body, .report-box-body');
+    const questionsBox = section.querySelector('.questions-box');
+    let bodyText = '';
+    if (questionsBox) {
+      const items = questionsBox.querySelectorAll('.question-item');
+      if (items.length > 0) {
+        bodyText = Array.from(items).map((item, i) => {
+          const q = item.querySelector('.question-text-display')?.textContent || '';
+          return (i + 1) + '. ' + q;
+        }).join('\n');
+      } else {
+        bodyText = questionsBox.innerText;
+      }
+    } else if (body) {
+      bodyText = body.innerText;
+    }
     if (!bodyText) return;
 
     checkY(30);
