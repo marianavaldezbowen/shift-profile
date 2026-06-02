@@ -85,7 +85,7 @@ Return ONLY a JSON object with these exact keys. No markdown, no backticks, noth
       return res.status(500).json({ error: 'Empty response from Anthropic', data });
     }
 
-    const rawText = data.content[0].text.trim();
+    const rawText = data.content[0].text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '');
     const firstBrace = rawText.indexOf('{');
     const lastBrace = rawText.lastIndexOf('}');
 
