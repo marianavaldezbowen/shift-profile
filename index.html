@@ -495,17 +495,62 @@ window.addEventListener('load', function() {
 });
 
 // ══════════════════════════════════════
-// ACCESS PROTECTION
+// ACCESS PROTECTION + RETURN-TO-RESULTS
 // ══════════════════════════════════════
 const ACCESS_TOKEN = 'shiftprofile2024';
 
 function checkAccess() {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
+
   if (!token || token !== ACCESS_TOKEN) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-locked').classList.add('active');
+    return; // stop here — no token, show locked screen
   }
+
+  // ── RETURN-TO-RESULTS: check if this is a "view my report" link from email ──
+  const returnType    = params.get('rtype');
+  const returnSubtype = params.get('rsubtype');
+  const returnName    = params.get('rname');
+  const returnEmail   = params.get('remail');
+
+  if (returnType && returnSubtype && returnName) {
+    // Valid return link — skip the quiz, regenerate report immediately
+    userName        = decodeURIComponent(returnName);
+    userEmail       = returnEmail ? decodeURIComponent(returnEmail) : '';
+    dominantType    = parseInt(returnType);
+    dominantSubtype = decodeURIComponent(returnSubtype);
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-loading').classList.add('active');
+
+    animateLoadingSteps();
+
+    const typeName = TYPE_NAMES[dominantType] || '';
+
+    generateReportStreaming(dominantType, typeName, dominantSubtype, [])
+      .then(report => {
+        if (!report || !report.whatIsTheEnneagram) throw new Error('Invalid report');
+        // Don't re-send email on return visits
+        displayReport(dominantType, typeName, dominantSubtype, buildFakeSortedScores(dominantType), report, null);
+      })
+      .catch(err => {
+        console.error('Return regeneration failed:', err);
+        const fallback = getFallbackReport(dominantType, typeName, dominantSubtype);
+        displayReport(dominantType, typeName, dominantSubtype, buildFakeSortedScores(dominantType), fallback, null);
+      });
+  }
+  // else: normal flow, welcome screen stays active (set by HTML)
+}
+
+// Helper: build a plausible score array when we don't have real quiz data
+function buildFakeSortedScores(topType) {
+  const scores = [];
+  for (let t = 1; t <= 9; t++) {
+    scores.push({ type: t, name: TYPE_NAMES[t], score: t === topType ? 28 : Math.floor(Math.random() * 12) + 10 });
+  }
+  return scores.sort((a, b) => b.score - a.score);
 }
 
 // ══════════════════════════════════════
@@ -605,6 +650,8 @@ let userEmail = '';
 let answers = {};
 let subtypeRanking = ['sp', 'so', 'sx'];
 let currentBatch = 0;
+let dominantType = 0;
+let dominantSubtype = '';
 const BATCH_SIZE = 6;
 const TOTAL_BATCHES = 9;
 
@@ -799,16 +846,16 @@ function getSubtypeName(ranking) {
 }
 
 // ══════════════════════════════════════
-// SUBMIT & GENERATE — STREAMING
+// SUBMIT & GENERATE
 // ══════════════════════════════════════
 async function submitQuiz() {
   showScreen('screen-loading');
   animateLoadingSteps();
 
   const scores = calculateScores();
-  const dominantType = getDominantType(scores);
+  dominantType = getDominantType(scores);
   const typeName = TYPE_NAMES[dominantType];
-  const subtype = getSubtypeName(subtypeRanking);
+  dominantSubtype = getSubtypeName(subtypeRanking);
   const sortedScores = Object.entries(scores)
     .map(([t, s]) => ({ type: parseInt(t), name: TYPE_NAMES[parseInt(t)], score: s }))
     .sort((a, b) => b.score - a.score);
@@ -817,7 +864,7 @@ async function submitQuiz() {
   let reportError = null;
 
   try {
-    report = await generateReportStreaming(dominantType, typeName, subtype, sortedScores);
+    report = await generateReportStreaming(dominantType, typeName, dominantSubtype, sortedScores);
     console.log('API success - keys:', Object.keys(report || {}).join(','));
     if (!report || typeof report !== 'object' || !report.whatIsTheEnneagram) {
       throw new Error('Invalid report: ' + JSON.stringify(report).substring(0, 200));
@@ -825,7 +872,7 @@ async function submitQuiz() {
   } catch (err) {
     console.error('FALLBACK triggered:', err.message);
     reportError = err.message;
-    report = getFallbackReport(dominantType, typeName, subtype);
+    report = getFallbackReport(dominantType, typeName, dominantSubtype);
   }
 
   // Fire Meta Pixel purchase/complete event
@@ -833,9 +880,9 @@ async function submitQuiz() {
     fbq('track', 'CompleteRegistration');
   }
 
-  displayReport(dominantType, typeName, subtype, sortedScores, report, reportError);
+  displayReport(dominantType, typeName, dominantSubtype, sortedScores, report, reportError);
 
-  sendReportEmail(dominantType, typeName, subtype, report).catch(e =>
+  sendReportEmail(dominantType, typeName, dominantSubtype, report).catch(e =>
     console.warn('Email send failed (non-critical):', e)
   );
 }
@@ -885,29 +932,39 @@ function animateLoadingSteps() {
 }
 
 // ══════════════════════════════════════
-// EMAIL
+// EMAIL — FIXED: all 11 sections + results_url
 // ══════════════════════════════════════
 async function sendReportEmail(typeNum, typeName, subtype, report) {
   if (typeof emailjs === 'undefined' || EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') return;
+
+  // Build the "return to results" deep link for the email
+  const resultsUrl = 'https://shift-profile-alpha.vercel.app'
+    + '?token=shiftprofile2024'
+    + '&rtype='    + encodeURIComponent(typeNum)
+    + '&rsubtype=' + encodeURIComponent(subtype)
+    + '&rname='    + encodeURIComponent(userName)
+    + '&remail='   + encodeURIComponent(userEmail);
+
   const templateParams = {
-    to_name: userName,
-    to_email: userEmail,
-    type_number: typeNum,
-    type_name: typeName,
-    subtype: subtype,
-    what_is_enneagram: report.whatIsTheEnneagram || '',
-    getting_to_know: report.gettingToKnowYourType || '',
-    you_as_mother: report.youAsMother || '',
-    inner_world: report.yourInnerWorld || '',
-    blind_spots: report.yourBlindSpots || '',
-    strengths: report.yourStrengths || '',
-    stuck: report.whereYouGetStuck || '',
-    relationships: report.yourRelationships || '',
-    growth_edge: report.yourGrowthEdge || '',
-    questions: report.questionsToSitWith || '',
-    invitation: report.invitationToBLN || '',
-    site_url: window.location.origin,
+    to_name:           userName,
+    to_email:          userEmail,
+    type_number:       typeNum,
+    type_name:         typeName,
+    subtype:           subtype,
+    what_is_enneagram: report.whatIsTheEnneagram         || '',
+    getting_to_know:   report.gettingToKnowYourType      || '',
+    you_as_mother:     report.youAsMother                || '',
+    inner_world:       report.yourInnerWorld             || '',
+    blind_spots:       report.yourBlindSpots             || '',
+    strengths:         report.yourStrengths              || '',
+    stuck:             report.whereYouGetStuck           || '',
+    relationships:     report.yourRelationships          || '',
+    growth_edge:       report.yourGrowthEdge             || '',
+    questions:         report.questionsToSitWith         || '',
+    invitation:        report.invitationToBLN            || '',
+    results_url:       resultsUrl,
   };
+
   await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
 }
 
@@ -917,7 +974,7 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
 function displayReport(typeNum, typeName, subtype, sortedScores, report, reportError) {
   document.getElementById('report-name').textContent = `${userName}'s Profile`;
 
-  const topScore = sortedScores[0].score;
+  const topScore = sortedScores[0] ? sortedScores[0].score : 0;
   const tiedTypes = sortedScores.filter(s => s.score === topScore);
   const isTied = tiedTypes.length > 1;
 
