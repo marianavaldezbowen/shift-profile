@@ -53,6 +53,7 @@ Third highest: ${thirdLabel} (${TYPE_NAMES[thirdType.type]}, score ${thirdType.s
 
 Context: ${userName} completed The Shift, a program for mothers in post-motherhood identity transition.
 Tone: Warm, direct, conversational — like a smart friend. Second person. NOT clinical.
+Tense: ALWAYS write in present tense. She IS going through this NOW. Never say 'you were' or 'you felt' or 'motherhood gave you' — say 'you are,' 'you feel,' 'motherhood gives you.' The Shift IS happening, not something that already happened.
 Every section written through the lens of motherhood and identity transition.
 
 Return ONLY a JSON object with these exact keys. No markdown, no backticks, nothing outside the JSON braces:
