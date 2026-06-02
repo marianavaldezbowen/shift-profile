@@ -1168,7 +1168,8 @@ function downloadPDF() {
       doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
     }
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 50, 44);
-    const bodyLines = doc.splitTextToSize(bodyText, contentW);
+    const cleanBodyText = bodyText.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/[\u2014]/g, '--').replace(/[\u2013]/g, '-');
+    const bodyLines = doc.splitTextToSize(cleanBodyText, contentW);
     bodyLines.forEach(line => { checkY(6); doc.text(line, margin, y); y += 5.5; });
     y += 10;
     if (idx < sections.length - 1) {
