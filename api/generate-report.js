@@ -9,12 +9,16 @@ export default async function handler(req, res) {
   }
 
   const { typeNum, typeName, subtype, sortedScores, userName } = req.body;
-  if (!typeNum || !sortedScores || !userName) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!typeNum || !userName) {
+    return res.status(400).json({ error: 'Missing required fields: typeNum or userName' });
+  }
+  if (!sortedScores || !Array.isArray(sortedScores)) {
+    return res.status(400).json({ error: 'sortedScores must be an array' });
   }
 
-  const secondType = sortedScores[1];
-  const thirdType = sortedScores[2];
+  // Safe fallbacks if sortedScores is incomplete (e.g. return-to-results calls)
+  const secondType = sortedScores[1] || { type: (typeNum % 9) + 1, score: 15 };
+  const thirdType  = sortedScores[2] || { type: ((typeNum + 1) % 9) + 1, score: 12 };
 
   const TYPE_CONTEXT = {
     1: "fears being corrupt or wrong, desires integrity, built identity around responsibility",
@@ -70,7 +74,7 @@ Return ONLY a JSON object with these exact keys. No markdown, no backticks, noth
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2500,
+        max_tokens: 3500,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -99,7 +103,22 @@ Return ONLY a JSON object with these exact keys. No markdown, no backticks, noth
     try {
       parsed = JSON.parse(jsonStr);
     } catch (parseErr) {
-      return res.status(500).json({ error: 'JSON parse failed', parseError: parseErr.message, preview: jsonStr.substring(0, 300) });
+      // JSON parse failed — log it and return a clear error
+      console.error('JSON parse failed:', parseErr.message);
+      console.error('Raw preview:', jsonStr.substring(0, 500));
+      return res.status(500).json({
+        error: 'JSON parse failed',
+        parseError: parseErr.message,
+        preview: jsonStr.substring(0, 300)
+      });
+    }
+
+    // Validate that the response has the minimum required keys
+    const requiredKeys = ['whatIsTheEnneagram', 'gettingToKnowYourType', 'whereYouGetStuck', 'invitationToBLN'];
+    const missingKeys = requiredKeys.filter(k => !parsed[k]);
+    if (missingKeys.length > 0) {
+      console.error('Missing required keys:', missingKeys);
+      return res.status(500).json({ error: 'Incomplete report', missingKeys });
     }
 
     return res.status(200).json(parsed);
