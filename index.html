@@ -1209,14 +1209,19 @@ function downloadPDF() {
   addPage();
 
   // ── SCORE BARS in PDF ──
+  const pdfBarColors = [
+    [196,113,74], [201,169,110], [122,140,126], [176,138,110],
+    [155,139,180], [126,168,168], [196,168,130], [168,155,138], [184,176,168]
+  ];
+
   doc.setFontSize(8); doc.setTextColor(138, 126, 116); doc.setFont('helvetica', 'bold');
   doc.text('YOUR TYPE SCORES — OUT OF 30', margin, y); y += 8;
 
   const scoreRows = document.querySelectorAll('.score-row');
+  let barColorIdx = 0;
   scoreRows.forEach(row => {
     const labelEl = row.querySelector('.score-label');
     const numEl   = row.querySelector('.score-num');
-    const fillEl  = row.querySelector('.score-bar-fill');
     if (!labelEl || !numEl) return;
 
     const label = labelEl.textContent.trim();
@@ -1236,14 +1241,11 @@ function downloadPDF() {
     doc.setFillColor(221, 213, 203);
     doc.roundedRect(barX, y - 3.5, barW, barH, 1, 1, 'F');
 
-    // Bar fill — use the element's computed background color or fall back to terra
-    const fillColor = fillEl ? fillEl.style.background : '#C4714A';
-    const hex = fillColor.replace('#','');
-    const r = parseInt(hex.substring(0,2),16) || 196;
-    const g = parseInt(hex.substring(2,4),16) || 113;
-    const b = parseInt(hex.substring(4,6),16) || 74;
+    // Bar fill — use hardcoded colors matching the on-screen version
+    const [r, g, b] = pdfBarColors[barColorIdx] || [196, 113, 74];
     doc.setFillColor(r, g, b);
     doc.roundedRect(barX, y - 3.5, barW * pct, barH, 1, 1, 'F');
+    barColorIdx++;
 
     // Score number
     doc.setFontSize(9); doc.setTextColor(100, 90, 84);
