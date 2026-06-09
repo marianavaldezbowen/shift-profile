@@ -1207,6 +1207,57 @@ function downloadPDF() {
   doc.text('marianavaldez.com', pageW / 2, pageH - 20, { align: 'center' });
 
   addPage();
+
+  // ── SCORE BARS in PDF ──
+  doc.setFontSize(8); doc.setTextColor(138, 126, 116); doc.setFont('helvetica', 'bold');
+  doc.text('YOUR TYPE SCORES — OUT OF 30', margin, y); y += 8;
+
+  const scoreRows = document.querySelectorAll('.score-row');
+  scoreRows.forEach(row => {
+    const labelEl = row.querySelector('.score-label');
+    const numEl   = row.querySelector('.score-num');
+    const fillEl  = row.querySelector('.score-bar-fill');
+    if (!labelEl || !numEl) return;
+
+    const label = labelEl.textContent.trim();
+    const score = parseInt(numEl.textContent.trim()) || 0;
+    const pct   = score / 30;
+
+    checkY(10);
+
+    // Label
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 90, 84);
+    doc.text(label, margin, y);
+
+    // Bar background
+    const barX = margin + 52;
+    const barW = contentW - 62;
+    const barH = 4;
+    doc.setFillColor(221, 213, 203);
+    doc.roundedRect(barX, y - 3.5, barW, barH, 1, 1, 'F');
+
+    // Bar fill — use the element's computed background color or fall back to terra
+    const fillColor = fillEl ? fillEl.style.background : '#C4714A';
+    const hex = fillColor.replace('#','');
+    const r = parseInt(hex.substring(0,2),16) || 196;
+    const g = parseInt(hex.substring(2,4),16) || 113;
+    const b = parseInt(hex.substring(4,6),16) || 74;
+    doc.setFillColor(r, g, b);
+    doc.roundedRect(barX, y - 3.5, barW * pct, barH, 1, 1, 'F');
+
+    // Score number
+    doc.setFontSize(9); doc.setTextColor(100, 90, 84);
+    doc.text(String(score), pageW - margin, y, { align: 'right' });
+
+    y += 9;
+  });
+
+  y += 8;
+  doc.setDrawColor(221, 213, 203);
+  doc.line(margin, y, pageW - margin, y);
+  y += 10;
+  // ── END SCORE BARS ──
+
   const sections = document.querySelectorAll('.report-section');
   sections.forEach((section, idx) => {
     const label = section.querySelector('.report-section-label')?.textContent || '';
