@@ -1525,8 +1525,18 @@ function attemptReport() {
   );
 }
 
+// Must match the keys generate-report.js actually returns. If a section is added
+// or removed there, this list has to change with it.
+const REPORT_KEYS = [
+  'gettingToKnowYourType', 'youAsMother', 'yourInnerWorld', 'yourBlindSpots',
+  'whereYouGetStuck', 'yourGrowthEdge', 'questionsToSitWith', 'invitationToBLN'
+];
+
 function isValidReport(r) {
-  return r && typeof r === 'object' && r.whatIsTheEnneagram && r.invitationToBLN;
+  if (!r || typeof r !== 'object') return false;
+  const missing = REPORT_KEYS.filter(k => !r[k]);
+  if (missing.length) console.error('Report missing keys:', missing);
+  return missing.length === 0;
 }
 
 // Two automatic attempts, then an honest failure screen. We never quietly serve
@@ -1560,6 +1570,7 @@ async function runGeneration() {
     return;
   }
 
+  window.__pdfScores = lastSortedScores;
   displayReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype, lastSortedScores, report, null);
 
   // Return visits already converted and already got their email.
@@ -1573,6 +1584,7 @@ async function runGeneration() {
 
 // She asked for the template knowingly. It's labelled as such, no email, no pixel.
 function showGeneralVersion() {
+  window.__pdfScores = lastSortedScores;
   const report = getFallbackReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype);
   displayReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype, lastSortedScores, report, true);
   showScreen('screen-report');
@@ -1981,6 +1993,85 @@ function downloadPDF() {
   y += 10;
   // ── END SCORE BARS ──
 
+  // ── Profile panels: these live in .panel / .glance-grid, which the section
+  // loop below doesn't read, so they'd be missing from the PDF otherwise. ──
+  const tp = TYPE_PROFILE[dominantType];
+  if (tp) {
+    checkY(30);
+    doc.setFontSize(16); doc.setTextColor(47, 49, 51); doc.setFont('helvetica', 'bold');
+    doc.text('Type ' + dominantType + ' at a glance', margin, y); y += 10;
+    doc.setFont('helvetica', 'normal');
+
+    const pairs = [
+      ['Worldview', tp.worldview], ['Focus of attention', tp.focus],
+      ['Core fear', tp.fear], ['Core desire', tp.desire],
+      ['The sentence underneath', tp.selfTalk],
+      ['Your gift', tp.gift], ['Your vice', tp.vice]
+    ];
+    pairs.forEach(([k, v]) => {
+      checkY(14);
+      doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+      doc.text(k.toUpperCase(), margin, y); y += 5;
+      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(String(v).replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"'), contentW);
+      lines.forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
+      y += 4;
+    });
+    y += 4;
+
+    // Centers, computed the same way as on screen
+    const byType = {};
+    (window.__pdfScores || []).forEach(x => byType[x.type] = x.score);
+    let grand = 0; const tot = {};
+    Object.keys(CENTER_INFO).forEach(c => {
+      tot[c] = CENTER_INFO[c].types.reduce((a, t) => a + (byType[t] || 0), 0);
+      grand += tot[c];
+    });
+    if (grand) {
+      checkY(24);
+      doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+      doc.text('CENTERS OF INTELLIGENCE', margin, y); y += 6;
+      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
+      Object.keys(CENTER_INFO).forEach(c => {
+        checkY(6);
+        const pct = Math.round((tot[c] / grand) * 100);
+        doc.text(c + (c === tp.center ? '  (your home base)' : '') + '   ' + pct + '%', margin, y);
+        y += 5.5;
+      });
+      y += 8;
+    }
+
+    // Instinctual stack
+    const stack = window.__subtypeStack || [];
+    if (stack.length === 3) {
+      checkY(24);
+      doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+      doc.text('YOUR INSTINCTUAL STACK', margin, y); y += 6;
+      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
+      stack.forEach((n, i) => {
+        checkY(6);
+        doc.text((i + 1) + '.  ' + n + (i === 0 ? '  (dominant)' : ''), margin, y);
+        y += 5.5;
+      });
+      y += 8;
+    }
+
+    // Wings and lines
+    checkY(24);
+    doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+    doc.text('WHERE YOU SIT, AND WHERE YOU MOVE', margin, y); y += 6;
+    doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
+    [
+      'Your wings: ' + tp.wings[0] + ' and ' + tp.wings[1],
+      'In growth you move toward ' + tp.growth + ' - ' + TYPE_PROFILE[tp.growth].name,
+      'Under strain you move toward ' + tp.stress + ' - ' + TYPE_PROFILE[tp.stress].name
+    ].forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
+    y += 12;
+
+    doc.setDrawColor(216, 210, 198);
+    checkY(10); doc.line(margin, y, margin + contentW, y); y += 12;
+  }
+
   const sections = document.querySelectorAll('.report-section');
   sections.forEach((section, idx) => {
     const label = section.querySelector('.report-section-label')?.textContent || '';
@@ -2004,8 +2095,10 @@ function downloadPDF() {
     if (!bodyText) return;
 
     checkY(30);
-    doc.setFontSize(8); doc.setTextColor(198, 123, 92); doc.setFont('helvetica', 'bold');
-    doc.text(label.toUpperCase(), margin, y); y += 6;
+    if (label) {
+      doc.setFontSize(8); doc.setTextColor(198, 123, 92); doc.setFont('helvetica', 'bold');
+      doc.text(label.toUpperCase(), margin, y); y += 6;
+    }
     if (title) {
       doc.setFontSize(16); doc.setTextColor(47, 49, 51);
       const titleLines = doc.splitTextToSize(title, contentW);
