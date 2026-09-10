@@ -5,8 +5,10 @@ const ANALYSIS_MODEL = 'claude-sonnet-5';
 const WRITING_MODEL  = 'claude-haiku-4-5-20251001';
 
 const TYPE_NAMES = {
-  1: "The Reformer", 2: "The Helper", 3: "The Achiever", 4: "The Individualist",
-  5: "The Investigator", 6: "The Loyalist", 7: "The Enthusiast", 8: "The Challenger", 9: "The Peacemaker"
+  // iEQ9 (Integrative Enneagram) type names, to match the certification.
+  1: "Strict Perfectionist", 2: "Considerate Helper", 3: "Competitive Achiever",
+  4: "Intense Creative", 5: "Quiet Specialist", 6: "Loyal Sceptic",
+  7: "Enthusiastic Visionary", 8: "Active Controller", 9: "Adaptive Peacemaker"
 };
 
 const TYPE_CONTEXT = {
@@ -110,7 +112,10 @@ export default async function handler(req, res) {
     subtypeRanking = [],   // full ranking, e.g. ["Social","One-on-One","Self-Preservation"]
     highOutliers = [],     // statements from OTHER types she rated 5
     lowOutliers = [],      // statements from HER type she rated 1-2
-    userContext = ''       // her own sentence
+    userContext = '',      // her own sentence
+    sunSign = '',          // optional, drives the zodiac section
+    subtypeKeyword = '',   // official iEQ9 subtype name, e.g. 'Prestige'
+    isCountertype = false  // this subtype behaves unlike the other two of its type
   } = req.body;
 
   if (!typeNum || !userName) {
@@ -176,7 +181,6 @@ ${contextBlock}
 
 Return plain text, no JSON, under 550 words, using exactly these labels:
 
-PATTERN NAME: two to four words naming HER specific loop, in plain everyday English. It has to be something she could say out loud to a friend and something she could catch herself doing in real time. Title Case. Examples of the right shape, do not reuse them: The Pre-emptive Yes. The Quiet Exit. Proving It Twice. Not clinical, not Enneagram jargon, not a number.
 
 CENTRAL CONTRADICTION: the specific tension in THIS data. Use the outliers, the gap, and her own words. Something a generic Type ${typeNum} description would miss.
 
@@ -216,9 +220,15 @@ An adult in the middle of an identity shift. She's done some inner work already.
 WHAT THIS IS
 Not a personality description. She can get that free online in thirty seconds. Everything here has to be traceable to HER data below. If a paragraph could show up in any free Enneagram description, rewrite it or cut it.
 
-Her ${subtype} subtype changes how Type ${typeNum} actually shows up. Reference it specifically, not as a footnote.
+Her ${subtype} subtype colours how Type ${typeNum} shows up, but the type is the subject. Reference the subtype only where it changes something real.
 
-THE PATTERN NAME from the analysis is the spine of this whole report. Use the exact name, capitalized the same way, at least twice in your sections. Never rename it, never paraphrase it, never explain that you're naming it. Just use it like she already knows it.
+BALANCE - THIS MATTERS
+Type ${typeNum} is the spine of this report. Write about the type first and foremost.
+The subtype is a modifier, not a co-headline. Mention it where it genuinely changes
+the picture - which is usually one or two places, not every section. Do not open
+sections with "As a ${subtype} ${typeNum}..." and do not caveat every observation
+with the subtype. If a paragraph would read the same with the subtype removed,
+remove it.${subtypeKeyword ? `\nThe established name for this subtype is "${subtypeKeyword}". You may use it once, naturally, if it earns its place. Never invent an alternative name for her pattern.${isCountertype ? ` She is the COUNTERTYPE of her type - the one of the three that behaves unlike the other two, which is why people with her type often mistype themselves. Where it's relevant, write to what makes her the exception rather than the rule.` : ''}` : ''}
 
 ANALYSIS OF HER RESULTS - build on this, don't restate it:
 ${analysis}
@@ -244,7 +254,6 @@ Return ONLY a raw JSON object. No markdown fences, no backticks, no text before 
 Write these five keys:
 
 {
-"patternName": "The PATTERN NAME from the analysis, exactly as written there. Two to four words, Title Case, nothing else. No quotes, no punctuation, no explanation.",
 "gettingToKnowYourType": "About 200 words. Who Type ${typeNum} actually is, written so she feels caught rather than informed. Then what the ${subtype} subtype specifically does to this type, and name the version of Type ${typeNum} she is NOT so the difference lands. If the analysis says her gap is 4 points or less, say so plainly and describe what being between two types feels like day to day. Introduce the pattern name here for the first time, naturally, as if it's obvious. End with her core fear and core desire, one plain sentence each.",
 "youAsMother": "About 180 words. Where this pattern got built. What it protected her from and what it earned her - it worked, that's why it stuck around. Then the turn: the thing that kept her safe at fifteen is the thing narrowing her options now. Specific to Type ${typeNum} and the ${subtype} subtype. Absolutely no mention of motherhood or children.",
 "yourInnerWorld": "About 200 words. The meta-programs from the analysis, in plain language. Never name them as jargon, never list them mechanically. Walk through one real decision-shaped moment and show how her filters run it before she's consciously decided anything. Land on the one that costs her most. This is the section that should make her stop and read a line twice.",
@@ -259,6 +268,7 @@ Write these four keys:
 "whereYouGetStuck": "About 190 words. THE STRONGEST SECTION IN THE REPORT.${cleanContext ? ` She wrote this in her own words: \\"${cleanContext}\\". Quote her back to herself EXACTLY, word for word, inside quotation marks, in the first two sentences. Do not clean up her grammar, do not paraphrase, do not summarize. Then show her what's underneath what she wrote.` : ' Open with THE SENTENCE from the analysis, in quotation marks, in her own likely words.'} Then what it's protecting. Then THE REFRAME, also in quotation marks. Make the swap concrete enough to use today. Use the pattern name at least once here.",
 "yourGrowthEdge": "About 200 words. THE 14-DAY PROTOCOL from the analysis, written as an actual assignment with a start and an end. Name THE TRIGGER first - the exact signal that the pattern has started. Then the thing she does, when she does it, and how she knows she did it. Under two minutes a day, fourteen days. Be specific enough that she could start tomorrow and know by Friday whether she's doing it right. Say plainly that this is small on purpose and that reading about a pattern changes nothing while catching it four or five times changes how she decides. No 'practice self-compassion'. Something she could do on a Tuesday at 3pm.",
 "questionsToSitWith": "Exactly 6 numbered questions as '1. text' each on its own line, separated by \\n. Specific to her data and her pattern name. Uncomfortable in a useful way. No yes/no questions - each should be hard to answer in one sentence.",
+${sunSign ? `"zodiacBlend": "About 230 words. Type ${typeNum} with a ${sunSign} sun. This is a bonus section and it should read as one - lighter, more playful, curious rather than clinical. Do NOT treat astrology as measurement and do not claim it explains her. Frame it as a second lens laid over the first. Find the genuine TENSION between the two: where the Enneagram drive and the ${sunSign} archetype pull in different directions, and where they amplify each other into something specific. Be concrete about what that combination looks like on an ordinary Tuesday. End on the question the combination raises for her. No horoscope voice, no predictions about events, no 'the stars say'.",` : ''}
 "invitationToBLN": "About 110 words. Do NOT pitch a program, a course, or a price. Tell her the one thing to do this week: start the 14 days, and put a note somewhere for day 14. Then remind her of the prediction and tell her to notice if it comes true, because that's how she'll know the pattern is real and not just a description she agreed with. Close by asking her to message Mariana on Instagram and say whether the type felt right and whether the prediction landed - say that it genuinely shapes what gets built next. Warm, direct, no hard sell."
 }`;
 
@@ -280,10 +290,7 @@ Write these four keys:
       return res.status(500).json({ error: 'Incomplete report', missingKeys });
     }
 
-    // patternName is optional - never fail the report over it
-    if (parsed.patternName) {
-      parsed.patternName = String(parsed.patternName).replace(/["'.]/g, '').trim().substring(0, 40);
-    }
+
 
     return res.status(200).json(parsed);
 
