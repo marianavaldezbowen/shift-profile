@@ -241,7 +241,7 @@ Return ONLY a raw JSON object. No markdown fences, no backticks, no text before 
 
   const promptA = `${shared}
 
-Write these four keys:
+Write these five keys:
 
 {
 "patternName": "The PATTERN NAME from the analysis, exactly as written there. Two to four words, Title Case, nothing else. No quotes, no punctuation, no explanation.",
@@ -253,7 +253,7 @@ Write these four keys:
 
   const promptB = `${shared}
 
-Write these keys:
+Write these four keys:
 
 {
 "whereYouGetStuck": "About 190 words. THE STRONGEST SECTION IN THE REPORT.${cleanContext ? ` She wrote this in her own words: \\"${cleanContext}\\". Quote her back to herself EXACTLY, word for word, inside quotation marks, in the first two sentences. Do not clean up her grammar, do not paraphrase, do not summarize. Then show her what's underneath what she wrote.` : ' Open with THE SENTENCE from the analysis, in quotation marks, in her own likely words.'} Then what it's protecting. Then THE REFRAME, also in quotation marks. Make the swap concrete enough to use today. Use the pattern name at least once here.",
