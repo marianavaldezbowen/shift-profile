@@ -1011,6 +1011,16 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
 }
 
+
+.ctr-types { display: flex; gap: 8px; flex-wrap: wrap; }
+.ctr-type {
+  font-family: 'Montserrat', sans-serif; font-size: 12.5px; font-weight: 500;
+  color: var(--ink-soft); background: #F0EFEB; padding: 5px 11px;
+}
+.ctr-type em { font-style: normal; font-weight: 400; opacity: 0.7; }
+.ctr-type.is-you { background: var(--type); color: #fff; }
+.center-row { align-items: center; }
+
 </style>
 </head>
 <body>
@@ -1899,7 +1909,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     const pct = Math.round((s.score / 30) * 100);
     return `
       <div class="score-row">
-        <div class="score-label">Type ${s.type} - ${s.name.split(' ').slice(1).join(' ')}</div>
+        <div class="score-label">Type ${s.type} - ${s.name}</div>
         <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%; background:${barColors[i] || '#DDD5CB'};"></div></div>
         <div class="score-num">${s.score}</div>
       </div>
@@ -2186,27 +2196,17 @@ function downloadPDF() {
     });
     y += 4;
 
-    // Centers, computed the same way as on screen
-    const byType = {};
-    (window.__pdfScores || []).forEach(x => byType[x.type] = x.score);
-    let grand = 0; const tot = {};
+    // Centres: membership only, for the reason noted in renderCenters.
+    checkY(20);
+    doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
+    doc.text('CENTRES OF INTELLIGENCE', margin, y); y += 6;
+    doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
     Object.keys(CENTER_INFO).forEach(c => {
-      tot[c] = CENTER_INFO[c].types.reduce((a, t) => a + (byType[t] || 0), 0);
-      grand += tot[c];
+      checkY(6);
+      doc.text(c + ' (types ' + CENTER_INFO[c].types.join(', ') + ')' + (c === tp.center ? '  - yours' : ''), margin, y);
+      y += 5.5;
     });
-    if (grand) {
-      checkY(24);
-      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-      doc.text('CENTERS OF INTELLIGENCE', margin, y); y += 6;
-      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-      Object.keys(CENTER_INFO).forEach(c => {
-        checkY(6);
-        const pct = Math.round((tot[c] / grand) * 100);
-        doc.text(c + (c === tp.center ? '  (your home base)' : '') + '   ' + pct + '%', margin, y);
-        y += 5.5;
-      });
-      y += 8;
-    }
+    y += 8;
 
     // Instinctual stack
     const stack = window.__subtypeStack || [];
@@ -2589,32 +2589,29 @@ function renderAtAGlance(typeNum) {
 
 // ── Centers of intelligence, computed from her actual answers ──
 function renderCenters(scores, typeNum) {
-  if (!scores || !scores.length) return '';
-  const byType = {};
-  scores.forEach(s => byType[s.type] = s.score);
-  const totals = {};
-  let grand = 0;
-  Object.keys(CENTER_INFO).forEach(c => {
-    totals[c] = CENTER_INFO[c].types.reduce((sum, t) => sum + (byType[t] || 0), 0);
-    grand += totals[c];
-  });
-  if (!grand) return '';
+  // Each centre holds 3 of the 9 types, so a share-of-total always lands near
+  // 33% and can show a buyer's home centre as her lowest. Membership only.
   const home = TYPE_PROFILE[typeNum] ? TYPE_PROFILE[typeNum].center : null;
+  if (!home) return '';
+  const byType = {};
+  (scores || []).forEach(x => byType[x.type] = x.score);
   const rows = Object.keys(CENTER_INFO).map(c => {
-    const pct = Math.round((totals[c] / grand) * 100);
+    const isHome = c === home;
+    const members = CENTER_INFO[c].types.map(t =>
+      `<span class="ctr-type${t === typeNum ? ' is-you' : ''}">Type ${t}${byType[t] ? ' <em>' + byType[t] + '</em>' : ''}</span>`
+    ).join('');
     return `
-      <div class="center-row${c === home ? ' is-home' : ''}">
-        <div class="center-name">${c}${c === home ? ' <em>your home base</em>' : ''}</div>
-        <div class="center-bar"><div class="center-fill" style="width:${pct}%"></div></div>
-        <div class="center-pct">${pct}%</div>
+      <div class="center-row${isHome ? ' is-home' : ''}">
+        <div class="center-name">${c}${isHome ? ' <em>yours</em>' : ''}</div>
+        <div class="ctr-types">${members}</div>
       </div>`;
   }).join('');
   return `
     <div class="panel">
-      <div class="panel-head">Centers of intelligence</div>
+      <div class="panel-head">Centres of intelligence</div>
       <div class="panel-body">
         ${rows}
-        <p class="panel-note">${home ? CENTER_INFO[home].blurb : ''}</p>
+        <p class="panel-note">${CENTER_INFO[home].blurb} The nine types group into three centres and yours sits in ${home}, regardless of how you scored on the other two types in that group.</p>
       </div>
     </div>`;
 }
