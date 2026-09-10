@@ -914,6 +914,103 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   .center-name { width: 108px; font-size: 12.5px; }
 }
 
+
+/* ── Per-type accent: set on #screen-report at render time ── */
+#screen-report { --type: #3F4B2F; }
+.panel-head { background: var(--type); }
+.glance-card { border-top-color: var(--type); }
+.glance-label { color: var(--type); }
+.center-row.is-home .center-fill { background: var(--type); }
+.stack-row.is-dominant .stack-rank { background: var(--type); }
+.wheel .node.me { fill: var(--type); }
+.wheel .line-growth { stroke: var(--type); }
+.key-dot.me { background: var(--type); }
+.key-line.growth { background: var(--type); }
+.report-box.growth { border-left-color: var(--type); }
+.report-box.invitation { border-left-color: var(--type); }
+.question-num-badge { background: var(--type) !important; }
+#report-pattern-wrap::before { background: var(--type); }
+
+/* ── Strengths and weaknesses ── */
+.sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+.sw-head {
+  font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 2px solid;
+}
+.sw-plus  { color: #3E7A52; border-color: #3E7A52; }
+.sw-minus { color: #BC6A4C; border-color: #BC6A4C; }
+.sw-list { margin: 0; padding-left: 18px; }
+.sw-list li {
+  font-family: 'Montserrat', sans-serif; font-size: 14px; line-height: 1.55;
+  color: var(--charcoal); margin-bottom: 11px;
+}
+.sw-col:first-child .sw-list li::marker { color: #3E7A52; }
+.sw-col:last-child .sw-list li::marker { color: #BC6A4C; }
+
+/* ── Development levels ── */
+.level-row {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 15px 16px; margin-bottom: 10px; border-left: 4px solid;
+}
+.level-healthy   { background: #EFF5F0; border-color: #3E7A52; }
+.level-average   { background: #FBF3E7; border-color: #C99A3E; }
+.level-unhealthy { background: #FBEEEA; border-color: #BC6A4C; }
+.level-tag {
+  width: 120px; flex-shrink: 0; font-family: 'Montserrat', sans-serif;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; padding-top: 2px;
+}
+.level-healthy   .level-tag { color: #3E7A52; }
+.level-average   .level-tag { color: #A87A22; }
+.level-unhealthy .level-tag { color: #BC6A4C; }
+.level-text {
+  font-family: 'Montserrat', sans-serif; font-size: 14.5px;
+  line-height: 1.6; color: var(--charcoal);
+}
+
+@media (max-width: 600px) {
+  .sw-grid { grid-template-columns: 1fr; gap: 22px; }
+  .level-row { flex-direction: column; gap: 7px; }
+  .level-tag { width: auto; }
+}
+
+
+/* ── Zodiac: clearly a different kind of thing from the rest ── */
+.zodiac-box {
+  border: 1px solid var(--rule); border-top: 3px solid #6B5FA8;
+  background: linear-gradient(180deg, #F7F5FB 0%, var(--page) 100%);
+  padding: 24px 26px;
+}
+.zodiac-tag {
+  font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; color: #6B5FA8;
+  margin-bottom: 14px;
+}
+
+
+/* ── Subtype panel ── */
+.subtype-keyword {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(30px, 4.5vw, 42px);
+  font-weight: 300; line-height: 1.05; color: var(--type); margin-bottom: 12px;
+}
+.subtype-blurb {
+  font-family: 'Montserrat', sans-serif; font-size: 15px;
+  line-height: 1.7; color: var(--charcoal);
+}
+#report-subtype-keyword {
+  font-family: 'Montserrat', sans-serif; font-size: 13.5px; font-weight: 500;
+  color: var(--ink-soft); margin-top: 14px; letter-spacing: 0.01em;
+}
+
+
+.counter-badge {
+  display: inline-block; margin-bottom: 12px; padding: 4px 12px;
+  background: var(--type); color: #fff;
+  font-family: 'Montserrat', sans-serif; font-size: 10.5px;
+  font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+}
+
 </style>
 </head>
 <body>
@@ -1157,6 +1254,8 @@ function checkAccess() {
 
     const rawCtx = params.get('rctx');
     userContext = rawCtx ? decodeURIComponent(rawCtx).substring(0, 500) : '';
+    const rawSign = params.get('rsign');
+    userSunSign = rawSign ? decodeURIComponent(rawSign).substring(0, 20) : '';
 
     runGeneration();
   }
@@ -1176,8 +1275,10 @@ const LIKERT_OPTIONS = [
 ];
 
 const TYPE_NAMES = {
-  1: "The Reformer", 2: "The Helper", 3: "The Achiever", 4: "The Individualist",
-  5: "The Investigator", 6: "The Loyalist", 7: "The Enthusiast", 8: "The Challenger", 9: "The Peacemaker"
+  // iEQ9 (Integrative Enneagram) type names, to match the certification.
+  1: "Strict Perfectionist", 2: "Considerate Helper", 3: "Competitive Achiever",
+  4: "Intense Creative", 5: "Quiet Specialist", 6: "Loyal Sceptic",
+  7: "Enthusiastic Visionary", 8: "Active Controller", 9: "Adaptive Peacemaker"
 };
 
 const SCORED_QUESTIONS = [
@@ -1265,6 +1366,7 @@ let dominantType = 0;
 let dominantSubtype = '';
 let userContext = '';
 let lastSortedScores = [];
+let userSunSign = '';
 let isReturnVisit = false;
 const BATCH_SIZE = 6;
 const TOTAL_BATCHES = 9;
@@ -1387,6 +1489,29 @@ function renderSubtypeSection() {
   window.scrollTo(0, 0);
 }
 
+
+// ── Sun sign from a birth date. Optional throughout - if she skips it,
+// the zodiac section simply doesn't render. ──
+const ZODIAC = [
+  ['Capricorn', 1, 19], ['Aquarius', 2, 18], ['Pisces', 3, 20], ['Aries', 4, 19],
+  ['Taurus', 5, 20], ['Gemini', 6, 20], ['Cancer', 7, 22], ['Leo', 8, 22],
+  ['Virgo', 9, 22], ['Libra', 10, 22], ['Scorpio', 11, 21], ['Sagittarius', 12, 21],
+  ['Capricorn', 12, 31]
+];
+
+function getSunSign(dateStr) {
+  if (!dateStr) return '';
+  const parts = String(dateStr).split('-');
+  if (parts.length < 3) return '';
+  const m = parseInt(parts[1], 10), d = parseInt(parts[2], 10);
+  if (!m || !d) return '';
+  for (let i = 0; i < ZODIAC.length; i++) {
+    const [name, month, lastDay] = ZODIAC[i];
+    if (m < month || (m === month && d <= lastDay)) return name;
+  }
+  return '';
+}
+
 function renderContextQuestion() {
   const fill = document.getElementById('progress-fill');
   const pct  = document.getElementById('progress-pct');
@@ -1404,6 +1529,8 @@ function renderContextQuestion() {
     <div class="intake-form">
       <label>What is the thing you keep doing that you wish you would stop?</label>
       <textarea id="user-context" rows="4" style="width:100%;padding:14px;font-family:inherit;font-size:15px;line-height:1.5;border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink);resize:vertical;" placeholder="However it comes out is fine."></textarea>
+      <label style="margin-top:22px;">Your birth date <span style="font-weight:400;color:var(--muted);">- optional, for the astrology section</span></label>
+      <input type="date" id="user-birthdate" style="width:100%;padding:13px;font-family:inherit;font-size:15px;border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--charcoal);">
     </div>
     <div class="quiz-nav">
       <button class="quiz-nav-back" onclick="renderSubtypeSection()">← Back</button>
@@ -1504,6 +1631,8 @@ function getSubtypeName(ranking) {
 async function submitQuiz() {
   const ctxEl = document.getElementById('user-context');
   if (ctxEl) userContext = ctxEl.value.trim().substring(0, 500);
+  const bdEl = document.getElementById('user-birthdate');
+  userSunSign = bdEl ? getSunSign(bdEl.value) : '';
 
   const scores = calculateScores();
   dominantType = getDominantType(scores);
@@ -1630,6 +1759,9 @@ async function generateReportStreaming(typeNum, typeName, subtype, sortedScores,
     body: JSON.stringify({
       typeNum, typeName, subtype, sortedScores, userName,
       subtypeRanking: fullRanking || [],
+      sunSign: userSunSign,
+      subtypeKeyword: (getSubtype(dominantType, dominantSubtype) || {}).keyword || '',
+      isCountertype: !!(getSubtype(dominantType, dominantSubtype) || {}).counter,
       highOutliers: (outliers && outliers.high) || [],
       lowOutliers: (outliers && outliers.low) || [],
       userContext
@@ -1693,7 +1825,8 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
     + '&rname='    + encodeURIComponent(userName)
     + '&remail='   + encodeURIComponent(userEmail)
     + (scoreString ? '&rscores=' + encodeURIComponent(scoreString) : '')
-    + (userContext ? '&rctx=' + encodeURIComponent(userContext.substring(0, 300)) : '');
+    + (userContext ? '&rctx=' + encodeURIComponent(userContext.substring(0, 300)) : '')
+    + (userSunSign ? '&rsign=' + encodeURIComponent(userSunSign) : '');
 
   const templateParams = {
     to_name:           userName,
@@ -1738,14 +1871,26 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
   }
   document.getElementById('report-subtype-label').textContent = `${subtype} Subtype`;
 
-  // Pattern name - only shown if the model returned one
+  // Each type carries its own accent colour through the whole report.
+  const typeColor = (TYPE_PROFILE[typeNum] && TYPE_PROFILE[typeNum].color) || '#3F4B2F';
+  document.getElementById('screen-report').style.setProperty('--type', typeColor);
+
+  // The header hero is the type. The subtype keyword sits beneath it.
   const patternWrap = document.getElementById('report-pattern-wrap');
-  if (report.patternName && String(report.patternName).trim()) {
-    document.getElementById('report-pattern-name').textContent = String(report.patternName).trim();
-    patternWrap.style.display = 'block';
-  } else {
-    patternWrap.style.display = 'none';
+  const stInfo = getSubtype(typeNum, subtype);
+  document.getElementById('report-pattern-name').textContent = typeName;
+  const eyebrow = patternWrap.querySelector('div');
+  if (eyebrow) eyebrow.textContent = 'Type ' + typeNum;
+  let sub = document.getElementById('report-subtype-keyword');
+  if (!sub) {
+    sub = document.createElement('div');
+    sub.id = 'report-subtype-keyword';
+    patternWrap.appendChild(sub);
   }
+  sub.textContent = stInfo
+    ? subtype + ' subtype: ' + stInfo.keyword + (stInfo.counter ? '  (countertype)' : '')
+    : subtype + ' subtype';
+  patternWrap.style.display = 'block';
 
   // Score bars
   // Ranked ramp: her dominant type darkest, stepping down through sage.
@@ -1792,8 +1937,11 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
         <div class="panel-body">${scoreBars}</div>
       </div>` : ''}
       ${renderCenters(sortedScores, typeNum)}
+      ${renderSubtypePanel(typeNum, subtype)}
       ${renderSubtypeViz(window.__subtypeStack, subtype)}
       ${renderWheel(typeNum)}
+      ${renderStrengthsWeaknesses(typeNum)}
+      ${renderLevels(typeNum)}
     </div>
     <hr class="report-divider">
 
@@ -1854,6 +2002,17 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     </div>
     <hr class="report-divider">
 
+    ${report.zodiacBlend ? `
+    <!-- ZODIAC -->
+    <div class="report-section zodiac-section">
+      <h2 class="report-section-title">Type ${typeNum} meets ${userSunSign}</h2>
+      <div class="zodiac-box">
+        <div class="zodiac-tag">A second lens, for fun</div>
+        <div class="report-box-body">${formatParagraphs(report.zodiacBlend)}</div>
+      </div>
+    </div>
+    <hr class="report-divider">` : ''}
+
     <!-- WHAT HAPPENS NOW -->
     <div class="report-section">
       <h2 class="report-section-title">What happens now</h2>
@@ -1910,6 +2069,9 @@ function parseReflectionQuestions(text) {
 // PDF DOWNLOAD
 // ══════════════════════════════════════
 function downloadPDF() {
+  // This buyer's type colour, used for the cover, headings and bars.
+  const _tcHex = (TYPE_PROFILE[dominantType] && TYPE_PROFILE[dominantType].color) || '#3F4B2F';
+  const TC = [1,3,5].map(i => parseInt(_tcHex.substr(i,2),16));
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
@@ -1922,10 +2084,10 @@ function downloadPDF() {
   function checkY(needed = 10) { if (y + needed > pageH - margin) addPage(); }
 
   // Cover
-  doc.setFillColor(63, 75, 47);
+  doc.setFillColor(TC[0], TC[1], TC[2]);
   doc.rect(0, 0, pageW, pageH, 'F');
   doc.setFontSize(10); doc.setTextColor(169, 177, 163);
-  doc.text('THE SHIFT PROFILE', pageW / 2, 70, { align: 'center', charSpace: 2 });
+  doc.text(PRODUCT_NAME.toUpperCase(), pageW / 2, 70, { align: 'center', charSpace: 2 });
   doc.setFontSize(32); doc.setTextColor(245, 242, 235);
   doc.text(`${userName}'s`, pageW / 2, 100, { align: 'center' });
   doc.text(PRODUCT_NAME, pageW / 2, 116, { align: 'center' });
@@ -1940,11 +2102,11 @@ function downloadPDF() {
   addPage();
 
   // ── SCORE BARS in PDF ──
-  // Olive Horizon: dominant type in olive, the rest stepping down through sage
-  const pdfBarColors = [
-    [63,75,47], [85,98,66], [110,124,90], [138,150,120],
-    [169,177,163], [186,192,180], [200,205,194], [212,215,206], [222,224,217]
-  ];
+  // Ranked ramp derived from this buyer's type colour, fading toward neutral
+  const pdfBarColors = Array.from({length:9}, (_, i) => {
+    const f = i / 8;
+    return TC.map(c => Math.round(c + (222 - c) * f * 0.92));
+  });
 
   const scoreRows = document.querySelectorAll('.score-row');
   if (scoreRows.length) {
@@ -1999,7 +2161,12 @@ function downloadPDF() {
   if (tp) {
     checkY(30);
     doc.setFontSize(16); doc.setTextColor(47, 49, 51); doc.setFont('helvetica', 'bold');
-    doc.text('Type ' + dominantType + ' at a glance', margin, y); y += 10;
+    doc.text('Type ' + dominantType + ' at a glance', margin, y); y += 8;
+    const _st = getSubtype(dominantType, dominantSubtype);
+    if (_st) {
+      doc.setFontSize(10); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'normal');
+      doc.text(dominantSubtype + ' subtype: ' + _st.keyword + (_st.counter ? '  (countertype)' : ''), margin, y); y += 8;
+    } else { y += 2; }
     doc.setFont('helvetica', 'normal');
 
     const pairs = [
@@ -2010,7 +2177,7 @@ function downloadPDF() {
     ];
     pairs.forEach(([k, v]) => {
       checkY(14);
-      doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
       doc.text(k.toUpperCase(), margin, y); y += 5;
       doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
       const lines = doc.splitTextToSize(String(v).replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"'), contentW);
@@ -2029,7 +2196,7 @@ function downloadPDF() {
     });
     if (grand) {
       checkY(24);
-      doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
       doc.text('CENTERS OF INTELLIGENCE', margin, y); y += 6;
       doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
       Object.keys(CENTER_INFO).forEach(c => {
@@ -2045,7 +2212,7 @@ function downloadPDF() {
     const stack = window.__subtypeStack || [];
     if (stack.length === 3) {
       checkY(24);
-      doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
       doc.text('YOUR INSTINCTUAL STACK', margin, y); y += 6;
       doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
       stack.forEach((n, i) => {
@@ -2058,7 +2225,7 @@ function downloadPDF() {
 
     // Wings and lines
     checkY(24);
-    doc.setFontSize(8); doc.setTextColor(63, 75, 47); doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
     doc.text('WHERE YOU SIT, AND WHERE YOU MOVE', margin, y); y += 6;
     doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
     [
@@ -2068,6 +2235,36 @@ function downloadPDF() {
     ].forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
     y += 12;
 
+    // Strengths and weaknesses
+    [['KEY STRENGTHS', tp.strengths], ['WHERE IT COSTS YOU', tp.weaknesses]].forEach(([hd, list]) => {
+      checkY(24);
+      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
+      doc.text(hd, margin, y); y += 6;
+      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
+      list.forEach(item => {
+        const lines = doc.splitTextToSize('- ' + item, contentW - 4);
+        checkY(lines.length * 6);
+        lines.forEach(l => { doc.text(l, margin + 2, y); y += 5.5; });
+      });
+      y += 7;
+    });
+
+    // The three levels
+    checkY(24);
+    doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
+    doc.text('THE THREE VERSIONS OF TYPE ' + dominantType, margin, y); y += 6;
+    [['At your best', tp.healthy], ['Most of the time', tp.average], ['Under real strain', tp.unhealthy]]
+      .forEach(([lab, txt]) => {
+        checkY(16);
+        doc.setFontSize(9); doc.setTextColor(90, 88, 84); doc.setFont('helvetica', 'bold');
+        doc.text(lab, margin, y); y += 5;
+        doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
+        const lines = doc.splitTextToSize(String(txt).replace(/[\u2018\u2019]/g, "'"), contentW);
+        lines.forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
+        y += 5;
+      });
+    y += 8;
+
     doc.setDrawColor(216, 210, 198);
     checkY(10); doc.line(margin, y, margin + contentW, y); y += 12;
   }
@@ -2076,7 +2273,7 @@ function downloadPDF() {
   sections.forEach((section, idx) => {
     const label = section.querySelector('.report-section-label')?.textContent || '';
     const title = section.querySelector('.report-section-title')?.textContent || '';
-    const body = section.querySelector('.report-section-body, .report-box-body');
+    const body = section.querySelector('.report-section-body, .report-box-body, .zodiac-box .report-box-body');
     const questionsBox = section.querySelector('.questions-box');
     let bodyText = '';
     if (questionsBox) {
@@ -2131,78 +2328,132 @@ function downloadPDF() {
 // This is what makes the report read as an instrument rather than an essay.
 // ══════════════════════════════════════
 const TYPE_PROFILE = {
-  1: { name:'The Perfectionist', center:'Body', wings:[9,2], stress:4, growth:7,
+  1: { name:TYPE_NAMES[1], center:'Body', wings:[9,2], stress:4, growth:7,
        worldview:'The world is a place that could be better, and someone has to be responsible about it.',
        focus:'What is wrong, what is out of place, and what should be corrected.',
        fear:'Being corrupt, wrong, or fundamentally bad.',
        desire:'To have integrity, and to know you got it right.',
        selfTalk:'"If I let this slide, who else is going to catch it?"',
        gift:'Discernment. You see the gap between how things are and how they could be, and you close it.',
-       vice:'Anger, usually held in rather than expressed - it shows up as tension and quiet resentment.' },
-  2: { name:'The Helper', center:'Heart', wings:[1,3], stress:8, growth:4,
+       vice:'Anger, usually held in rather than expressed - it shows up as tension and quiet resentment.',
+       color:'#A6632E',
+       strengths:["Sees the gap between how things are and how they should be, and closes it", "Reliable to the point that people stop double-checking your work", "Fair - you apply the same standard to yourself first"],
+       weaknesses:["The inner critic runs whether or not anyone is watching", "Resentment builds quietly because you rarely say you're annoyed", "Difficulty letting something be finished and good enough"],
+       healthy:"You hold standards without punishing yourself for missing them. Serenity - you can accept that things are imperfect and still act.",
+       average:"You correct, improve and fix. Useful, and exhausting. The critic is loud and you call it high standards.",
+       unhealthy:"Nothing is ever right. You're rigid, self-righteous, and the anger you deny leaks out sideways." },
+  2: { name:TYPE_NAMES[2], center:'Heart', wings:[1,3], stress:8, growth:4,
        worldview:'People matter most, and love is something you earn by being needed.',
        focus:'What other people need, often before they have said it.',
        fear:'Being unwanted, or unloved for who you are rather than what you give.',
        desire:'To be genuinely loved, not just appreciated.',
        selfTalk:'"They need me. I can\'t not help."',
        gift:'Attunement. You sense what a person needs from across a room.',
-       vice:'Pride, in the specific form of believing you don\'t have needs of your own.' },
-  3: { name:'The Achiever', center:'Heart', wings:[2,4], stress:9, growth:6,
+       vice:'Pride, in the specific form of believing you don\'t have needs of your own.',
+       color:'#8B701B',
+       strengths:["Reads what someone needs before they've said it", "Makes people feel genuinely seen and safe", "Generous with time, energy and attention in a way people remember"],
+       weaknesses:["Your own needs go unnamed until they come out as resentment", "Help is sometimes given to be needed, not because it was wanted", "You struggle to accept care without immediately repaying it"],
+       healthy:"You give freely and receive freely. You know what you need and you say it out loud without apologising.",
+       average:"You give in order to be needed. Help is offered before it's asked for, and unmet needs turn quietly into keeping score.",
+       unhealthy:"You feel used and unappreciated, become intrusive or manipulative, and insist you want nothing while needing a great deal." },
+  3: { name:TYPE_NAMES[3], center:'Heart', wings:[2,4], stress:9, growth:6,
        worldview:'The world values winners, so falling behind is not an option.',
        focus:'Goals, results, and how you are coming across while getting them.',
        fear:'Being worthless without the accomplishments.',
        desire:'To be valuable, and to feel it rather than just be told it.',
        selfTalk:'"I must succeed. I am what I do."',
        gift:'Momentum. You can turn an idea into a real thing faster than almost anyone.',
-       vice:'Deceit, mostly self-deceit - believing you are the image you built.' },
-  4: { name:'The Individualist', center:'Heart', wings:[3,5], stress:2, growth:1,
+       vice:'Deceit, mostly self-deceit - believing you are the image you built.',
+       color:'#647B3E',
+       strengths:["Turns an idea into a real thing faster than almost anyone", "Reads what a room rewards and delivers it", "Recovers from setbacks by getting straight back to work"],
+       weaknesses:["Worth is measured in output, so rest feels like losing ground", "Feelings get set aside as inefficient rather than processed", "You can lose track of what you actually want under what wins"],
+       healthy:"You know your value without the receipts. Authentic - what people see is genuinely you, not a version built for them.",
+       average:"You perform competence. The image is managed, achievements stack up, and you're not sure who you are without them.",
+       unhealthy:"Image replaces self entirely. You cut corners, exaggerate, and become hostile to anyone who threatens the story." },
+  4: { name:TYPE_NAMES[4], center:'Heart', wings:[3,5], stress:2, growth:1,
        worldview:'Something essential is missing in me that other people seem to have naturally.',
        focus:'What is absent, what is far away, and what feels most true.',
        fear:'Having no identity, or no significance of your own.',
        desire:'To find yourself and be seen as you actually are.',
        selfTalk:'"No one really gets it. No one really gets me."',
        gift:'Depth. You can stay with feeling that other people flee, and make meaning from it.',
-       vice:'Envy - the ache toward what others have and you believe you lack.' },
-  5: { name:'The Investigator', center:'Head', wings:[4,6], stress:7, growth:8,
+       vice:'Envy - the ache toward what others have and you believe you lack.',
+       color:'#338164',
+       strengths:["Stays with feeling that other people run from", "Finds meaning and beauty where others see routine", "Honest about the hard thing when everyone else is being polite"],
+       weaknesses:["Comparison runs constantly and you usually come out short", "Ordinary feels like a personal failure", "Moods get treated as identity rather than weather"],
+       healthy:"You feel deeply and act anyway. Equanimity - your emotions inform you without running you.",
+       average:"You look for what's missing and find it. Longing for the unavailable feels more real than what's in front of you.",
+       unhealthy:"You're consumed by envy and self-loathing, withdraw from people, and romanticise your own suffering." },
+  5: { name:TYPE_NAMES[5], center:'Head', wings:[4,6], stress:7, growth:8,
        worldview:'The world demands more than I have, so I had better conserve what I\'ve got.',
        focus:'Information, and the distance you need to process it safely.',
        fear:'Being depleted, overwhelmed, or incapable.',
        desire:'To be competent, and to understand before you commit.',
        selfTalk:'"I need more time. I need more information."',
        gift:'Clarity. You see systems whole while others are still reacting to parts.',
-       vice:'Avarice - not of money, but of your time, energy and inner privacy.' },
-  6: { name:'The Loyalist', center:'Head', wings:[5,7], stress:3, growth:9,
+       vice:'Avarice - not of money, but of your time, energy and inner privacy.',
+       color:'#397A9D',
+       strengths:["Sees whole systems while other people react to fragments", "Calm and clear-headed in situations that panic everyone else", "Says only what you actually think is true"],
+       weaknesses:["You withdraw to conserve rather than engage and refuel", "Feelings get analysed instead of felt", "People experience distance you didn't intend"],
+       healthy:"You engage instead of observing. Non-attachment - you can give your knowledge, time and presence without feeling drained.",
+       average:"You retreat to think. Knowledge is stockpiled, energy is guarded, and connection happens at a measured distance.",
+       unhealthy:"You isolate completely, become contemptuous of people who need things, and mistake avoidance for independence." },
+  6: { name:TYPE_NAMES[6], center:'Head', wings:[5,7], stress:3, growth:9,
        worldview:'The world is unpredictable, so being prepared is the responsible thing to do.',
        focus:'What could go wrong, and who can actually be trusted.',
        fear:'Being without support or guidance when it counts.',
        desire:'Security, and the ability to trust your own judgement.',
        selfTalk:'"But what if. Let me think this through one more time."',
        gift:'Loyalty and foresight. You spot the risk everyone else talked themselves out of.',
-       vice:'Fear, which you often experience as thinking rather than as feeling.' },
-  7: { name:'The Enthusiast', center:'Head', wings:[6,8], stress:1, growth:5,
+       vice:'Fear, which you often experience as thinking rather than as feeling.',
+       color:'#6B5FA8',
+       strengths:["Spots the risk everyone else talked themselves out of", "Genuinely loyal - you stay when things get hard", "Asks the question in the room nobody wanted to ask"],
+       weaknesses:["Doubt gets aimed at your own judgement first", "Preparation can become a way of never starting", "Trust is slow to give and quick to withdraw"],
+       healthy:"You trust your own read. Courage - you act while afraid instead of waiting for the fear to pass.",
+       average:"You scan, prepare and test. Reassurance helps briefly. Certainty about your own judgement stays out of reach.",
+       unhealthy:"Anxiety runs the show. You become suspicious and reactive, or you overcorrect into recklessness to prove you're not afraid." },
+  7: { name:TYPE_NAMES[7], center:'Head', wings:[6,8], stress:1, growth:5,
        worldview:'Life is full of possibility, and pain is something to move through quickly.',
        focus:'What is next, what is exciting, and what keeps the options open.',
        fear:'Being trapped in pain, limitation, or deprivation.',
        desire:'To be satisfied, and free.',
        selfTalk:'"There\'s something better. Let\'s keep it moving."',
        gift:'Vision and reframing. You find the possible route when everyone else sees a wall.',
-       vice:'Gluttony - not for food, but for experience, stimulation and more.' },
-  8: { name:'The Challenger', center:'Body', wings:[7,9], stress:5, growth:2,
+       vice:'Gluttony - not for food, but for experience, stimulation and more.',
+       color:'#317B9B',
+       strengths:["Finds the possible route when everyone else sees a wall", "Brings genuine energy that lifts a room", "Connects ideas nobody had thought to put together"],
+       weaknesses:["Discomfort gets outrun rather than felt", "Starting is easy, finishing is not", "Options stay open long past the point of usefulness"],
+       healthy:"You stay for the hard part. Sobriety - you can be present with what's here instead of reaching for what's next.",
+       average:"You keep moving. Plans multiply, pain gets reframed fast, and depth loses to variety.",
+       unhealthy:"You're frantic and scattered, escaping into whatever numbs, and increasingly unable to tolerate stillness." },
+  8: { name:TYPE_NAMES[8], center:'Body', wings:[7,9], stress:5, growth:2,
        worldview:'The world is hard, and the strong protect the people who can\'t protect themselves.',
        focus:'Power, control, and where the injustice is.',
        fear:'Being controlled, betrayed, or made vulnerable.',
        desire:'To protect yourself and the people who are yours.',
        selfTalk:'"I\'ll handle it. I don\'t need anyone."',
        gift:'Decisive protection. You say the thing everyone was thinking and no one would say.',
-       vice:'Excess - too much intensity, too much force, too much of everything.' },
-  9: { name:'The Peacemaker', center:'Body', wings:[8,1], stress:6, growth:3,
+       vice:'Excess - too much intensity, too much force, too much of everything.',
+       color:'#BC523F',
+       strengths:["Says the thing everyone was thinking and nobody would say", "Protects the people who can't protect themselves", "Decides fast and carries the weight of it"],
+       weaknesses:["Vulnerability reads as danger, so it stays hidden", "Intensity lands harder on people than you realise", "Control gets taken before it's offered"],
+       healthy:"You lead with strength and let people in. Innocence - you can be soft without believing it will cost you.",
+       average:"You take charge and push. Directness is a shield, and you test people to see who can handle you.",
+       unhealthy:"You dominate and intimidate, see betrayal everywhere, and destroy things rather than appear weak." },
+  9: { name:TYPE_NAMES[9], center:'Body', wings:[8,1], stress:6, growth:3,
        worldview:'The world is more manageable when everyone is getting along.',
        focus:'Other people\'s positions, and keeping the peace between them.',
        fear:'Conflict, disconnection, and being made not to matter.',
        desire:'Inner peace, and a sense that you count.',
        selfTalk:'"It\'s fine. It doesn\'t really matter that much."',
        gift:'Steadiness. You hold every side at once and people relax around you.',
-       vice:'Sloth - not laziness, but falling asleep to your own priorities.' }
+       vice:'Self-forgetting - not laziness, but falling asleep to your own priorities.',
+       color:'#9C5A3C',
+       strengths:["Holds every side at once and people relax around you", "Steady when everything else is loud", "Genuinely non-judgemental in a way that is rare"],
+       weaknesses:["Your own priorities go last and eventually go missing", "Agreement is given when disagreement was true", "Anger comes out as delay rather than words"],
+       healthy:"You know what you want and you say it. Right action - you show up for your own life with the energy you give everyone else.",
+       average:"You merge with what's around you. Comfort and routine absorb the friction, and your own agenda stays vague.",
+       unhealthy:"You've checked out entirely, numbing through habit, stubborn and passive-aggressive, unable to say what you want or need." }
 };
 
 const CENTER_INFO = {
@@ -2210,6 +2461,111 @@ const CENTER_INFO = {
   Heart: { types:[2,3,4], blurb:'You lead with feeling and how you are received. The core emotion underneath is shame, whether or not you name it.' },
   Head:  { types:[5,6,7], blurb:'You lead with thinking and anticipation. The core emotion underneath is fear, whether or not it feels like fear.' }
 };
+
+
+
+// ══════════════════════════════════════
+// THE 27 SUBTYPES
+// Naranjo's instinctual subtypes as commonly named in the literature
+// (Chestnut / Naranjo lineage). These replace the previously generated
+// pattern names, which were invented per buyer and appear in no source.
+// ══════════════════════════════════════
+const SUBTYPE_KEYWORDS = {
+  1: { 'Self-Preservation': ['Worry', false, 'The most anxious One. The perfectionism turns inward and practical - anticipating problems, preparing for them, keeping things under control. The inner critic is loud and the anger mostly stays in.'],
+       'One-on-One':        ['Zeal', true,  'The most intense One, and unlike the other two. The reforming energy points outward at people, and the anger gets expressed rather than swallowed when your efforts to improve things get resisted.'],
+       'Social':            ['Non-Adaptable', false, 'You become the example rather than the critic. Correct conduct, high standards, visible integrity - being a model of the right way matters more than fixing any individual thing.'] },
+  2: { 'Self-Preservation': ['Privilege', true, 'The reluctant Two, and unlike the other two. More youthful and self-protective, you draw care toward you rather than pushing help outward, and you resist long commitments that would make you dependent.'],
+       'One-on-One':        ['Enchant', false, 'You aim everything at the individual. Charm, attention and real intensity go into building one close bond, and inside it you can finally state what you need. Boundaries and hearing "no" are hard.'],
+       'Social':            ['Ambition', false, 'You help at the level of groups. Influence, being in the know and holding a central role in a community matter more than being indispensable to one person.'] },
+  3: { 'Self-Preservation': ['Security', true, 'The private Three, and unlike the other two. You dislike advertising what you have achieved and would rather be quietly excellent. Material security through hard work, sometimes to the point of workaholism.'],
+       'One-on-One':        ['Charisma', false, 'You channel the competitiveness into the people close to you - if they succeed, you have succeeded. Personal magnetism is the tool, and your own feelings get set aside to stay attractive to them.'],
+       'Social':            ['Prestige', false, 'Standing and visibility above all. You read what a group rewards with real precision and deliver it, and looking successful matters enough that failure gets covered rather than examined.'] },
+  4: { 'Self-Preservation': ['Tenacity', true, 'The stoic Four, and unlike the other two. You endure rather than express, absorbing pain quietly and wanting credit for not complaining. Sensitive, but often cut off from what you actually feel.'],
+       'One-on-One':        ['Competition', false, 'The loudest Four. Envy turns into rivalry and you go after what you want rather than aching for it. Demanding, vocal about your needs, and the anger often covers how sad you actually are.'],
+       'Social':            ['Drama / Shame', false, 'You feel your suffering deeply and let people see it. Not competitive but comparing constantly, coming out short, and wanting badly to be understood as you actually are.'] },
+  5: { 'Self-Preservation': ['Castle', false, 'Boundaries are physical. You need a space that is yours, keep a small circle, and would far rather watch social life than take part in it. Guarded about the inner world.'],
+       'One-on-One':        ['Confidant', true, 'The romantic Five, and unlike the other two. You look for the one person who genuinely gets you and will share the private world nobody else sees. Less guarded, more dependent on that connection than you would like.'],
+       'Social':            ['Totem', false, 'Knowledge as belonging. You attach to big questions, experts and ideals, sharing your thinking generously while still guarding your time, space and inner resources.'] },
+  6: { 'Self-Preservation': ['Warmth', false, 'The most openly anxious Six. Safety comes from alliances, so you are genuinely warm and affectionate, careful with opinions, and slow to risk being wrong.'],
+       'One-on-One':        ['Intimidation', true, 'The counterphobic Six, and unlike the other two. You run at the fear rather than away from it - bold, assertive, sometimes intimidating, and often mistaken for an Eight. Vulnerability is hard to reach.'],
+       'Social':            ['Duty', false, 'You manage fear through rules, roles and systems. More black-and-white than other Sixes, precise and dutiful, and looking for something reliable to trust instead of your own doubt.'] },
+  7: { 'Self-Preservation': ['Network', false, 'The connector. You build a circle of people and resources that guarantees you will be alright, and you are very good at getting what you need. Pleasure-seeking, and skilled at justifying it.'],
+       'One-on-One':        ['Fascination', false, 'The dreamer. You see the possible version of everything and everyone, which makes you infectious and occasionally unrealistic. Ordinary and predictable are the hardest things to sit with.'],
+       'Social':            ['Sacrifice', true, 'The counter-Seven, and unlike the other two. You postpone your own gratification to be useful, which can look like a Two. Generous and service-driven, and quietly hoping the sacrifice gets noticed.'] },
+  8: { 'Self-Preservation': ['Satisfaction', false, 'The most direct Eight. Strong, productive, and unapologetic about getting what you need. A pillar for other people, and blunt to the point of impatience when your needs go unmet.'],
+       'One-on-One':        ['Possession', false, 'The most rebellious Eight. You break rules on purpose, want intensity, and take real ownership of the people and situations that are yours. Provocation is a tool, not an accident.'],
+       'Social':            ['Solidarity', true, 'The protective Eight, and unlike the other two. Power gets spent on other people rather than on yourself, which can read as Two-ish. Sharply tuned to injustice and fiercely loyal to your own.'] },
+  9: { 'Self-Preservation': ['Appetite', false, 'You soothe yourself through the physical - food, rest, routine, the comforts that make the day manageable. Grounded, rhythmic, and stubborn when someone disrupts the balance.'],
+       'One-on-One':        ['Fusion', false, 'You merge with the person closest to you and take on their life as yours. Partnered feels safer than alone, and your own preferences go quiet. Boundaries are the hard work here.'],
+       'Social':            ['Participation', true, 'The workaholic Nine, and unlike the other two. You lean into the group, often as the one who holds it together, keeping a cheerful front and putting your own needs last until they disappear.'] }
+};
+
+function getSubtype(typeNum, subtypeName) {
+  const t = SUBTYPE_KEYWORDS[typeNum];
+  if (!t || !t[subtypeName]) return null;
+  return { keyword: t[subtypeName][0], counter: t[subtypeName][1], blurb: t[subtypeName][2] };
+}
+
+// ── Subtype panel: the one place the subtype gets full attention ──
+function renderSubtypePanel(typeNum, subtypeName) {
+  const st = getSubtype(typeNum, subtypeName);
+  if (!st) return '';
+  return `
+    <div class="panel">
+      <div class="panel-head">Your subtype: ${subtypeName}</div>
+      <div class="panel-body">
+        <div class="subtype-keyword">${st.keyword}</div>
+        ${st.counter ? '<div class="counter-badge">Countertype</div>' : ''}
+        <div class="subtype-blurb">${st.blurb}</div>
+        <p class="panel-note">${st.counter
+          ? `Yours is the countertype of Type ${typeNum} - the one of the three that behaves unlike the other two, and the reason many people with your type mistype themselves.`
+          : `Each of the nine types splits three ways by dominant instinct, which is where the 27 subtypes come from. "${st.keyword}" is the established name for Type ${typeNum} with a ${subtypeName} instinct.`}</p>
+      </div>
+    </div>`;
+}
+
+// ── Strengths and weaknesses, as bullets rather than paragraphs ──
+function renderStrengthsWeaknesses(typeNum) {
+  const t = TYPE_PROFILE[typeNum];
+  if (!t) return '';
+  return `
+    <div class="panel">
+      <div class="panel-head">Key strengths and weaknesses</div>
+      <div class="panel-body sw-grid">
+        <div class="sw-col">
+          <div class="sw-head sw-plus">What you're genuinely good at</div>
+          <ul class="sw-list">${t.strengths.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div class="sw-col">
+          <div class="sw-head sw-minus">Where it costs you</div>
+          <ul class="sw-list">${t.weaknesses.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Healthy / average / unhealthy, so she knows what she's aiming at ──
+function renderLevels(typeNum) {
+  const t = TYPE_PROFILE[typeNum];
+  if (!t) return '';
+  const rows = [
+    ['healthy',   'At your best',    t.healthy],
+    ['average',   'Most of the time', t.average],
+    ['unhealthy', 'Under real strain', t.unhealthy]
+  ];
+  return `
+    <div class="panel">
+      <div class="panel-head">The three versions of Type ${typeNum}</div>
+      <div class="panel-body">
+        ${rows.map(([cls, label, text]) => `
+          <div class="level-row level-${cls}">
+            <div class="level-tag">${label}</div>
+            <div class="level-text">${text}</div>
+          </div>`).join('')}
+        <p class="panel-note">Nobody lives at one level. You move between them depending on strain, sleep and who you're with. The point isn't to stay at the top - it's to notice which one you're in.</p>
+      </div>
+    </div>`;
+}
 
 // ── Profile card grid ──
 function renderAtAGlance(typeNum) {
