@@ -28,35 +28,35 @@ src="https://www.facebook.com/tr?id=1309711794380173&ev=PageView&noscript=1"
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root {
-  /* Light throughout. Warm greige is the page; charcoal appears only as a
-     thin band and as text; olive and terracotta are accents, not fields. */
-  --page:        #EDEAE4;   /* the background, nearly everywhere */
-  --page-lift:   #F6F4F0;   /* cards, raised surfaces */
-  --charcoal:    #2E2E2C;   /* text, and the one dark band */
-  --olive:       #3F4B2F;   /* accent - rules, marks, dark blocks */
+  /* White page, near-black text, squared corners. Colour is an accent only. */
+  --page:        #FFFFFF;
+  --page-lift:   #F6F5F2;
+  --charcoal:    #1E2124;   /* body text - near black */
+  --ink-soft:    #3D4045;   /* secondary text */
+  --olive:       #3F4B2F;
   --olive-soft:  #4C5A39;
-  --sage-mid:    #A9B1A3;
-  --sage-bg:     #E2E4DC;
-  --linen:       #EDEAE4;
-  --linen-lift:  #F6F4F0;
-  --terra:       #C67B5C;
-  --terra-light: #D28E71;
-  --terra-bg:    #F3E5DC;
+  --sage-mid:    #8B9682;
+  --sage-bg:     #EDF0E9;
+  --linen:       #FFFFFF;
+  --linen-lift:  #F6F5F2;
+  --terra:       #BC6A4C;
+  --terra-light: #CE8365;
+  --terra-bg:    #FAF0EA;
 
   /* legacy aliases */
-  --cream:       #EDEAE4;
-  --warm-white:  #F6F4F0;
-  --deep:        #2E2E2C;
+  --cream:       #FFFFFF;
+  --warm-white:  #F6F5F2;
+  --deep:        #1E2124;
   --sage-deep:   #3F4B2F;
   --sage:        #4C5A39;
-  --blush:       #F3E5DC;
-  --blush-soft:  #F6F0EA;
-  --gold:        #A9B1A3;
-  --gold-light:  #C6CBBF;
-  --gold-bg:     #E2E4DC;
-  --clay:        #C67B5C;
-  --muted:       #79776F;
-  --rule:        #DAD5CC;
+  --blush:       #FAF0EA;
+  --blush-soft:  #FBF6F2;
+  --gold:        #8B9682;
+  --gold-light:  #B7BFAF;
+  --gold-bg:     #EDF0E9;
+  --clay:        #BC6A4C;
+  --muted:       #5C5F63;
+  --rule:        #DCDAD4;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: var(--cream); color: var(--deep); font-family: 'Montserrat', sans-serif; font-weight: 300; line-height: 1.7; min-height: 100vh; }
@@ -737,6 +737,182 @@ body { background: var(--cream); color: var(--deep); }
 /* Divider weight, so sections breathe like the reference */
 .report-divider { margin: 56px 0; border-top: 1px solid var(--rule); }
 .report-section { margin-bottom: 8px; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   READABILITY PASS
+   White page, near-black text, heavier weights, squared corners.
+   ══════════════════════════════════════════════════════════════ */
+
+body, #screen-report, #screen-quiz, #screen-thankyou,
+#screen-welcome, #screen-locked, #screen-loading, #screen-failed { background: var(--page); }
+.report-header { background: var(--page-lift); border-bottom: 1px solid var(--rule); }
+
+/* Body copy: 400 not 300, larger, near-black */
+.report-section-body, .report-box-body {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px; font-weight: 400; line-height: 1.75;
+  color: var(--charcoal);
+}
+.report-section-body p, .report-box-body p { margin-bottom: 16px; }
+
+/* Bold text was rendering olive green. It reads as black now. */
+.report-section-body strong, .report-box-body strong,
+.report-box.strengths .report-box-body strong,
+.report-box.invitation .report-box-body strong {
+  color: var(--charcoal) !important; font-weight: 600;
+}
+
+/* The questions were pale sage italic serif on a light box - unreadable */
+.question-text-display {
+  font-family: 'Montserrat', sans-serif !important;
+  font-style: normal !important;
+  font-size: 15.5px !important;
+  font-weight: 400 !important;
+  line-height: 1.7 !important;
+  color: var(--charcoal) !important;
+}
+.question-num-badge {
+  background: var(--olive) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+.questions-box { background: var(--page-lift) !important; border: 1px solid var(--rule) !important; }
+
+/* Closing section: light, black text, no reversed-out block */
+.report-box.invitation { background: var(--page-lift); border-left: 3px solid var(--olive); }
+.report-box.invitation .report-box-body { color: var(--charcoal); }
+
+/* Headings: heavier and darker */
+.report-section-title {
+  color: var(--charcoal); font-weight: 500;
+  font-size: clamp(25px, 3.2vw, 33px); letter-spacing: -0.01em;
+}
+.section-intro h2 { color: var(--charcoal); font-weight: 400; }
+.welcome-title, .locked-title, .thankyou-title, .loading-title { color: var(--charcoal); }
+
+/* Secondary text darkened so it's actually legible */
+.welcome-sub, .locked-sub, .instructions p, .section-intro p,
+.thankyou-sub, .thankyou-step-text, .loading-sub, .loading-step,
+.report-name, .welcome-meta-label { color: var(--ink-soft); }
+.muted, .locked-link, #screen-failed .locked-link { color: var(--ink-soft); }
+
+/* Squared corners read as professional rather than organic */
+.report-box, .questions-box, .scores-section, .question-card,
+.rank-item, .intake-form, .btn-primary, .btn-secondary,
+.bln-callout, .intake-form input, .intake-form textarea { border-radius: 3px; }
+.report-header { border-radius: 0; }
+.question-card { box-shadow: none; border: 1px solid var(--rule); }
+.report-box { border-left-width: 3px; }
+
+/* Quiz text also bumped to 400 */
+.question-text { font-weight: 400; color: var(--charcoal); }
+.likert-option label { color: var(--ink-soft); font-weight: 400; }
+
+/* Score bars, on white */
+.scores-section { background: var(--page-lift); border: 1px solid var(--rule); }
+.score-label { color: var(--ink-soft); font-size: 12.5px; }
+.score-bar-wrap { background: #E8E6E0; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   DATA PANELS
+   ══════════════════════════════════════════════════════════════ */
+.glance-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px; margin-bottom: 12px;
+}
+.glance-card {
+  background: var(--page); padding: 18px 20px;
+  border: 1px solid var(--rule); border-top: 3px solid var(--olive);
+}
+.glance-label {
+  display: block; font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--olive); margin-bottom: 8px;
+}
+.glance-value {
+  font-family: 'Montserrat', sans-serif; font-size: 14.5px;
+  line-height: 1.6; color: var(--charcoal); font-weight: 400;
+}
+
+.panel { border: 1px solid var(--rule); margin-bottom: 20px; background: var(--page); }
+.panel-head {
+  background: var(--olive); color: #fff;
+  font-family: 'Montserrat', sans-serif; font-size: 12.5px; font-weight: 600;
+  letter-spacing: 0.03em; padding: 11px 20px;
+}
+.panel-body { padding: 22px 20px; }
+.panel-note {
+  font-family: 'Montserrat', sans-serif; font-size: 13.5px; line-height: 1.6;
+  color: var(--ink-soft); margin: 16px 0 0; padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+
+.center-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.center-name {
+  width: 150px; flex-shrink: 0; font-family: 'Montserrat', sans-serif;
+  font-size: 13.5px; color: var(--charcoal); font-weight: 500;
+}
+.center-row.is-home .center-name { font-weight: 600; }
+.center-name em { font-style: normal; font-weight: 400; color: var(--terra); font-size: 12px; }
+.center-bar { flex: 1; height: 10px; background: #EBE9E3; }
+.center-fill { height: 100%; background: var(--sage-mid); }
+.center-row.is-home .center-fill { background: var(--olive); }
+.center-pct {
+  width: 42px; text-align: right; font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--charcoal);
+}
+
+.stack-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+.stack-rank {
+  width: 26px; height: 26px; flex-shrink: 0; background: #EBE9E3; color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600;
+}
+.stack-row.is-dominant .stack-rank { background: var(--olive); color: #fff; }
+.stack-name {
+  font-family: 'Montserrat', sans-serif; font-size: 14.5px;
+  font-weight: 500; color: var(--charcoal);
+}
+.stack-row.is-dominant .stack-name { font-weight: 600; }
+.stack-name em { font-style: normal; font-weight: 400; color: var(--terra); font-size: 12px; }
+.stack-note {
+  font-family: 'Montserrat', sans-serif; font-size: 13px;
+  color: var(--ink-soft); margin-top: 2px; line-height: 1.5;
+}
+
+.wheel-body { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
+.wheel { width: 268px; height: 268px; flex-shrink: 0; }
+.wheel-ring { fill: none; stroke: var(--rule); stroke-width: 1.5; }
+.wheel .node { fill: #EBE9E3; stroke: none; }
+.wheel .node.wing { fill: #fff; stroke: var(--sage-mid); stroke-width: 2; }
+.wheel .node.me { fill: var(--olive); }
+.wheel .node-label {
+  font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+  fill: var(--ink-soft); text-anchor: middle;
+}
+.wheel .node-label.me { fill: #fff; font-size: 16px; }
+.wheel .line-growth { stroke: var(--olive); stroke-width: 2; }
+.wheel .line-stress { stroke: var(--terra); stroke-width: 2; stroke-dasharray: 5 4; }
+.wheel-key {
+  flex: 1; min-width: 230px; font-family: 'Montserrat', sans-serif;
+  font-size: 13.5px; line-height: 1.5; color: var(--charcoal);
+}
+.wheel-key > div { display: flex; align-items: baseline; gap: 9px; margin-bottom: 11px; }
+.key-dot { width: 12px; height: 12px; flex-shrink: 0; border-radius: 50%; }
+.key-dot.me { background: var(--olive); }
+.key-dot.wing { background: #fff; border: 2px solid var(--sage-mid); }
+.key-line { width: 18px; height: 2px; flex-shrink: 0; margin-top: 7px; }
+.key-line.growth { background: var(--olive); }
+.key-line.stress { background: var(--terra); }
+
+@media (max-width: 600px) {
+  .glance-grid { grid-template-columns: 1fr; }
+  .wheel-body { justify-content: center; }
+  .center-name { width: 108px; font-size: 12.5px; }
+}
 
 </style>
 </head>
@@ -1560,7 +1736,8 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
   }
 
   // Score bars
-  const barColors = ['#C4714A','#C9A96E','#7A8C7E','#B08A6E','#9B8BB4','#7EA8A8','#C4A882','#A89B8A','#B8B0A8'];
+  // Ranked ramp: her dominant type darkest, stepping down through sage.
+  const barColors = ['#3F4B2F','#55623F','#6B7A52','#828F69','#99A483','#AFB89E','#C3CAB5','#D3D8C9','#E0E4D9'];
   const scoreBars = sortedScores.map((s, i) => {
     const pct = Math.round((s.score / 30) * 100);
     return `
@@ -1587,26 +1764,29 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
 
   content.innerHTML = `
     ${fallbackBanner}
-    ${sortedScores.length ? `<!-- SCORE BARS -->
-    <div class="scores-section">
-      <div class="scores-title">Your Type Scores - out of 30</div>
-      ${scoreBars}
-    </div>` : ''}
 
-    <!-- WHAT IS THE ENNEAGRAM -->
+    <!-- AT A GLANCE -->
     <div class="report-section">
-      <span class="report-section-label">First Things First</span>
-      <h2 class="report-section-title">What This Actually Is</h2>
-      <div class="report-box intro">
-        <span class="report-box-label">A quick grounding before we start</span>
-        <div class="report-box-body">${formatParagraphs(report.whatIsTheEnneagram)}</div>
-      </div>
+      <h2 class="report-section-title">Type ${typeNum} at a glance</h2>
+      ${renderAtAGlance(typeNum)}
+    </div>
+
+    <!-- YOUR RESULTS -->
+    <div class="report-section">
+      <h2 class="report-section-title">Your results</h2>
+      ${sortedScores.length ? `
+      <div class="panel">
+        <div class="panel-head">How you scored across all nine</div>
+        <div class="panel-body">${scoreBars}</div>
+      </div>` : ''}
+      ${renderCenters(sortedScores, typeNum)}
+      ${renderSubtypeViz(window.__subtypeStack, subtype)}
+      ${renderWheel(typeNum)}
     </div>
     <hr class="report-divider">
 
-    <!-- GETTING TO KNOW YOUR TYPE -->
+    <!-- YOUR TYPE -->
     <div class="report-section">
-      <span class="report-section-label">Getting to Know You</span>
       <h2 class="report-section-title">Type ${typeNum}: ${typeName}, ${subtype}</h2>
       <div class="report-section-body">${formatParagraphs(report.gettingToKnowYourType)}</div>
     </div>
@@ -1614,93 +1794,58 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
 
     <!-- HOW YOU GOT HERE -->
     <div class="report-section">
-      <span class="report-section-label">The Heart of It</span>
-      <h2 class="report-section-title">How You Got Here</h2>
+      <h2 class="report-section-title">How you got here</h2>
       <div class="report-section-body">${formatParagraphs(report.youAsMother)}</div>
     </div>
     <hr class="report-divider">
 
-    <!-- INNER WORLD -->
+    <!-- HOW YOUR MIND RUNS -->
     <div class="report-section">
-      <span class="report-section-label">Your Inner World</span>
-      <h2 class="report-section-title">How Your Mind Actually Runs</h2>
+      <h2 class="report-section-title">How your mind actually runs</h2>
       <div class="report-box inner-world">
-        <span class="report-box-label">The filters deciding things before you do</span>
         <div class="report-box-body">${formatParagraphs(report.yourInnerWorld)}</div>
       </div>
     </div>
     <hr class="report-divider">
 
-    <!-- BLIND SPOTS -->
+    <!-- BLIND SPOTS + PREDICTION -->
     <div class="report-section">
-      <span class="report-section-label">The Stuff You Can't See</span>
-      <h2 class="report-section-title">What You Can't See Yet</h2>
+      <h2 class="report-section-title">What you can't see yet</h2>
       <div class="report-box blindspot">
-        <span class="report-box-label">Including what you're about to do next</span>
         <div class="report-box-body">${formatParagraphs(report.yourBlindSpots)}</div>
       </div>
     </div>
     <hr class="report-divider">
 
-    <!-- STRENGTHS -->
+    <!-- THE SENTENCE -->
     <div class="report-section">
-      <span class="report-section-label">What You Bring</span>
-      <h2 class="report-section-title">What You're Actually Good At</h2>
-      <div class="report-box strengths">
-        <span class="report-box-label">The actual superpowers - earned, not generic</span>
-        <div class="report-box-body">${formatParagraphs(report.yourStrengths)}</div>
-      </div>
-    </div>
-    <hr class="report-divider">
-
-    <!-- WHERE YOU GET STUCK -->
-    <div class="report-section">
-      <span class="report-section-label">The Loop</span>
-      <h2 class="report-section-title">The Sentence You Keep Saying</h2>
+      <h2 class="report-section-title">The sentence you keep saying</h2>
       <div class="report-box stuck">
-        <span class="report-box-label">The specific pattern that keeps recurring</span>
         <div class="report-box-body">${formatParagraphs(report.whereYouGetStuck)}</div>
       </div>
     </div>
     <hr class="report-divider">
 
-    <!-- RELATIONSHIPS -->
+    <!-- 14 DAYS -->
     <div class="report-section">
-      <span class="report-section-label">Your People</span>
-      <h2 class="report-section-title">How You Show Up With People</h2>
-      <div class="report-box relationships">
-        <span class="report-box-label">What you give, what you withhold, what you never ask for</span>
-        <div class="report-box-body">${formatParagraphs(report.yourRelationships)}</div>
-      </div>
-    </div>
-    <hr class="report-divider">
-
-    <!-- GROWTH EDGE -->
-    <div class="report-section">
-      <span class="report-section-label">The Way Forward</span>
-      <h2 class="report-section-title">Your Next 14 Days</h2>
+      <h2 class="report-section-title">Your next 14 days</h2>
       <div class="report-box growth">
-        <span class="report-box-label">Small on purpose - it only works if you actually do it</span>
         <div class="report-box-body">${formatParagraphs(report.yourGrowthEdge)}</div>
       </div>
     </div>
     <hr class="report-divider">
 
-    <!-- REFLECTION QUESTIONS -->
+    <!-- QUESTIONS -->
     <div class="report-section">
-      <span class="report-section-label">Go Deeper</span>
-      <h2 class="report-section-title">Questions to Sit With</h2>
-      <div class="questions-box">
-        <span class="report-box-label">For journaling, for stillness, for the drive when no one is talking</span>
-        ${questionsHtml}
-      </div>
+      <h2 class="report-section-title">Questions to sit with</h2>
+      <div class="questions-box">${questionsHtml}</div>
     </div>
     <hr class="report-divider">
 
-    <!-- INVITATION -->
+    <!-- WHAT HAPPENS NOW -->
     <div class="report-section">
+      <h2 class="report-section-title">What happens now</h2>
       <div class="report-box invitation">
-        <span class="report-box-label">What Happens Now</span>
         <div class="report-box-body">${formatParagraphs(report.invitationToBLN)}</div>
       </div>
     </div>
@@ -1886,6 +2031,209 @@ function downloadPDF() {
 // ══════════════════════════════════════
 // FALLBACK REPORT
 // ══════════════════════════════════════
+
+// ══════════════════════════════════════
+// TYPE PROFILE DATA
+// Static per type. No AI call, no generation time, cannot hallucinate.
+// This is what makes the report read as an instrument rather than an essay.
+// ══════════════════════════════════════
+const TYPE_PROFILE = {
+  1: { name:'The Perfectionist', center:'Body', wings:[9,2], stress:4, growth:7,
+       worldview:'The world is a place that could be better, and someone has to be responsible about it.',
+       focus:'What is wrong, what is out of place, and what should be corrected.',
+       fear:'Being corrupt, wrong, or fundamentally bad.',
+       desire:'To have integrity, and to know you got it right.',
+       selfTalk:'"If I let this slide, who else is going to catch it?"',
+       gift:'Discernment. You see the gap between how things are and how they could be, and you close it.',
+       vice:'Anger, usually held in rather than expressed - it shows up as tension and quiet resentment.' },
+  2: { name:'The Helper', center:'Heart', wings:[1,3], stress:8, growth:4,
+       worldview:'People matter most, and love is something you earn by being needed.',
+       focus:'What other people need, often before they have said it.',
+       fear:'Being unwanted, or unloved for who you are rather than what you give.',
+       desire:'To be genuinely loved, not just appreciated.',
+       selfTalk:'"They need me. I can\'t not help."',
+       gift:'Attunement. You sense what a person needs from across a room.',
+       vice:'Pride, in the specific form of believing you don\'t have needs of your own.' },
+  3: { name:'The Achiever', center:'Heart', wings:[2,4], stress:9, growth:6,
+       worldview:'The world values winners, so falling behind is not an option.',
+       focus:'Goals, results, and how you are coming across while getting them.',
+       fear:'Being worthless without the accomplishments.',
+       desire:'To be valuable, and to feel it rather than just be told it.',
+       selfTalk:'"I must succeed. I am what I do."',
+       gift:'Momentum. You can turn an idea into a real thing faster than almost anyone.',
+       vice:'Deceit, mostly self-deceit - believing you are the image you built.' },
+  4: { name:'The Individualist', center:'Heart', wings:[3,5], stress:2, growth:1,
+       worldview:'Something essential is missing in me that other people seem to have naturally.',
+       focus:'What is absent, what is far away, and what feels most true.',
+       fear:'Having no identity, or no significance of your own.',
+       desire:'To find yourself and be seen as you actually are.',
+       selfTalk:'"No one really gets it. No one really gets me."',
+       gift:'Depth. You can stay with feeling that other people flee, and make meaning from it.',
+       vice:'Envy - the ache toward what others have and you believe you lack.' },
+  5: { name:'The Investigator', center:'Head', wings:[4,6], stress:7, growth:8,
+       worldview:'The world demands more than I have, so I had better conserve what I\'ve got.',
+       focus:'Information, and the distance you need to process it safely.',
+       fear:'Being depleted, overwhelmed, or incapable.',
+       desire:'To be competent, and to understand before you commit.',
+       selfTalk:'"I need more time. I need more information."',
+       gift:'Clarity. You see systems whole while others are still reacting to parts.',
+       vice:'Avarice - not of money, but of your time, energy and inner privacy.' },
+  6: { name:'The Loyalist', center:'Head', wings:[5,7], stress:3, growth:9,
+       worldview:'The world is unpredictable, so being prepared is the responsible thing to do.',
+       focus:'What could go wrong, and who can actually be trusted.',
+       fear:'Being without support or guidance when it counts.',
+       desire:'Security, and the ability to trust your own judgement.',
+       selfTalk:'"But what if. Let me think this through one more time."',
+       gift:'Loyalty and foresight. You spot the risk everyone else talked themselves out of.',
+       vice:'Fear, which you often experience as thinking rather than as feeling.' },
+  7: { name:'The Enthusiast', center:'Head', wings:[6,8], stress:1, growth:5,
+       worldview:'Life is full of possibility, and pain is something to move through quickly.',
+       focus:'What is next, what is exciting, and what keeps the options open.',
+       fear:'Being trapped in pain, limitation, or deprivation.',
+       desire:'To be satisfied, and free.',
+       selfTalk:'"There\'s something better. Let\'s keep it moving."',
+       gift:'Vision and reframing. You find the possible route when everyone else sees a wall.',
+       vice:'Gluttony - not for food, but for experience, stimulation and more.' },
+  8: { name:'The Challenger', center:'Body', wings:[7,9], stress:5, growth:2,
+       worldview:'The world is hard, and the strong protect the people who can\'t protect themselves.',
+       focus:'Power, control, and where the injustice is.',
+       fear:'Being controlled, betrayed, or made vulnerable.',
+       desire:'To protect yourself and the people who are yours.',
+       selfTalk:'"I\'ll handle it. I don\'t need anyone."',
+       gift:'Decisive protection. You say the thing everyone was thinking and no one would say.',
+       vice:'Excess - too much intensity, too much force, too much of everything.' },
+  9: { name:'The Peacemaker', center:'Body', wings:[8,1], stress:6, growth:3,
+       worldview:'The world is more manageable when everyone is getting along.',
+       focus:'Other people\'s positions, and keeping the peace between them.',
+       fear:'Conflict, disconnection, and being made not to matter.',
+       desire:'Inner peace, and a sense that you count.',
+       selfTalk:'"It\'s fine. It doesn\'t really matter that much."',
+       gift:'Steadiness. You hold every side at once and people relax around you.',
+       vice:'Sloth - not laziness, but falling asleep to your own priorities.' }
+};
+
+const CENTER_INFO = {
+  Body:  { types:[8,9,1], blurb:'You lead with instinct and gut response. The core emotion underneath is anger, whether or not you express it.' },
+  Heart: { types:[2,3,4], blurb:'You lead with feeling and how you are received. The core emotion underneath is shame, whether or not you name it.' },
+  Head:  { types:[5,6,7], blurb:'You lead with thinking and anticipation. The core emotion underneath is fear, whether or not it feels like fear.' }
+};
+
+// ── Profile card grid ──
+function renderAtAGlance(typeNum) {
+  const t = TYPE_PROFILE[typeNum];
+  if (!t) return '';
+  const cards = [
+    ['Worldview', t.worldview], ['Focus of attention', t.focus],
+    ['Core fear', t.fear], ['Core desire', t.desire],
+    ['The sentence underneath', t.selfTalk], ['Your gift', t.gift],
+    ['Your vice', t.vice]
+  ];
+  return `
+    <div class="glance-grid">
+      ${cards.map(([label, val]) => `
+        <div class="glance-card">
+          <span class="glance-label">${label}</span>
+          <div class="glance-value">${val}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── Centers of intelligence, computed from her actual answers ──
+function renderCenters(scores, typeNum) {
+  if (!scores || !scores.length) return '';
+  const byType = {};
+  scores.forEach(s => byType[s.type] = s.score);
+  const totals = {};
+  let grand = 0;
+  Object.keys(CENTER_INFO).forEach(c => {
+    totals[c] = CENTER_INFO[c].types.reduce((sum, t) => sum + (byType[t] || 0), 0);
+    grand += totals[c];
+  });
+  if (!grand) return '';
+  const home = TYPE_PROFILE[typeNum] ? TYPE_PROFILE[typeNum].center : null;
+  const rows = Object.keys(CENTER_INFO).map(c => {
+    const pct = Math.round((totals[c] / grand) * 100);
+    return `
+      <div class="center-row${c === home ? ' is-home' : ''}">
+        <div class="center-name">${c}${c === home ? ' <em>your home base</em>' : ''}</div>
+        <div class="center-bar"><div class="center-fill" style="width:${pct}%"></div></div>
+        <div class="center-pct">${pct}%</div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="panel">
+      <div class="panel-head">Centers of intelligence</div>
+      <div class="panel-body">
+        ${rows}
+        <p class="panel-note">${home ? CENTER_INFO[home].blurb : ''}</p>
+      </div>
+    </div>`;
+}
+
+// ── Subtype ranking, all three, in her order ──
+function renderSubtypeViz(ranking, dominant) {
+  const meta = {
+    'Self-Preservation': 'Safety, resources, comfort, having enough.',
+    'Social':            'Belonging, standing, and your place in the group.',
+    'One-on-One':        'Intensity, chemistry, and the specific person in front of you.'
+  };
+  const order = (ranking && ranking.length === 3) ? ranking : [dominant];
+  return `
+    <div class="panel">
+      <div class="panel-head">Your instinctual stack</div>
+      <div class="panel-body">
+        ${order.map((name, i) => `
+          <div class="stack-row${i === 0 ? ' is-dominant' : ''}">
+            <div class="stack-rank">${i + 1}</div>
+            <div>
+              <div class="stack-name">${name}${i === 0 ? ' <em>dominant</em>' : ''}</div>
+              <div class="stack-note">${meta[name] || ''}</div>
+            </div>
+          </div>`).join('')}
+        <p class="panel-note">Two people who share your type but not your stack can be almost unrecognisable to each other. There are 27 combinations, not 9.</p>
+      </div>
+    </div>`;
+}
+
+// ── Enneagram wheel with her type, wing, and lines marked ──
+function renderWheel(typeNum) {
+  const t = TYPE_PROFILE[typeNum];
+  if (!t) return '';
+  const cx = 150, cy = 150, r = 108;
+  const pos = n => {
+    const deg = (n === 9) ? -90 : -90 + (n * 40);
+    const rad = deg * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  };
+  const me = pos(typeNum), st = pos(t.stress), gr = pos(t.growth);
+  const nodes = [1,2,3,4,5,6,7,8,9].map(n => {
+    const q = pos(n);
+    const isMe = n === typeNum;
+    const isWing = t.wings.indexOf(n) !== -1;
+    const cls = isMe ? 'node me' : (isWing ? 'node wing' : 'node');
+    return `<circle class="${cls}" cx="${q.x}" cy="${q.y}" r="${isMe ? 19 : 14}"></circle>
+            <text class="node-label${isMe ? ' me' : ''}" x="${q.x}" y="${q.y + (isMe ? 6 : 5)}">${n}</text>`;
+  }).join('');
+  return `
+    <div class="panel">
+      <div class="panel-head">Where you sit, and where you move</div>
+      <div class="panel-body wheel-body">
+        <svg viewBox="0 0 300 300" class="wheel" role="img" aria-label="Enneagram wheel showing type ${typeNum}">
+          <circle cx="${cx}" cy="${cy}" r="${r}" class="wheel-ring"></circle>
+          <line class="line-growth" x1="${me.x}" y1="${me.y}" x2="${gr.x}" y2="${gr.y}"></line>
+          <line class="line-stress" x1="${me.x}" y1="${me.y}" x2="${st.x}" y2="${st.y}"></line>
+          ${nodes}
+        </svg>
+        <div class="wheel-key">
+          <div><span class="key-dot me"></span> You are <strong>Type ${typeNum}</strong></div>
+          <div><span class="key-dot wing"></span> Your wings: ${t.wings[0]} and ${t.wings[1]}</div>
+          <div><span class="key-line growth"></span> In growth you move toward <strong>${t.growth}</strong> - ${TYPE_PROFILE[t.growth].name}</div>
+          <div><span class="key-line stress"></span> Under strain you move toward <strong>${t.stress}</strong> - ${TYPE_PROFILE[t.stress].name}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function getFallbackReport(typeNum, typeName, subtype) {
   return {
     whatIsTheEnneagram: `The Enneagram isn't a personality label. It's a map of the strategy you built early on to stay safe, to be loved, or to stay in control.\n\nThat strategy worked. That's exactly why it stuck around. It's still running now, quietly, inside decisions you think you're making freely.\n\nKnowing what the strategy is doesn't make it go away. It just gives you a choice you didn't have before.`,
