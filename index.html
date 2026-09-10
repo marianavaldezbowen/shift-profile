@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Shift Profile — Discover Your Enneagram Type</title>
+<title>Enneagram Profile</title>
 
 <!-- Meta Pixel -->
 <script>
@@ -23,27 +23,43 @@ src="https://www.facebook.com/tr?id=1309711794380173&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel -->
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root {
-  --cream: #F7F3EE;
-  --warm-white: #FDFAF7;
-  --deep: #1C1814;
-  --terra: #C4714A;
-  --terra-light: #E8956F;
-  --terra-bg: #FFF3ED;
-  --sage: #7A8C7E;
-  --sage-bg: #EFF3F0;
-  --gold: #C9A96E;
-  --gold-light: #E8D5B0;
-  --gold-bg: #FDF7EC;
-  --muted: #8A7E74;
-  --rule: #DDD5CB;
+  /* Light throughout. Warm greige is the page; charcoal appears only as a
+     thin band and as text; olive and terracotta are accents, not fields. */
+  --page:        #EDEAE4;   /* the background, nearly everywhere */
+  --page-lift:   #F6F4F0;   /* cards, raised surfaces */
+  --charcoal:    #2E2E2C;   /* text, and the one dark band */
+  --olive:       #3F4B2F;   /* accent - rules, marks, dark blocks */
+  --olive-soft:  #4C5A39;
+  --sage-mid:    #A9B1A3;
+  --sage-bg:     #E2E4DC;
+  --linen:       #EDEAE4;
+  --linen-lift:  #F6F4F0;
+  --terra:       #C67B5C;
+  --terra-light: #D28E71;
+  --terra-bg:    #F3E5DC;
+
+  /* legacy aliases */
+  --cream:       #EDEAE4;
+  --warm-white:  #F6F4F0;
+  --deep:        #2E2E2C;
+  --sage-deep:   #3F4B2F;
+  --sage:        #4C5A39;
+  --blush:       #F3E5DC;
+  --blush-soft:  #F6F0EA;
+  --gold:        #A9B1A3;
+  --gold-light:  #C6CBBF;
+  --gold-bg:     #E2E4DC;
+  --clay:        #C67B5C;
+  --muted:       #79776F;
+  --rule:        #DAD5CC;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; min-height: 100vh; }
+body { background: var(--cream); color: var(--deep); font-family: 'Montserrat', sans-serif; font-weight: 300; line-height: 1.7; min-height: 100vh; }
 
 /* ── SCREENS ── */
 .screen { display: none; min-height: 100vh; }
@@ -80,16 +96,16 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
 /* ── INTAKE FORM ── */
 .intake-form { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 32px; max-width: 440px; width: 100%; margin: 0 auto 32px; text-align: left; }
 .intake-form label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
-.intake-form input { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 3px; padding: 12px 16px; color: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 15px; margin-bottom: 20px; outline: none; transition: border-color 0.2s; }
+.intake-form input { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 3px; padding: 12px 16px; color: var(--warm-white); font-family: 'Montserrat', sans-serif; font-size: 15px; margin-bottom: 20px; outline: none; transition: border-color 0.2s; }
 .intake-form input:focus { border-color: var(--terra); }
 .intake-form input::placeholder { color: rgba(255,255,255,0.3); }
 
 /* ── BUTTONS ── */
-.btn-primary { background: var(--terra); color: white; border: none; border-radius: 3px; padding: 16px 40px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; cursor: pointer; transition: background 0.2s; display: inline-block; }
+.btn-primary { background: var(--terra); color: white; border: none; border-radius: 3px; padding: 16px 40px; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; cursor: pointer; transition: background 0.2s; display: inline-block; }
 .btn-primary:hover { background: var(--terra-light); }
-.btn-secondary { background: transparent; color: var(--warm-white); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 3px; padding: 14px 32px; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s; display: inline-block; }
+.btn-secondary { background: transparent; color: var(--warm-white); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 3px; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s; display: inline-block; }
 .btn-secondary:hover { border-color: rgba(255,255,255,0.6); }
-.btn-dark { background: var(--deep); color: var(--warm-white); border: none; border-radius: 3px; padding: 14px 32px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.btn-dark { background: var(--deep); color: var(--warm-white); border: none; border-radius: 3px; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
 .btn-dark:hover { background: #2C2420; }
 
 /* ── INSTRUCTIONS ── */
@@ -132,7 +148,7 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
 .rank-text { font-size: 15px; line-height: 1.5; color: var(--deep); flex: 1; }
 .rank-handle { color: var(--rule); font-size: 16px; flex-shrink: 0; }
 .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
-.quiz-nav-back { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; padding: 8px 0; }
+.quiz-nav-back { background: none; border: none; color: var(--muted); font-family: 'Montserrat', sans-serif; font-size: 14px; cursor: pointer; padding: 8px 0; }
 .quiz-nav-back:hover { color: var(--deep); }
 .question-error { color: var(--terra); font-size: 13px; margin-top: 8px; display: none; }
 
@@ -331,6 +347,397 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
   .questions-box { padding: 24px 20px; }
   .streaming-preview { margin: 24px 16px 0; }
 }
+
+
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT PASS
+   Reference: warm off-white page, sage colour blocks, a blush band,
+   serif headings, soft rounded cards, one small terracotta button.
+   ══════════════════════════════════════════════════════════════ */
+
+/* --deep is now a text colour, so every surface that used it as a
+   background moves to sage. */
+#screen-welcome,
+#screen-loading,
+#screen-failed,
+.quiz-header,
+.report-header { background: var(--sage-deep); }
+.btn-dark { background: var(--sage-deep); color: #fff; }
+.btn-dark:hover { background: var(--sage); }
+
+#screen-quiz, #screen-report, #screen-thankyou { background: var(--cream); }
+body { background: var(--cream); color: var(--deep); }
+
+/* Softer, quieter glows than the originals */
+#screen-welcome::before,
+.report-header::before {
+  background: radial-gradient(circle, rgba(255,255,255,0.09) 0%, transparent 66%);
+}
+
+/* ── Type: serif headings, Montserrat for everything working ── */
+.welcome-title, .thankyou-title,
+.section-intro h2, .report-section-title,
+.loading-title, .question-text, #report-pattern-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  letter-spacing: -0.005em;
+}
+.welcome-title { color: #FFFDF8; line-height: 1.05; }
+.welcome-title em { color: inherit; }
+.section-intro h2, .report-section-title { color: var(--deep); }
+.report-section-title { font-size: clamp(27px, 3.6vw, 38px); margin-bottom: 18px; }
+.question-text { font-size: clamp(21px, 3vw, 27px); line-height: 1.35; }
+.loading-title { color: #FFFDF8; font-size: 34px; }
+
+.welcome-sub, .instructions p, .section-intro p,
+.report-section-body, .report-box-body, .rank-text, .likert-option label {
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+}
+.welcome-sub { font-size: 16px; font-weight: 300; line-height: 1.7; color: rgba(255,253,248,0.86); max-width: 46ch; }
+.instructions p { color: rgba(255,253,248,0.78); }
+.loading-sub, .loading-step { color: rgba(255,253,248,0.75); }
+.quiz-logo { font-family: 'Montserrat', sans-serif; font-style: normal; font-weight: 500; font-size: 13px; color: #FFFDF8; }
+
+/* Small labels: sentence case, no tracked-out caps */
+.welcome-badge, .welcome-meta-label, .intake-form label,
+.quiz-progress-label, .question-num, .streaming-preview-label, .scores-title {
+  text-transform: none; letter-spacing: 0.01em; font-weight: 500; font-size: 12.5px;
+}
+.welcome-badge {
+  border-color: rgba(255,253,248,0.35); color: rgba(255,253,248,0.9);
+  font-size: 12px; padding: 5px 16px;
+}
+.welcome-meta-label { color: rgba(255,253,248,0.62); }
+.welcome-meta-value { font-family: 'Montserrat', sans-serif; font-weight: 400; font-size: 17px; color: #FFFDF8; }
+
+/* Decoration that said nothing the heading didn't */
+.report-section-label, .report-box-label, .report-eyebrow, .scores-title { display: none; }
+
+/* ── Soft cards, like the reference ── */
+.question-card {
+  background: var(--warm-white);
+  border-radius: 14px;
+  border: 1px solid rgba(58,54,48,0.05);
+  box-shadow: 0 2px 14px rgba(58,54,48,0.05);
+  padding: 34px 36px;
+}
+.rank-item { background: var(--warm-white); border-radius: 12px; border-color: var(--rule); }
+.rank-item.drag-over, .rank-item.dragging { border-color: var(--sage-mid); background: var(--sage-bg); }
+.rank-num { background: var(--sage-deep); }
+.likert-option label { border-radius: 10px; border-color: var(--rule); }
+.likert-option input:checked + label { border-color: var(--sage); background: var(--sage-bg); color: var(--sage-deep); }
+.likert-option label:hover { border-color: var(--sage-mid); }
+
+.report-box {
+  background: var(--blush-soft);
+  border-radius: 14px;
+  border-left: 3px solid var(--blush);
+  padding: 28px 32px;
+}
+.report-box.growth { background: var(--sage-bg); border-left-color: var(--sage-mid); }
+.report-divider { border: 0; border-top: 1px solid var(--rule); margin: 52px 0; }
+
+.intake-form {
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.20);
+  border-radius: 14px;
+}
+.intake-form label { color: rgba(255,253,248,0.72); }
+.intake-form input, .intake-form textarea {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 8px;
+  color: #FFFDF8;
+}
+.intake-form input::placeholder { color: rgba(255,253,248,0.45); }
+.intake-form input:focus { border-color: rgba(255,253,248,0.6); }
+
+/* ── One small terracotta button, exactly as in the reference ── */
+.btn-primary {
+  background: var(--terra); color: #fff;
+  border-radius: 8px; padding: 14px 30px;
+  font-weight: 500; letter-spacing: 0.01em; font-size: 14px;
+}
+.btn-primary:hover { background: var(--terra-light); }
+.btn-secondary { border-radius: 8px; border-color: rgba(58,54,48,0.2); color: var(--deep); }
+.btn-secondary:hover { border-color: var(--deep); }
+
+.quiz-progress-fill { background: var(--gold-light); }
+.quiz-progress-label { color: rgba(255,253,248,0.7); }
+.loading-icon { border-color: rgba(255,255,255,0.22); border-top-color: #FFFDF8; }
+.loading-step.done .step-dot { background: var(--gold-light); }
+.loading-step.active .step-dot { background: #FFFDF8; }
+.question-error { color: var(--terra); }
+
+/* ══════════════════════════════════════════════════════════════
+   THE PATTERN NAME - the one place the design raises its voice
+   ══════════════════════════════════════════════════════════════ */
+.report-header { padding-bottom: 52px; border-radius: 0 0 40px 40px; }
+.report-name {
+  font-family: 'Montserrat', sans-serif; font-weight: 400;
+  font-size: clamp(15px, 2vw, 18px); letter-spacing: 0.01em;
+  color: rgba(255,253,248,0.7); margin-bottom: 10px;
+}
+.report-type-badge {
+  background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.24);
+  margin-top: 6px; padding: 7px 20px;
+}
+.report-type-badge span { color: rgba(255,253,248,0.82); font-size: 12.5px; }
+.report-type-badge strong { color: #FFFDF8; font-size: 12.5px; }
+
+#report-pattern-wrap { margin-top: 34px !important; padding-top: 26px; position: relative; }
+#report-pattern-wrap::before {
+  content: ''; position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%); width: 36px; height: 1px;
+  background: rgba(255,253,248,0.45);
+}
+#report-pattern-wrap > div:first-of-type {
+  font-family: 'Montserrat', sans-serif !important; font-size: 12.5px !important;
+  letter-spacing: 0.01em !important; text-transform: none !important;
+  font-weight: 500 !important; color: rgba(255,253,248,0.65) !important;
+  margin-bottom: 12px !important;
+}
+#report-pattern-name {
+  font-size: clamp(40px, 7vw, 66px) !important;
+  font-style: normal !important; font-weight: 300 !important;
+  line-height: 1.03 !important; letter-spacing: -0.02em !important;
+  color: #FFFDF8 !important;
+}
+
+/* ── Quality floor ── */
+.report-section-body, .report-box-body { max-width: 68ch; }
+.btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-dark:focus-visible,
+.quiz-nav-back:focus-visible, .intake-form input:focus-visible,
+.intake-form textarea:focus-visible, a:focus-visible {
+  outline: 2px solid var(--terra); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+@media (max-width: 600px) {
+  .question-card { padding: 24px 20px; }
+  .quiz-body, .report-content { padding-left: 20px; padding-right: 20px; }
+  #screen-welcome { padding: 44px 20px; }
+  .report-header { border-radius: 0 0 26px 26px; }
+}
+
+
+/* ── Box variants: the originals used a cold blue, a purple and a pink.
+   Everything folds into sage / blush / sand so the report reads as one thing. ── */
+.report-box.intro         { background: var(--warm-white); border-left: 3px solid var(--gold); }
+.report-box.inner-world   { background: var(--sage-bg);    border-left: 3px solid var(--sage-mid); }
+.report-box.blindspot     { background: var(--blush-soft); border-left: 3px solid var(--terra); }
+.report-box.strengths     { background: var(--gold-bg);    border-left: 3px solid var(--gold); }
+.report-box.stuck         { background: var(--blush);      border-left: 3px solid var(--terra); }
+.report-box.relationships { background: var(--sage-bg);    border-left: 3px solid var(--sage-mid); }
+.report-box.breakthrough  { background: var(--sage-bg);    border-left: 3px solid var(--sage-mid); }
+.report-box.blend         { background: var(--gold-bg);    border-left: 3px solid var(--gold); }
+.report-box.growth        { background: var(--sage-bg);    border-left: 3px solid var(--sage); }
+.report-box.invitation    { background: var(--sage-deep);  border-left: none; }
+.report-box.invitation .report-box-body { color: rgba(255,253,248,0.92); }
+.report-box.invitation .report-box-body strong { color: var(--gold-light); }
+.report-box { border-radius: 14px; padding: 28px 32px; }
+
+.questions-box { background: var(--warm-white); border-radius: 14px; padding: 30px 32px; border: 1px solid var(--rule); }
+.report-section-body strong, .report-box-body strong { color: var(--terra); font-weight: 500; }
+.report-box.invitation .report-box-body p { margin-bottom: 14px; }
+
+/* Score bars, back into palette */
+.score-bar-wrap { background: var(--rule); }
+.scores-section { background: var(--warm-white); border-radius: 14px; padding: 26px 30px; border: 1px solid var(--rule); }
+
+
+/* ── Olive Horizon adjustments ── */
+.btn-primary { background: var(--terra); color: #fff; }
+.btn-primary:hover { background: var(--terra-light); }
+.btn-dark:hover { background: var(--olive-soft); }
+.report-section-body strong, .report-box-body strong { color: var(--terra); }
+
+/* Boxes: linen and sage mist carry the report, terracotta tint marks the one
+   section that matters most. */
+.report-box.intro         { background: var(--linen-lift); border-left: 3px solid var(--sage-mid); }
+.report-box.inner-world   { background: var(--sage-bg);    border-left: 3px solid var(--sage-mid); }
+.report-box.blindspot     { background: var(--linen-lift); border-left: 3px solid var(--terra); }
+.report-box.strengths     { background: var(--sage-bg);    border-left: 3px solid var(--sage-mid); }
+.report-box.stuck         { background: var(--terra-bg);   border-left: 3px solid var(--terra); }
+.report-box.relationships { background: var(--linen-lift); border-left: 3px solid var(--sage-mid); }
+.report-box.breakthrough  { background: var(--sage-bg);    border-left: 3px solid var(--sage-mid); }
+.report-box.blend         { background: var(--linen-lift); border-left: 3px solid var(--sage-mid); }
+.report-box.growth        { background: var(--sage-bg);    border-left: 3px solid var(--olive); }
+.report-box.invitation    { background: var(--olive);      border-left: none; }
+.report-box.invitation .report-box-body { color: rgba(245,242,235,0.93); }
+.report-box.invitation .report-box-body strong { color: var(--sage-mid); }
+
+.questions-box, .scores-section { background: var(--linen-lift); border-color: var(--rule); }
+.question-card { background: var(--linen-lift); }
+.rank-item { background: var(--linen-lift); }
+.likert-option input:checked + label { background: var(--sage-bg); border-color: var(--olive); color: var(--olive); }
+.likert-option label:hover { border-color: var(--sage-mid); }
+.rank-num { background: var(--olive); }
+.quiz-progress-fill { background: var(--sage-mid); }
+.loading-step.done .step-dot { background: var(--sage-mid); }
+.welcome-meta-value, .welcome-title, .loading-title { color: #F5F2EB; }
+
+
+/* ── Locked screen: the one screen that never got the olive pass ── */
+#screen-locked { background: var(--olive); }
+.locked-title { color: #F5F2EB; }
+.locked-title em { color: inherit; }
+.locked-sub { color: rgba(245,242,235,0.78); font-family: 'Montserrat', sans-serif; font-size: 15px; line-height: 1.7; }
+.locked-link { color: rgba(245,242,235,0.6); }
+.locked-link a { color: var(--sage-mid); text-decoration: underline; text-underline-offset: 3px; }
+.locked-link a:hover { color: #F5F2EB; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   SCREEN AUDIT FIXES
+   ══════════════════════════════════════════════════════════════ */
+
+/* The failure screen inherited the background but not the layout */
+#screen-failed {
+  justify-content: center; align-items: center;
+  text-align: center; padding: 60px 40px;
+}
+#screen-failed .btn-primary { display: inline-block; width: auto; }
+#screen-failed .welcome-badge { display: inline-block; width: auto; }
+#screen-failed .instructions p { color: rgba(245,242,235,0.78); }
+#screen-failed .locked-link { color: rgba(245,242,235,0.6); }
+#screen-failed .locked-link a { color: var(--sage-mid); text-decoration: underline; text-underline-offset: 3px; }
+
+/* The intake form was styled for the dark welcome screen. On the light quiz
+   surface the label was white on linen - invisible. */
+#screen-quiz .intake-form {
+  background: var(--linen-lift);
+  border: 1px solid var(--rule);
+}
+#screen-quiz .intake-form label { color: var(--charcoal); font-weight: 500; }
+#screen-quiz .intake-form textarea {
+  background: #fff; border: 1px solid var(--rule);
+  color: var(--charcoal);
+}
+#screen-quiz .intake-form textarea::placeholder { color: var(--muted); }
+#screen-quiz .intake-form textarea:focus { border-color: var(--olive); }
+
+/* Thank-you screen was light text on a light background */
+.thankyou-title { color: var(--charcoal); }
+.thankyou-title em { color: inherit; }
+.thankyou-sub { font-family: 'Montserrat', sans-serif; font-style: normal; font-size: 16px; color: var(--muted); }
+.thankyou-badge {
+  text-transform: none; letter-spacing: 0.01em; font-size: 12px; font-weight: 500;
+  color: var(--olive); border-color: var(--sage-mid);
+}
+.thankyou-icon { color: var(--sage-mid); }
+.thankyou-step-text strong { color: var(--charcoal); }
+.thankyou-step-text { color: var(--muted); }
+.thankyou-step-num { background: var(--olive); color: #F5F2EB; }
+.bln-callout { background: var(--sage-bg); border-radius: 14px; padding: 22px 26px; border: none; }
+.bln-callout p { color: var(--charcoal); font-size: 15px; line-height: 1.7; }
+.bln-callout a { color: var(--terra); }
+
+/* Eyebrows: sentence case, and quiet enough not to compete with the heading */
+.section-intro .eyebrow {
+  text-transform: none; letter-spacing: 0.01em;
+  font-size: 12.5px; color: var(--muted); font-weight: 500;
+}
+
+/* Likert options were different heights depending on label wrap */
+.likert-option label { min-height: 46px; display: flex; align-items: center; justify-content: center; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT THROUGHOUT
+   Every full screen is the warm greige page. The only dark surfaces
+   left are the thin quiz bar and one closing block.
+   ══════════════════════════════════════════════════════════════ */
+
+#screen-welcome, #screen-locked, #screen-loading,
+#screen-failed, #screen-quiz, #screen-report, #screen-thankyou,
+.report-header, body { background: var(--page); }
+
+/* The thin bar is the one place dark still reads as a band, not a field */
+.quiz-header { background: var(--charcoal); }
+.quiz-logo { color: var(--page-lift); }
+.quiz-progress-label { color: rgba(246,244,240,0.7); }
+.quiz-progress-bar { background: rgba(255,255,255,0.16); }
+.quiz-progress-fill { background: var(--sage-mid); }
+
+/* Headlines and body, now on light */
+.welcome-title, .locked-title, .loading-title, .thankyou-title,
+.section-intro h2, .report-section-title { color: var(--charcoal); }
+.welcome-title em, .locked-title em, .thankyou-title em { color: inherit; }
+.welcome-sub, .locked-sub, .loading-sub, .loading-step,
+.instructions p, .section-intro p, .thankyou-sub { color: var(--muted); }
+#screen-failed .instructions p { color: var(--muted); }
+
+.welcome-badge, .thankyou-badge {
+  color: var(--olive); border-color: var(--sage-mid); background: transparent;
+}
+.welcome-meta-label { color: var(--muted); }
+.welcome-meta-value { color: var(--charcoal); }
+.welcome-meta { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 20px 0; }
+
+.locked-link, #screen-failed .locked-link { color: var(--muted); }
+.locked-link a, #screen-failed .locked-link a { color: var(--olive); text-decoration: underline; text-underline-offset: 3px; }
+.locked-link a:hover, #screen-failed .locked-link a:hover { color: var(--terra); }
+
+/* The intake form was a translucent panel on a dark field */
+.intake-form, #screen-quiz .intake-form {
+  background: var(--page-lift);
+  border: 1px solid var(--rule);
+}
+.intake-form label, #screen-quiz .intake-form label { color: var(--charcoal); font-weight: 500; }
+.intake-form input, .intake-form textarea,
+#screen-quiz .intake-form textarea {
+  background: #fff; border: 1px solid var(--rule); color: var(--charcoal);
+}
+.intake-form input::placeholder, .intake-form textarea::placeholder { color: var(--muted); }
+.intake-form input:focus, .intake-form textarea:focus { border-color: var(--olive); }
+
+.loading-icon { border-color: var(--rule); border-top-color: var(--olive); }
+.loading-step .step-dot { background: var(--rule); }
+.loading-step.done .step-dot { background: var(--sage-mid); }
+.loading-step.active .step-dot { background: var(--olive); }
+
+/* Report header: light, with the pattern name carrying it */
+.report-header { border-radius: 0; padding: 56px 40px 48px; border-bottom: 1px solid var(--rule); }
+.report-header::before, #screen-welcome::before { display: none; }
+.report-name { color: var(--muted); }
+.report-type-badge { background: transparent; border: 1px solid var(--rule); }
+.report-type-badge span { color: var(--muted); }
+.report-type-badge strong { color: var(--charcoal); }
+#report-pattern-wrap::before { background: var(--terra); }
+#report-pattern-wrap > div:first-of-type { color: var(--muted) !important; }
+#report-pattern-name { color: var(--charcoal) !important; }
+
+/* One dark block left, at the very end */
+.report-box.invitation { background: var(--charcoal); }
+.report-box.invitation .report-box-body { color: rgba(246,244,240,0.92); }
+.report-box.invitation .report-box-body strong { color: var(--sage-mid); }
+
+.question-card, .rank-item, .questions-box, .scores-section { background: var(--page-lift); }
+.thankyou-icon { color: var(--sage-mid); }
+.thankyou-step-num { background: var(--olive); color: var(--page-lift); }
+.btn-secondary { color: var(--charcoal); border-color: var(--rule); }
+
+
+/* Report header lifts just enough to read as its own block */
+.report-header { background: var(--page-lift); }
+.report-header + * { border-top: none; }
+
+/* Terracotta stays at accent weight: buttons, one box border, one rule */
+.report-section-body strong, .report-box-body strong { color: var(--olive); font-weight: 500; }
+.report-box.stuck { background: var(--terra-bg); border-left: 3px solid var(--terra); }
+.report-box.blindspot { background: var(--page-lift); border-left: 3px solid var(--terra); }
+
+/* Divider weight, so sections breathe like the reference */
+.report-divider { margin: 56px 0; border-top: 1px solid var(--rule); }
+.report-section { margin-bottom: 8px; }
+
 </style>
 </head>
 <body>
@@ -339,10 +746,9 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
      SCREEN 0: ACCESS LOCKED
 ══════════════════════════════════════ -->
 <div id="screen-locked" class="screen">
-  <div class="locked-icon">🔒</div>
   <h1 class="locked-title">This profile is for<br><em>buyers only</em></h1>
-  <p class="locked-sub">The Shift Profile is available exclusively to women who have purchased it. If you've already bought access, please use the link from your purchase confirmation email.</p>
-  <a href="https://marianavaldez.com/shift-profile" class="btn-primary" style="text-decoration:none;">Get Access →</a>
+  <p class="locked-sub">This profile is only for people who've purchased it. If you've already bought access, use the link from your confirmation email.</p>
+  <a href="https://marianavaldez.com/shift-profile" class="btn-primary" style="text-decoration:none;">Get Access</a>
   <div class="locked-link" style="margin-top:24px;">
     Already purchased? <a href="mailto:hello@marianavaldez.com">Contact support</a>
   </div>
@@ -352,13 +758,13 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
      SCREEN 1: WELCOME
 ══════════════════════════════════════ -->
 <div id="screen-welcome" class="screen active">
-  <span class="welcome-badge">The Shift Profile</span>
+  <span class="welcome-badge" data-product-name></span>
   <h1 class="welcome-title">Discover who you<br><em>actually are</em></h1>
-  <p class="welcome-sub">A personalized Enneagram report built for women in the middle of becoming someone new</p>
+  <p class="welcome-sub">Not a type and a paragraph. Your actual pattern, named, and one thing to do about it.</p>
   <div class="welcome-meta">
     <div class="welcome-meta-item">
       <span class="welcome-meta-label">Questions</span>
-      <span class="welcome-meta-value">57</span>
+      <span class="welcome-meta-value">54</span>
     </div>
     <div class="welcome-meta-item">
       <span class="welcome-meta-label">Time</span>
@@ -376,9 +782,9 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
     <input type="email" id="user-email" placeholder="sofia@example.com" autocomplete="email">
     <div class="error-msg" id="intake-error">Please enter your name and a valid email address.</div>
   </div>
-  <button class="btn-primary" onclick="startQuiz()">Begin My Profile →</button>
+  <button class="btn-primary" onclick="startQuiz()">Begin My Profile</button>
   <div class="instructions" style="margin-top: 32px;">
-    <p>As you read each statement, go with your first instinct — the answer that feels most true to who you are <em>most of the time</em>, not just on your best day.</p>
+    <p>As you read each statement, go with your first instinct - the answer that feels most true to who you are <em>most of the time</em>, not just on your best day.</p>
     <p style="margin-top: 8px;">There are no right or wrong answers. No type is better than another. This is about awareness, not judgment.</p>
   </div>
 </div>
@@ -388,7 +794,7 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
 ══════════════════════════════════════ -->
 <div id="screen-quiz" class="screen">
   <div class="quiz-header">
-    <div class="quiz-logo">The Shift Profile</div>
+    <div class="quiz-logo" data-product-name></div>
     <div class="quiz-progress-wrap">
       <div class="quiz-progress-label">
         <span id="progress-section">Section 1 of 2</span>
@@ -412,12 +818,29 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
   <div class="loading-steps">
     <div class="loading-step active" id="step-1"><div class="step-dot"></div><span>Calculating your Enneagram type</span></div>
     <div class="loading-step" id="step-2"><div class="step-dot"></div><span>Identifying your subtype</span></div>
-    <div class="loading-step" id="step-3"><div class="step-dot"></div><span>Writing your personalized report</span></div>
-    <div class="loading-step" id="step-4"><div class="step-dot"></div><span>Almost there...</span></div>
+    <div class="loading-step" id="step-3"><div class="step-dot"></div><span>Finding the pattern underneath</span></div>
+    <div class="loading-step" id="step-4"><div class="step-dot"></div><span>Writing it out - this part takes a minute</span></div>
   </div>
   <div class="streaming-preview" id="streaming-preview" style="display:none;">
     <span class="streaming-preview-label">A glimpse of your report</span>
     <div class="streaming-text" id="streaming-text"><span class="streaming-cursor"></span></div>
+  </div>
+</div>
+
+<div id="screen-failed" class="screen">
+  <span class="welcome-badge">Something went wrong</span>
+  <h1 class="welcome-title">That's on me,<br><em>not on you</em></h1>
+  <p class="welcome-sub">Your answers came through fine. The part that writes your report hit an error, so I'd rather show you nothing than show you something generic.</p>
+  <div class="instructions" style="margin-top:28px;">
+    <p>Try again in a moment - it usually works the second time. If it doesn't, your access link still works, so you can come back later today and pick up right here.</p>
+    <p style="margin-top:10px;">I've been notified either way, and I'll follow up if it's still broken.</p>
+  </div>
+  <button class="btn-primary" style="margin-top:28px;" onclick="runGeneration()">Try Again</button>
+  <div class="locked-link" style="margin-top:22px;">
+    Rather not wait? <a href="#" onclick="showGeneralVersion();return false;">Show me the general version for my type</a>
+  </div>
+  <div class="locked-link" style="margin-top:14px;">
+    Still stuck? <a href="mailto:hello@marianavaldez.com">Email me</a>
   </div>
 </div>
 
@@ -426,14 +849,17 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
 ══════════════════════════════════════ -->
 <div id="screen-report" class="screen">
   <div class="report-header">
-    <span class="report-eyebrow">Your Shift Profile</span>
+    <span class="report-eyebrow" data-product-name-possessive></span>
     <div class="report-name" id="report-name">Loading...</div>
     <div style="position:relative;">
       <div class="report-type-badge">
         <span id="report-type-label">Type</span>
-        <strong id="report-type-name">—</strong>
-        <span>·</span>
+        <strong id="report-type-name">-</strong>
         <span id="report-subtype-label">Subtype</span>
+      </div>
+      <div id="report-pattern-wrap" style="display:none;margin-top:18px;">
+        <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Your pattern</div>
+        <div id="report-pattern-name" style="font-family:'Cormorant Garamond',serif;font-size:30px;line-height:1.15;color:var(--terra);font-style:italic;"></div>
       </div>
     </div>
   </div>
@@ -447,7 +873,7 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
   <span class="thankyou-badge">You did it</span>
   <span class="thankyou-icon">✦</span>
   <h1 class="thankyou-title">Your report is<br><em>on its way</em></h1>
-  <p class="thankyou-sub">Check your inbox — your personalized Shift Profile has been sent to you.</p>
+  <p class="thankyou-sub">Check your inbox - your personalized profile is on its way.</p>
   <div class="thankyou-steps">
     <div class="thankyou-step">
       <div class="thankyou-step-num">1</div>
@@ -460,14 +886,14 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
       <div class="thankyou-step-num">2</div>
       <div class="thankyou-step-text">
         <strong>Read slowly</strong>
-        Your report was written specifically for your type and subtype. Give yourself quiet time with it — don't rush.
+        It was written from your answers, not just your type. The section that makes you uncomfortable is the one doing the work.
       </div>
     </div>
     <div class="thankyou-step">
       <div class="thankyou-step-num">3</div>
       <div class="thankyou-step-text">
-        <strong>Notice what lands</strong>
-        Write down the one thing that surprised you most. That's usually the most important thing.
+        <strong>Start the 14 days</strong>
+        Your report ends with one small thing to do. Put a note in your phone for day 14 before you close this.
       </div>
     </div>
   </div>
@@ -475,11 +901,16 @@ body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', san
     <button class="btn-primary" onclick="showScreen('screen-report'); window.scrollTo(0,0);">View My Report Again</button>
   </div>
   <div class="bln-callout">
-    <p>Ready to go deeper? In <strong>Your Best Life Now</strong>, we explore your Enneagram type fully — the subconscious patterns, the sticking points, and exactly how to move through them. <a href="https://marianavaldez.com/your-best-life-now" target="_blank">Learn more →</a></p>
+    <p>Did the type feel right? Tell me what landed and what missed - it genuinely shapes what I build next. <a href="https://instagram.com/marianavaldezbowen" target="_blank">Message me on Instagram</a></p>
   </div>
 </div>
 
 <script>
+// ══════════════════════════════════════
+// PRODUCT NAME - change this one line to rename the product everywhere
+// ══════════════════════════════════════
+const PRODUCT_NAME = 'Enneagram Profile';
+
 // ══════════════════════════════════════
 // EMAILJS CONFIG
 // ══════════════════════════════════════
@@ -487,7 +918,15 @@ const EMAILJS_PUBLIC_KEY  = 'Hbh_HwtgRTKQhMroG';
 const EMAILJS_SERVICE_ID  = 'service_tpldbbn';
 const EMAILJS_TEMPLATE_ID = 'template_um5yh7s';
 
+// Second template, for failure alerts to Mariana. Create it in EmailJS and paste
+// the ID here. Until then, alerts are skipped silently and nothing breaks.
+const EMAILJS_ALERT_TEMPLATE_ID = 'YOUR_ALERT_TEMPLATE_ID';
+const OWNER_EMAIL = 'hello@marianavaldez.com';
+
 window.addEventListener('load', function() {
+  document.querySelectorAll('[data-product-name]').forEach(el => el.textContent = PRODUCT_NAME);
+  document.querySelectorAll('[data-product-name-possessive]').forEach(el => el.textContent = 'Your ' + PRODUCT_NAME);
+
   if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
     emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
   }
@@ -506,7 +945,7 @@ function checkAccess() {
   if (!token || token !== ACCESS_TOKEN) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-locked').classList.add('active');
-    return; // stop here — no token, show locked screen
+    return; // stop here - no token, show locked screen
   }
 
   // ── RETURN-TO-RESULTS: check if this is a "view my report" link from email ──
@@ -516,43 +955,39 @@ function checkAccess() {
   const returnEmail   = params.get('remail');
 
   if (returnType && returnSubtype && returnName) {
-    // Valid return link — skip the quiz, regenerate report immediately
+    // Valid return link - skip the quiz, regenerate report immediately
     userName        = decodeURIComponent(returnName);
     userEmail       = returnEmail ? decodeURIComponent(returnEmail) : '';
     dominantType    = parseInt(returnType);
     dominantSubtype = decodeURIComponent(returnSubtype);
 
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-loading').classList.add('active');
+    // Same generation path as a first-time run - retries, honest failure screen,
+    // no duplicate email, no second conversion event.
+    isReturnVisit = true;
 
-    animateLoadingSteps();
+    const rawScores = params.get('rscores');
+    if (rawScores) {
+      const nums = decodeURIComponent(rawScores).split(',').map(n => parseInt(n, 10));
+      if (nums.length === 9 && nums.every(n => !isNaN(n))) {
+        lastSortedScores = nums
+          .map((score, i) => ({ type: i + 1, name: TYPE_NAMES[i + 1], score }))
+          .sort((a, b) => b.score - a.score);
+      } else {
+        lastSortedScores = [];
+      }
+    } else {
+      lastSortedScores = [];
+    }
 
-    const typeName = TYPE_NAMES[dominantType] || '';
+    const rawCtx = params.get('rctx');
+    userContext = rawCtx ? decodeURIComponent(rawCtx).substring(0, 500) : '';
 
-    generateReportStreaming(dominantType, typeName, dominantSubtype, [])
-      .then(report => {
-        if (!report || !report.whatIsTheEnneagram) throw new Error('Invalid report');
-        // Don't re-send email on return visits
-        displayReport(dominantType, typeName, dominantSubtype, buildFakeSortedScores(dominantType), report, null);
-      })
-      .catch(err => {
-        console.error('Return regeneration failed:', err);
-        const fallback = getFallbackReport(dominantType, typeName, dominantSubtype);
-        displayReport(dominantType, typeName, dominantSubtype, buildFakeSortedScores(dominantType), fallback, null);
-      });
+    runGeneration();
   }
   // else: normal flow, welcome screen stays active (set by HTML)
 }
 
 // Helper: build a plausible score array when we don't have real quiz data
-function buildFakeSortedScores(topType) {
-  const scores = [];
-  for (let t = 1; t <= 9; t++) {
-    scores.push({ type: t, name: TYPE_NAMES[t], score: t === topType ? 28 : Math.floor(Math.random() * 12) + 10 });
-  }
-  return scores.sort((a, b) => b.score - a.score);
-}
-
 // ══════════════════════════════════════
 // DATA
 // ══════════════════════════════════════
@@ -570,60 +1005,60 @@ const TYPE_NAMES = {
 };
 
 const SCORED_QUESTIONS = [
-  { id: "1a", type: 1, text: "I have a strong sense of what's right and feel responsible for upholding it — even when it's inconvenient." },
+  { id: "1a", type: 1, text: "I have a strong sense of what's right and feel responsible for upholding it - even when it's inconvenient." },
   { id: "1b", type: 1, text: "I find it genuinely difficult to relax when I know something could be done better." },
-  { id: "1c", type: 1, text: "I hold myself to standards I rarely share out loud — but feel when I fall short of them." },
+  { id: "1c", type: 1, text: "I hold myself to standards I rarely say out loud - but I feel it when I fall short of them." },
   { id: "1d", type: 1, text: "I believe there's a right way to do things, and it bothers me when people cut corners." },
-  { id: "1e", type: 1, text: "I want to be good — not just look good. My integrity matters to me more than my image." },
+  { id: "1e", type: 1, text: "I want to be good - not just look good. My integrity matters to me more than my image." },
   { id: "1f", type: 1, text: "A small inner critic often notices what I did wrong before anyone else does." },
   { id: "2a", type: 2, text: "I feel most like myself when I'm genuinely useful to someone I care about." },
   { id: "2b", type: 2, text: "I sometimes realize I've spent so much time on others that I don't know what I actually need." },
   { id: "2c", type: 2, text: "Being loved and being needed feel deeply connected for me." },
-  { id: "2d", type: 2, text: "I can sense what others need before they ask — and it's hard not to respond to that." },
+  { id: "2d", type: 2, text: "I can sense what others need before they ask - and it's hard not to respond to that." },
   { id: "2e", type: 2, text: "I struggle to ask for help because it feels like I should be the one giving it." },
   { id: "2f", type: 2, text: "My sense of worth is quietly tied to whether the people in my life are okay." },
-  { id: "3a", type: 3, text: "I'm aware of how I'm perceived and adjust naturally — not to be fake, but to succeed." },
+  { id: "3a", type: 3, text: "I'm aware of how I'm perceived and adjust naturally - not to be fake, but to succeed." },
   { id: "3b", type: 3, text: "My identity has been deeply tied to what I achieve and how I'm seen achieving it." },
-  { id: "3c", type: 3, text: "Failure — or even the appearance of it — hits me harder than I usually let on." },
+  { id: "3c", type: 3, text: "Failure - or even the appearance of it - hits me harder than I usually let on." },
   { id: "3d", type: 3, text: "I've spent a lot of energy becoming someone impressive. The shift toward 'meaningful' has been disorienting." },
   { id: "3e", type: 3, text: "I'm efficient, goal-oriented, and uncomfortable when I don't have something to show for my time." },
   { id: "3f", type: 3, text: "I sometimes wonder if the version of me everyone admires is actually the real me." },
-  { id: "4a", type: 4, text: "I've always felt a little different — like I experience things more intensely than most people around me." },
+  { id: "4a", type: 4, text: "I've always felt a little different - like I experience things more intensely than most people around me." },
   { id: "4b", type: 4, text: "I'd rather be authentic than well-liked. Fitting in at the cost of my truth feels like a kind of death." },
   { id: "4c", type: 4, text: "There's a recurring sense that something essential is missing in me that others seem to have naturally." },
-  { id: "4d", type: 4, text: "My emotional life is rich and complex — I feel things deeply and often need space to process them." },
+  { id: "4d", type: 4, text: "My emotional life is rich and complex - I feel things deeply and often need space to process them." },
   { id: "4e", type: 4, text: "I envy those who seem content. I want depth and meaning, but it often comes with a quiet ache." },
-  { id: "4f", type: 4, text: "I want to be truly seen — not for what I do, but for who I actually am underneath all of it." },
-  { id: "5a", type: 5, text: "I need time and space to think before I'm ready to engage — with people, decisions, or emotions." },
-  { id: "5b", type: 5, text: "Being around people for too long drains me. Solitude isn't loneliness — it's where I restore." },
+  { id: "4f", type: 4, text: "I want to be truly seen - not for what I do, but for who I actually am underneath all of it." },
+  { id: "5a", type: 5, text: "I need time and space to think before I'm ready to engage - with people, decisions, or emotions." },
+  { id: "5b", type: 5, text: "Being around people for too long drains me. Solitude isn't loneliness - it's where I restore." },
   { id: "5c", type: 5, text: "I want to understand things deeply before I commit to them or talk about them." },
-  { id: "5d", type: 5, text: "I can feel anxious about having enough — enough time, energy, privacy, resources — to function well." },
+  { id: "5d", type: 5, text: "I can feel anxious about having enough - enough time, energy, privacy, resources - to function well." },
   { id: "5e", type: 5, text: "I tend to observe more than I participate, and I'm more comfortable with knowledge than with feelings." },
-  { id: "5f", type: 5, text: "I protect my inner world carefully — not everyone earns the right to know what I really think." },
-  { id: "6a", type: 6, text: "I scan for what could go wrong — not because I'm negative, but because being prepared feels safe." },
+  { id: "5f", type: 5, text: "I protect my inner world carefully - not everyone earns the right to know what I really think." },
+  { id: "6a", type: 6, text: "I scan for what could go wrong - not because I'm negative, but because being prepared feels safe." },
   { id: "6b", type: 6, text: "I value loyalty above almost everything. When trust is broken, it's hard to rebuild." },
-  { id: "6c", type: 6, text: "I've noticed I can be skeptical of things that seem too good — I look for the catch." },
+  { id: "6c", type: 6, text: "I've noticed I can be skeptical of things that seem too good - I look for the catch." },
   { id: "6d", type: 6, text: "Before big decisions, I tend to overthink and seek reassurance from people I trust." },
   { id: "6e", type: 6, text: "Feeling supported and knowing others have my back matters more to me than most people realize." },
   { id: "6f", type: 6, text: "I've questioned my own judgment enough times that I sometimes doubt myself more than I should." },
-  { id: "7a", type: 7, text: "I move toward what's exciting and tend to reframe difficulty into opportunity — sometimes too quickly." },
+  { id: "7a", type: 7, text: "I move toward what's exciting and tend to reframe difficulty into opportunity - sometimes too quickly." },
   { id: "7b", type: 7, text: "Staying with painful emotions for too long feels like a kind of trap I need to escape." },
   { id: "7c", type: 7, text: "I can start more things than I finish because the beginning of something always feels the most alive." },
   { id: "7d", type: 7, text: "Boredom, repetition, and limitation feel genuinely suffocating to me." },
-  { id: "7e", type: 7, text: "I want my life to feel expansive — full of possibility, experience, and joy." },
+  { id: "7e", type: 7, text: "I want my life to feel expansive - full of possibility, experience, and joy." },
   { id: "7f", type: 7, text: "The version of myself I most resist is the one who has to sit still and face what hurts." },
-  { id: "8a", type: 8, text: "I lead instinctively — not because I seek power, but because someone has to and I trust myself to do it." },
+  { id: "8a", type: 8, text: "I lead instinctively - not because I seek power, but because someone has to and I trust myself to do it." },
   { id: "8b", type: 8, text: "Vulnerability feels dangerous. I protect myself by staying strong, even when I'm not." },
   { id: "8c", type: 8, text: "I have little patience for weakness, injustice, or being controlled by others." },
-  { id: "8d", type: 8, text: "I can be too much for some people — too direct, too intense — and I've learned to live with that." },
+  { id: "8d", type: 8, text: "I can be too much for some people - too direct, too intense - and I've learned to live with that." },
   { id: "8e", type: 8, text: "My anger comes up fast and signals when something feels wrong or when someone is being treated unfairly." },
-  { id: "8f", type: 8, text: "What I want more than almost anything is to be respected — and to never be seen as weak." },
-  { id: "9a", type: 9, text: "I go along with what others want more often than I speak up — and I tell myself it's because I don't mind." },
+  { id: "8f", type: 8, text: "What I want more than almost anything is to be respected - and to never be seen as weak." },
+  { id: "9a", type: 9, text: "I go along with what others want more often than I speak up - and I tell myself it's because I don't mind." },
   { id: "9b", type: 9, text: "I struggle to know what I really want, especially when it might create tension with someone I love." },
   { id: "9c", type: 9, text: "Conflict feels like such a threat to connection that I'll absorb a lot of discomfort to avoid it." },
   { id: "9d", type: 9, text: "I can numb out or distract myself when things get too hard to face directly." },
-  { id: "9e", type: 9, text: "People describe me as calming to be around — but inside I'm often more uncertain than I appear." },
-  { id: "9f", type: 9, text: "My needs have a habit of going last — not because I'm selfless, but because asserting them feels risky." },
+  { id: "9e", type: 9, text: "People describe me as calming to be around - but inside I'm often more uncertain than I appear." },
+  { id: "9f", type: 9, text: "My needs have a habit of going last - not because I'm selfless, but because asserting them feels risky." },
 ];
 
 function shuffleArray(arr) {
@@ -637,9 +1072,9 @@ function shuffleArray(arr) {
 const SHUFFLED_QUESTIONS = shuffleArray(SCORED_QUESTIONS);
 
 const SUBTYPE_ITEMS = [
-  { id: "sp", subtype: "Self-Preservation", text: "My energy goes most toward securing my personal safety, health, comfort, and resources — I need my foundations to feel stable before I can give fully to anything else." },
-  { id: "so", subtype: "Social", text: "My energy goes most toward my place in groups — belonging, contributing, being valued by my community. I'm aware of social dynamics and motivated by being part of something meaningful." },
-  { id: "sx", subtype: "One-on-One", text: "My energy goes most toward deep, intense one-on-one connection — I'm drawn to people and experiences that feel electric, transformative, and completely real." }
+  { id: "sp", subtype: "Self-Preservation", text: "My energy goes most toward securing my personal safety, health, comfort, and resources - I need my foundations to feel stable before I can give fully to anything else." },
+  { id: "so", subtype: "Social", text: "My energy goes most toward my place in groups - belonging, contributing, being valued by my community. I'm aware of social dynamics and motivated by being part of something meaningful." },
+  { id: "sx", subtype: "One-on-One", text: "My energy goes most toward deep, intense one-on-one connection - I'm drawn to people and experiences that feel electric, transformative, and completely real." }
 ];
 
 // ══════════════════════════════════════
@@ -652,6 +1087,9 @@ let subtypeRanking = ['sp', 'so', 'sx'];
 let currentBatch = 0;
 let dominantType = 0;
 let dominantSubtype = '';
+let userContext = '';
+let lastSortedScores = [];
+let isReturnVisit = false;
 const BATCH_SIZE = 6;
 const TOTAL_BATCHES = 9;
 
@@ -691,7 +1129,7 @@ function updateProgress() {
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-pct').textContent = pct + '%';
   if (currentBatch < TOTAL_BATCHES) {
-    document.getElementById('progress-section').textContent = `Section 1 of 2 — Part ${currentBatch + 1} of ${TOTAL_BATCHES}`;
+    document.getElementById('progress-section').textContent = `Section 1 of 2 - Part ${currentBatch + 1} of ${TOTAL_BATCHES}`;
   } else {
     document.getElementById('progress-section').textContent = 'Section 2 of 2';
   }
@@ -707,9 +1145,8 @@ function renderBatch(batchIndex) {
   const questions = SHUFFLED_QUESTIONS.slice(start, start + BATCH_SIZE);
   let html = `
     <div class="section-intro">
-      <span class="eyebrow">Section 1 of 2 · Part ${batchIndex + 1} of ${TOTAL_BATCHES}</span>
       <h2>How much does each statement<br>resonate with you?</h2>
-      <p>Go with your first instinct — the version of you that shows up most of the time, not your ideal self.</p>
+      <p>Go with your first instinct - the version of you that shows up most of the time, not your ideal self.</p>
     </div>
   `;
   questions.forEach((q, i) => {
@@ -735,7 +1172,7 @@ function renderBatch(batchIndex) {
     <div class="question-error" id="batch-error">Please answer all statements before continuing.</div>
     <div class="quiz-nav">
       ${batchIndex > 0 ? `<button class="quiz-nav-back" onclick="goBackBatch()">← Back</button>` : '<div></div>'}
-      <button class="btn-primary" onclick="nextBatch()">Continue →</button>
+      <button class="btn-primary" onclick="nextBatch()">Continue</button>
     </div>
   `;
   body.innerHTML = html;
@@ -760,18 +1197,58 @@ function renderSubtypeSection() {
   });
   body.innerHTML = `
     <div class="section-intro">
-      <span class="eyebrow">Section 2 of 2 · Final Step</span>
+      <span class="eyebrow">Section 2 of 2</span>
       <h2>Which energy drives<br>you most?</h2>
-      <p>Drag these three descriptions into order — most like you at the top, least like you at the bottom. Go with your gut.</p>
+      <p>Drag these three descriptions into order - most like you at the top, least like you at the bottom. Go with your gut.</p>
     </div>
-    <p class="rank-instructions">Drag to reorder — #1 is most like you</p>
+    <p class="rank-instructions">Drag to reorder - #1 is most like you</p>
     <div class="rank-items" id="rank-container">${itemsHtml}</div>
     <div class="quiz-nav">
       <button class="quiz-nav-back" onclick="goBackToLastBatch()">← Back</button>
-      <button class="btn-primary" onclick="submitQuiz()">Generate My Profile →</button>
+      <button class="btn-primary" onclick="renderContextQuestion()">Continue</button>
     </div>
   `;
   window.scrollTo(0, 0);
+}
+
+function renderContextQuestion() {
+  const fill = document.getElementById('progress-fill');
+  const pct  = document.getElementById('progress-pct');
+  const sect = document.getElementById('progress-section');
+  if (fill) fill.style.width = '100%';
+  if (pct)  pct.textContent = '100%';
+  if (sect) sect.textContent = 'Last step';
+  const body = document.getElementById('quiz-body');
+  body.innerHTML = `
+    <div class="section-intro">
+      <span class="eyebrow">One last thing</span>
+      <h2>Before I write<br>your report</h2>
+      <p>This is the part no test can guess. Answer in a sentence or two and it gets woven into your results.</p>
+    </div>
+    <div class="intake-form">
+      <label>What is the thing you keep doing that you wish you would stop?</label>
+      <textarea id="user-context" rows="4" style="width:100%;padding:14px;font-family:inherit;font-size:15px;line-height:1.5;border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink);resize:vertical;" placeholder="However it comes out is fine."></textarea>
+    </div>
+    <div class="quiz-nav">
+      <button class="quiz-nav-back" onclick="renderSubtypeSection()">← Back</button>
+      <button class="btn-primary" onclick="submitQuiz()">Generate My Profile</button>
+    </div>
+    <div class="instructions" style="margin-top:24px;text-align:center;">
+      <p><a href="#" onclick="document.getElementById('user-context').value='';submitQuiz();return false;" style="color:var(--muted);font-size:13px;">Skip this and generate my report</a></p>
+    </div>
+  `;
+  window.scrollTo(0, 0);
+}
+
+function getOutliers(dominant) {
+  const high = [], low = [];
+  SCORED_QUESTIONS.forEach(q => {
+    const v = answers[q.id];
+    if (!v) return;
+    if (q.type !== dominant && v === 5) high.push({ type: q.type, text: q.text });
+    if (q.type === dominant && v <= 2) low.push({ type: q.type, text: q.text });
+  });
+  return { high: high.slice(0, 4), low: low.slice(0, 3) };
 }
 
 function setAnswer(qId, value) { answers[qId] = value; }
@@ -849,57 +1326,131 @@ function getSubtypeName(ranking) {
 // SUBMIT & GENERATE
 // ══════════════════════════════════════
 async function submitQuiz() {
-  showScreen('screen-loading');
-  animateLoadingSteps();
+  const ctxEl = document.getElementById('user-context');
+  if (ctxEl) userContext = ctxEl.value.trim().substring(0, 500);
 
   const scores = calculateScores();
   dominantType = getDominantType(scores);
-  const typeName = TYPE_NAMES[dominantType];
   dominantSubtype = getSubtypeName(subtypeRanking);
-  const sortedScores = Object.entries(scores)
+  lastSortedScores = Object.entries(scores)
     .map(([t, s]) => ({ type: parseInt(t), name: TYPE_NAMES[parseInt(t)], score: s }))
     .sort((a, b) => b.score - a.score);
 
+  runGeneration();
+}
+
+function attemptReport() {
+  // On a return visit there are no raw answers, so there are no outliers.
+  const outliers = Object.keys(answers).length ? getOutliers(dominantType) : { high: [], low: [] };
+  const fullRanking = subtypeRanking.map(id => ({ sp: 'Self-Preservation', so: 'Social', sx: 'One-on-One' })[id]);
+  return generateReportStreaming(
+    dominantType, TYPE_NAMES[dominantType], dominantSubtype,
+    lastSortedScores, outliers, fullRanking
+  );
+}
+
+function isValidReport(r) {
+  return r && typeof r === 'object' && r.whatIsTheEnneagram && r.invitationToBLN;
+}
+
+// Two automatic attempts, then an honest failure screen. We never quietly serve
+// the template as if it were the real thing - she can choose it, but she's told.
+async function runGeneration() {
+  showScreen('screen-loading');
+  resetLoadingSteps();
+  animateLoadingSteps();
+
   let report = null;
-  let reportError = null;
+  let lastError = null;
 
-  try {
-    report = await generateReportStreaming(dominantType, typeName, dominantSubtype, sortedScores);
-    console.log('API success - keys:', Object.keys(report || {}).join(','));
-    if (!report || typeof report !== 'object' || !report.whatIsTheEnneagram) {
-      throw new Error('Invalid report: ' + JSON.stringify(report).substring(0, 200));
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      report = await attemptReport();
+      if (!isValidReport(report)) throw new Error('Incomplete report returned');
+      lastError = null;
+      break;
+    } catch (err) {
+      lastError = err.message || String(err);
+      console.error(`Generation attempt ${attempt} failed:`, lastError);
+      report = null;
+      if (attempt === 1) await new Promise(r => setTimeout(r, 2000));
     }
-  } catch (err) {
-    console.error('FALLBACK triggered:', err.message);
-    reportError = err.message;
-    report = getFallbackReport(dominantType, typeName, dominantSubtype);
   }
 
-  // Fire Meta Pixel purchase/complete event
-  if (typeof fbq !== 'undefined') {
-    fbq('track', 'CompleteRegistration');
+  if (lastError) {
+    notifyOwnerOfFailure(lastError);
+    showScreen('screen-failed');
+    window.scrollTo(0, 0);
+    return;
   }
 
-  displayReport(dominantType, typeName, dominantSubtype, sortedScores, report, reportError);
+  displayReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype, lastSortedScores, report, null);
 
-  sendReportEmail(dominantType, typeName, dominantSubtype, report).catch(e =>
+  // Return visits already converted and already got their email.
+  if (isReturnVisit) return;
+
+  if (typeof fbq !== 'undefined') fbq('track', 'CompleteRegistration');
+  sendReportEmail(dominantType, TYPE_NAMES[dominantType], dominantSubtype, report).catch(e =>
     console.warn('Email send failed (non-critical):', e)
   );
+}
+
+// She asked for the template knowingly. It's labelled as such, no email, no pixel.
+function showGeneralVersion() {
+  const report = getFallbackReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype);
+  displayReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype, lastSortedScores, report, true);
+  showScreen('screen-report');
+  window.scrollTo(0, 0);
+}
+
+function resetLoadingSteps() {
+  ['step-1', 'step-2', 'step-3', 'step-4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('done', 'active');
+    if (i === 0) el.classList.add('active');
+  });
+}
+
+// Fire-and-forget alert so a failure reaches Mariana without a refund request.
+// Needs a second EmailJS template; if it isn't set up this silently does nothing.
+function notifyOwnerOfFailure(errorMessage) {
+  try {
+    if (typeof emailjs === 'undefined') return;
+    if (!EMAILJS_ALERT_TEMPLATE_ID || EMAILJS_ALERT_TEMPLATE_ID.indexOf('YOUR_') === 0) return;
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_ALERT_TEMPLATE_ID, {
+      to_email: OWNER_EMAIL,
+      buyer_name: userName || '(unknown)',
+      buyer_email: userEmail || '(unknown)',
+      type_number: dominantType || '?',
+      subtype: dominantSubtype || '?',
+      error_message: String(errorMessage).substring(0, 400),
+      when: new Date().toISOString()
+    }).catch(e => console.warn('Owner alert failed:', e));
+  } catch (e) {
+    console.warn('Owner alert threw:', e);
+  }
 }
 
 // ══════════════════════════════════════
 // SIMPLE FETCH (non-streaming)
 // ══════════════════════════════════════
-async function generateReportStreaming(typeNum, typeName, subtype, sortedScores) {
+async function generateReportStreaming(typeNum, typeName, subtype, sortedScores, outliers, fullRanking) {
   const response = await fetch('/api/generate-report', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ typeNum, typeName, subtype, sortedScores, userName })
+    body: JSON.stringify({
+      typeNum, typeName, subtype, sortedScores, userName,
+      subtypeRanking: fullRanking || [],
+      highOutliers: (outliers && outliers.high) || [],
+      lowOutliers: (outliers && outliers.low) || [],
+      userContext
+    })
   });
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`HTTP ${response.status} — ${err}`);
+    throw new Error(`HTTP ${response.status} - ${err}`);
   }
 
   const report = await response.json();
@@ -916,34 +1467,45 @@ async function generateReportStreaming(typeNum, typeName, subtype, sortedScores)
 // ══════════════════════════════════════
 function animateLoadingSteps() {
   const steps = ['step-1', 'step-2', 'step-3', 'step-4'];
+  // Roughly matched to real generation time (analysis pass + two writing passes).
+  const durations = [5000, 7000, 16000, 60000];
   let current = 0;
   const advance = () => {
     if (current > 0) {
-      document.getElementById(steps[current - 1]).classList.remove('active');
-      document.getElementById(steps[current - 1]).classList.add('done');
+      const prev = document.getElementById(steps[current - 1]);
+      if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
     }
     if (current < steps.length) {
-      document.getElementById(steps[current]).classList.add('active');
+      const el = document.getElementById(steps[current]);
+      if (el) el.classList.add('active');
+      setTimeout(advance, durations[current]);
       current++;
-      setTimeout(advance, current === steps.length ? 8000 : 3000);
     }
   };
   advance();
 }
 
 // ══════════════════════════════════════
-// EMAIL — FIXED: all 11 sections + results_url
+// EMAIL - FIXED: all 11 sections + results_url
 // ══════════════════════════════════════
 async function sendReportEmail(typeNum, typeName, subtype, report) {
   if (typeof emailjs === 'undefined' || EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') return;
 
   // Build the "return to results" deep link for the email
+  // Scores and her own sentence ride along, so a return visit regenerates from
+  // the same material rather than a thinner version of it.
+  const scoreString = lastSortedScores.length
+    ? [...lastSortedScores].sort((a, b) => a.type - b.type).map(x => x.score).join(',')
+    : '';
+
   const resultsUrl = 'https://shift-profile-alpha.vercel.app'
     + '?token=shiftprofile2024'
     + '&rtype='    + encodeURIComponent(typeNum)
     + '&rsubtype=' + encodeURIComponent(subtype)
     + '&rname='    + encodeURIComponent(userName)
-    + '&remail='   + encodeURIComponent(userEmail);
+    + '&remail='   + encodeURIComponent(userEmail)
+    + (scoreString ? '&rscores=' + encodeURIComponent(scoreString) : '')
+    + (userContext ? '&rctx=' + encodeURIComponent(userContext.substring(0, 300)) : '');
 
   const templateParams = {
     to_name:           userName,
@@ -951,6 +1513,7 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
     type_number:       typeNum,
     type_name:         typeName,
     subtype:           subtype,
+    pattern_name:      report.patternName                || '',
     what_is_enneagram: report.whatIsTheEnneagram         || '',
     getting_to_know:   report.gettingToKnowYourType      || '',
     you_as_mother:     report.youAsMother                || '',
@@ -987,13 +1550,22 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
   }
   document.getElementById('report-subtype-label').textContent = `${subtype} Subtype`;
 
+  // Pattern name - only shown if the model returned one
+  const patternWrap = document.getElementById('report-pattern-wrap');
+  if (report.patternName && String(report.patternName).trim()) {
+    document.getElementById('report-pattern-name').textContent = String(report.patternName).trim();
+    patternWrap.style.display = 'block';
+  } else {
+    patternWrap.style.display = 'none';
+  }
+
   // Score bars
   const barColors = ['#C4714A','#C9A96E','#7A8C7E','#B08A6E','#9B8BB4','#7EA8A8','#C4A882','#A89B8A','#B8B0A8'];
   const scoreBars = sortedScores.map((s, i) => {
     const pct = Math.round((s.score / 30) * 100);
     return `
       <div class="score-row">
-        <div class="score-label">Type ${s.type} — ${s.name.split(' ').slice(1).join(' ')}</div>
+        <div class="score-label">Type ${s.type} - ${s.name.split(' ').slice(1).join(' ')}</div>
         <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%; background:${barColors[i] || '#DDD5CB'};"></div></div>
         <div class="score-num">${s.score}</div>
       </div>
@@ -1005,26 +1577,28 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
 
   const content = document.getElementById('report-content');
 
-  if (reportError) {
-    const errBanner = document.createElement('div');
-    errBanner.style.cssText = 'background:#FFF3ED;border:1px solid #C4714A;border-radius:4px;padding:12px 20px;font-size:13px;color:#C4714A;margin-bottom:24px;font-family:monospace;';
-    errBanner.textContent = '⚠ AI report error (showing template): ' + reportError;
-    content.prepend(errBanner);
-  }
+  // NOTE: this used to be prepended before innerHTML was assigned, which wiped it
+  // every time. It's part of the template now, and it's written for a buyer.
+  const fallbackBanner = reportError ? `
+    <div style="background:#FDF7EC;border:1px solid #C9A96E;border-radius:4px;padding:16px 20px;font-size:14px;line-height:1.5;color:#8A7E74;margin-bottom:28px;">
+      <strong style="color:#C4714A;">This is the general version for your type.</strong><br>
+      Your personalized report didn't generate. This still covers the shape of Type ${typeNum}, but it isn't written from your specific answers. Your access link keeps working - try again later, or email hello@marianavaldez.com and I'll sort it out.
+    </div>` : '';
 
   content.innerHTML = `
-    <!-- SCORE BARS -->
+    ${fallbackBanner}
+    ${sortedScores.length ? `<!-- SCORE BARS -->
     <div class="scores-section">
-      <div class="scores-title">Your Type Scores — out of 30</div>
+      <div class="scores-title">Your Type Scores - out of 30</div>
       ${scoreBars}
-    </div>
+    </div>` : ''}
 
     <!-- WHAT IS THE ENNEAGRAM -->
     <div class="report-section">
       <span class="report-section-label">First Things First</span>
-      <h2 class="report-section-title">What Even Is the Enneagram?</h2>
+      <h2 class="report-section-title">What This Actually Is</h2>
       <div class="report-box intro">
-        <span class="report-box-label">A quick grounding before we dive in</span>
+        <span class="report-box-label">A quick grounding before we start</span>
         <div class="report-box-body">${formatParagraphs(report.whatIsTheEnneagram)}</div>
       </div>
     </div>
@@ -1033,15 +1607,15 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- GETTING TO KNOW YOUR TYPE -->
     <div class="report-section">
       <span class="report-section-label">Getting to Know You</span>
-      <h2 class="report-section-title">Type ${typeNum} — ${typeName}</h2>
+      <h2 class="report-section-title">Type ${typeNum}: ${typeName}, ${subtype}</h2>
       <div class="report-section-body">${formatParagraphs(report.gettingToKnowYourType)}</div>
     </div>
     <hr class="report-divider">
 
-    <!-- YOU AS A MOTHER -->
+    <!-- HOW YOU GOT HERE -->
     <div class="report-section">
       <span class="report-section-label">The Heart of It</span>
-      <h2 class="report-section-title">You as a Mother — What Actually Happened</h2>
+      <h2 class="report-section-title">How You Got Here</h2>
       <div class="report-section-body">${formatParagraphs(report.youAsMother)}</div>
     </div>
     <hr class="report-divider">
@@ -1049,9 +1623,9 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- INNER WORLD -->
     <div class="report-section">
       <span class="report-section-label">Your Inner World</span>
-      <h2 class="report-section-title">How You Think, Feel & Move Through Life</h2>
+      <h2 class="report-section-title">How Your Mind Actually Runs</h2>
       <div class="report-box inner-world">
-        <span class="report-box-label">What's happening inside — including the parts you don't say out loud</span>
+        <span class="report-box-label">The filters deciding things before you do</span>
         <div class="report-box-body">${formatParagraphs(report.yourInnerWorld)}</div>
       </div>
     </div>
@@ -1060,9 +1634,9 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- BLIND SPOTS -->
     <div class="report-section">
       <span class="report-section-label">The Stuff You Can't See</span>
-      <h2 class="report-section-title">Your Blind Spots</h2>
+      <h2 class="report-section-title">What You Can't See Yet</h2>
       <div class="report-box blindspot">
-        <span class="report-box-label">Obvious to everyone else, invisible to you</span>
+        <span class="report-box-label">Including what you're about to do next</span>
         <div class="report-box-body">${formatParagraphs(report.yourBlindSpots)}</div>
       </div>
     </div>
@@ -1071,9 +1645,9 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- STRENGTHS -->
     <div class="report-section">
       <span class="report-section-label">What You Bring</span>
-      <h2 class="report-section-title">Your Real Strengths in This Season</h2>
+      <h2 class="report-section-title">What You're Actually Good At</h2>
       <div class="report-box strengths">
-        <span class="report-box-label">The actual superpowers — earned, not generic</span>
+        <span class="report-box-label">The actual superpowers - earned, not generic</span>
         <div class="report-box-body">${formatParagraphs(report.yourStrengths)}</div>
       </div>
     </div>
@@ -1082,7 +1656,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- WHERE YOU GET STUCK -->
     <div class="report-section">
       <span class="report-section-label">The Loop</span>
-      <h2 class="report-section-title">Where You Get Stuck</h2>
+      <h2 class="report-section-title">The Sentence You Keep Saying</h2>
       <div class="report-box stuck">
         <span class="report-box-label">The specific pattern that keeps recurring</span>
         <div class="report-box-body">${formatParagraphs(report.whereYouGetStuck)}</div>
@@ -1093,9 +1667,9 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- RELATIONSHIPS -->
     <div class="report-section">
       <span class="report-section-label">Your People</span>
-      <h2 class="report-section-title">How You Show Up in Your Relationships</h2>
+      <h2 class="report-section-title">How You Show Up With People</h2>
       <div class="report-box relationships">
-        <span class="report-box-label">Partner, kids, friends, your own mother</span>
+        <span class="report-box-label">What you give, what you withhold, what you never ask for</span>
         <div class="report-box-body">${formatParagraphs(report.yourRelationships)}</div>
       </div>
     </div>
@@ -1104,9 +1678,9 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- GROWTH EDGE -->
     <div class="report-section">
       <span class="report-section-label">The Way Forward</span>
-      <h2 class="report-section-title">Your Growth Edge</h2>
+      <h2 class="report-section-title">Your Next 14 Days</h2>
       <div class="report-box growth">
-        <span class="report-box-label">What integration actually looks like for you — real and specific</span>
+        <span class="report-box-label">Small on purpose - it only works if you actually do it</span>
         <div class="report-box-body">${formatParagraphs(report.yourGrowthEdge)}</div>
       </div>
     </div>
@@ -1117,7 +1691,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
       <span class="report-section-label">Go Deeper</span>
       <h2 class="report-section-title">Questions to Sit With</h2>
       <div class="questions-box">
-        <span class="report-box-label">For journaling, for stillness, for the car ride when no one's talking</span>
+        <span class="report-box-label">For journaling, for stillness, for the drive when no one is talking</span>
         ${questionsHtml}
       </div>
     </div>
@@ -1126,7 +1700,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- INVITATION -->
     <div class="report-section">
       <div class="report-box invitation">
-        <span class="report-box-label">What's Next</span>
+        <span class="report-box-label">What Happens Now</span>
         <div class="report-box-body">${formatParagraphs(report.invitationToBLN)}</div>
       </div>
     </div>
@@ -1138,7 +1712,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <div class="report-actions">
       <button class="btn-primary" onclick="downloadPDF()">Download PDF</button>
       <button class="btn-dark" onclick="window.print()">Print</button>
-      <button class="btn-secondary" style="border-color:var(--rule);color:var(--muted);" onclick="goToThankYou()">I'm Done Reading →</button>
+      <button class="btn-secondary" style="border-color:var(--rule);color:var(--muted);" onclick="goToThankYou()">I'm Done Reading</button>
     </div>
   `;
 
@@ -1191,33 +1765,35 @@ function downloadPDF() {
   function checkY(needed = 10) { if (y + needed > pageH - margin) addPage(); }
 
   // Cover
-  doc.setFillColor(28, 24, 20);
+  doc.setFillColor(63, 75, 47);
   doc.rect(0, 0, pageW, pageH, 'F');
-  doc.setFontSize(10); doc.setTextColor(196, 113, 74);
+  doc.setFontSize(10); doc.setTextColor(169, 177, 163);
   doc.text('THE SHIFT PROFILE', pageW / 2, 70, { align: 'center', charSpace: 2 });
-  doc.setFontSize(32); doc.setTextColor(253, 250, 247);
+  doc.setFontSize(32); doc.setTextColor(245, 242, 235);
   doc.text(`${userName}'s`, pageW / 2, 100, { align: 'center' });
-  doc.text('Shift Profile', pageW / 2, 116, { align: 'center' });
-  doc.setFontSize(14); doc.setTextColor(201, 169, 110);
+  doc.text(PRODUCT_NAME, pageW / 2, 116, { align: 'center' });
+  doc.setFontSize(14); doc.setTextColor(169, 177, 163);
   const typeLabel = document.getElementById('report-type-label').textContent;
   const typeName2 = document.getElementById('report-type-name').textContent;
   const subtypeLabel = document.getElementById('report-subtype-label').textContent;
-  doc.text(`${typeLabel} — ${typeName2}  ·  ${subtypeLabel}`, pageW / 2, 140, { align: 'center' });
-  doc.setFontSize(11); doc.setTextColor(138, 126, 116);
+  doc.text(`${typeLabel} - ${typeName2}  ·  ${subtypeLabel}`, pageW / 2, 140, { align: 'center' });
+  doc.setFontSize(11); doc.setTextColor(169, 177, 163);
   doc.text('marianavaldez.com', pageW / 2, pageH - 20, { align: 'center' });
 
   addPage();
 
   // ── SCORE BARS in PDF ──
+  // Olive Horizon: dominant type in olive, the rest stepping down through sage
   const pdfBarColors = [
-    [196,113,74], [201,169,110], [122,140,126], [176,138,110],
-    [155,139,180], [126,168,168], [196,168,130], [168,155,138], [184,176,168]
+    [63,75,47], [85,98,66], [110,124,90], [138,150,120],
+    [169,177,163], [186,192,180], [200,205,194], [212,215,206], [222,224,217]
   ];
 
-  doc.setFontSize(8); doc.setTextColor(138, 126, 116); doc.setFont('helvetica', 'bold');
-  doc.text('YOUR TYPE SCORES — OUT OF 30', margin, y); y += 8;
-
   const scoreRows = document.querySelectorAll('.score-row');
+  if (scoreRows.length) {
+    doc.setFontSize(8); doc.setTextColor(138, 126, 116); doc.setFont('helvetica', 'bold');
+    doc.text('YOUR TYPE SCORES - OUT OF 30', margin, y); y += 8;
+  }
   let barColorIdx = 0;
   scoreRows.forEach(row => {
     const labelEl = row.querySelector('.score-label');
@@ -1231,31 +1807,31 @@ function downloadPDF() {
     checkY(10);
 
     // Label
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 90, 84);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(90, 88, 84);
     doc.text(label, margin, y);
 
     // Bar background
     const barX = margin + 52;
     const barW = contentW - 62;
     const barH = 4;
-    doc.setFillColor(221, 213, 203);
+    doc.setFillColor(216, 210, 198);
     doc.roundedRect(barX, y - 3.5, barW, barH, 1, 1, 'F');
 
-    // Bar fill — use hardcoded colors matching the on-screen version
+    // Bar fill - use hardcoded colors matching the on-screen version
     const [r, g, b] = pdfBarColors[barColorIdx] || [196, 113, 74];
     doc.setFillColor(r, g, b);
     doc.roundedRect(barX, y - 3.5, barW * pct, barH, 1, 1, 'F');
     barColorIdx++;
 
     // Score number
-    doc.setFontSize(9); doc.setTextColor(100, 90, 84);
+    doc.setFontSize(9); doc.setTextColor(90, 88, 84);
     doc.text(String(score), pageW - margin, y, { align: 'right' });
 
     y += 9;
   });
 
   y += 8;
-  doc.setDrawColor(221, 213, 203);
+  doc.setDrawColor(216, 210, 198);
   doc.line(margin, y, pageW - margin, y);
   y += 10;
   // ── END SCORE BARS ──
@@ -1283,22 +1859,22 @@ function downloadPDF() {
     if (!bodyText) return;
 
     checkY(30);
-    doc.setFontSize(8); doc.setTextColor(196, 113, 74); doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8); doc.setTextColor(198, 123, 92); doc.setFont('helvetica', 'bold');
     doc.text(label.toUpperCase(), margin, y); y += 6;
     if (title) {
-      doc.setFontSize(16); doc.setTextColor(28, 24, 20);
+      doc.setFontSize(16); doc.setTextColor(47, 49, 51);
       const titleLines = doc.splitTextToSize(title, contentW);
       checkY(titleLines.length * 8 + 4);
       doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
     }
-    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 50, 44);
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(58, 58, 60);
     const cleanBodyText = bodyText.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/[\u2014]/g, '--').replace(/[\u2013]/g, '-');
     const bodyLines = doc.splitTextToSize(cleanBodyText, contentW);
     bodyLines.forEach(line => { checkY(6); doc.text(line, margin, y); y += 5.5; });
     y += 10;
     if (idx < sections.length - 1) {
       checkY(4);
-      doc.setDrawColor(221, 213, 203);
+      doc.setDrawColor(216, 210, 198);
       doc.line(margin, y, pageW - margin, y);
       y += 10;
     }
@@ -1312,17 +1888,17 @@ function downloadPDF() {
 // ══════════════════════════════════════
 function getFallbackReport(typeNum, typeName, subtype) {
   return {
-    whatIsTheEnneagram: `The Enneagram is a personality system — but not like the ones you've probably seen before. It's not about behavior. It's about motivation. It explains why you do what you do, not just what you do. And that distinction changes everything.\n\nMost personality systems tell you what you're like. The Enneagram tells you what you're afraid of, what you're secretly trying to prove, and what you've built your whole identity around. It's the map of the subconscious operating system that's been running your life.\n\nThis isn't about putting you in a box. It's about finally having words for something you've always felt but never quite been able to name.`,
-    gettingToKnowYourType: `As a Type ${typeNum} — ${typeName} — there's a specific lens you've been looking through your whole life. A way of seeing the world, a set of fears driving you, a desire at the core of everything. This is the pattern that shaped your career, your relationships, and your sense of self before motherhood changed everything.\n\nYour type isn't your personality — it's the strategy your psyche built to feel safe and valuable in the world. And it worked, for a long time. Understanding it is the beginning of choosing whether to keep using it.`,
-    youAsMother: `Becoming a mother didn't just add a new role to your life. For a Type ${typeNum}, it disrupted the entire operating system. The strategies that built your identity before — the ones that worked, that kept you safe, that made you feel like you — suddenly stopped fitting.\n\nThat disorientation you've been feeling? That's not a sign something went wrong. That's the earthquake doing its necessary work. The old identity is loosening. Something more real is trying to come through.`,
-    yourInnerWorld: `Inside, you're running a very specific internal weather system. There are things you notice that others walk right past. There are things you miss that everyone else sees clearly. Your ${subtype} subtype shapes all of this — it's the filter through which your Type ${typeNum} patterns get expressed in daily life.\n\nUnderstanding your inner world isn't self-indulgent. It's the foundation of everything that changes next.`,
-    yourBlindSpots: `Every type has patterns that are completely invisible from the inside but obvious from the outside. These aren't flaws — they're the cost of the strategy your type built. Seeing them clearly, even when it's uncomfortable, is how you start to have a choice about them.\n\nThe recognition IS the gift. You can't change what you can't see.`,
-    yourStrengths: `Your type comes with real, earned strengths — not generic positivity, but specific advantages that come from exactly the way your mind and heart work. These matter especially right now, in this transition, in this season of becoming.\n\nDon't dismiss them. They're part of what you're bringing forward.`,
-    whereYouGetStuck: `There's a specific loop for Type ${typeNum} in the middle of an identity transition. A pattern that keeps recurring, a way of getting pulled back into the old operating system even when you can feel yourself trying to move forward.\n\nNaming it is the first step to stepping out of it.`,
-    yourRelationships: `How you show up in your closest relationships — with your partner, your kids, your friends, your own mother — is deeply shaped by your type. What you give naturally, what you struggle to receive, what you need that you rarely ask for.\n\nMotherhood has shifted all of this. Understanding how is part of the work.`,
-    yourGrowthEdge: `Integration for Type ${typeNum} isn't about becoming a different person. It's about having more access to yourself — the parts that got buried, the capacities that got underdeveloped, the freedom that comes from not being run by your fears.\n\nIt's possible. And it starts right here, with exactly this kind of awareness.`,
-    questionsToSitWith: `1. What am I most afraid people would see if I stopped performing?\n2. What part of who I was before motherhood am I still trying to hold onto — and why?\n3. What would I do differently if I wasn't worried about how it looked?\n4. What do I actually need right now that I haven't asked for?\n5. Where am I living from fear instead of desire?\n6. What would it feel like to let the old version of me go — and who might I become?`,
-    invitationToBLN: `The fact that you're here, doing this work, says everything. Everything you just read comes alive inside The Shift's 5 videos — that's where the real movement happens. And if you're ready to go even deeper — to work through your type fully and dismantle the patterns underneath — Your Best Life Now at marianavaldez.com/your-best-life-now was built exactly for this, and a special discount will be waiting for you at the end of The Shift.`
+    whatIsTheEnneagram: `The Enneagram isn't a personality label. It's a map of the strategy you built early on to stay safe, to be loved, or to stay in control.\n\nThat strategy worked. That's exactly why it stuck around. It's still running now, quietly, inside decisions you think you're making freely.\n\nKnowing what the strategy is doesn't make it go away. It just gives you a choice you didn't have before.`,
+    gettingToKnowYourType: `Type ${typeNum}, ${typeName}, with a ${subtype} subtype.\n\nYour type isn't what you're like. It's what you're afraid of, and what you've quietly organized your whole life around avoiding.\n\nThe subtype matters as much as the number, and most tests skip it entirely. Two people who share your type but not your subtype can be almost unrecognizable to each other.\n\nThis is the pattern sitting underneath the choices you've been calling personality.`,
+    youAsMother: `Somewhere early on, this was the smartest move available to you. It protected you from something and it got you something, and both of those were real.\n\nThat's the part people skip. The strategy isn't a flaw. It's a solution that outlived the problem it was built for.\n\nWhat kept you safe at fifteen is the thing narrowing your options now.`,
+    yourInnerWorld: `Between something happening and you responding, there's a set of filters running faster than thought. They decide what you notice, what you write off, and what counts as a good enough reason.\n\nYou experience all of that as instinct. It isn't. It's a pattern, and patterns can change once you can actually see one running.`,
+    yourBlindSpots: `Every type has something that's invisible from the inside, because it's the lens and not the view.\n\nThere's probably something the people closest to you have tried to tell you more than once, in slightly different words each time, and you've set it aside every time. That's usually where it lives.\n\nHere's what happens next. In about two or three weeks you're going to decide you were being dramatic about all of this. You'll think something like "it wasn't that deep." That's not perspective. That's the pattern protecting itself from being watched.`,
+    yourStrengths: `Your type comes with real advantages, and they come from the way your mind actually works rather than from effort.\n\nThe one you write off is the one that comes easily. You assume it's easy for everyone. It isn't, and the people around you have probably noticed even if they've never said so.`,
+    whereYouGetStuck: `There's a sentence you say to yourself on repeat. You might not have heard it out loud in years, but it's running underneath the decisions you keep making the same way.\n\nThat sentence is protecting something. It isn't stupid and it isn't weakness. It's just expensive.\n\nThe work isn't silencing it. It's finding a sentence that's also true and costs you less.`,
+    yourRelationships: `There's something you give easily, something you hold back without ever deciding to, and something you need and almost never ask for out loud.\n\nMost of the friction in your closest relationships lives in that third one.`,
+    yourGrowthEdge: `The pattern has a first signal. Something physical or mental that shows up before the behavior does, every single time.\n\nYou already know what yours is. You've just never treated it as information.\n\nFor the next fourteen days, all you're doing is catching it. When you notice the signal, name it out loud or in your head - just the name, nothing else - and keep going. Don't fix it, don't analyze it, don't journal about it. Two seconds.\n\nIt's small on purpose. Reading about a pattern changes nothing. Catching it four or five times changes how you make decisions.`,
+    questionsToSitWith: `1. What would I have to stop believing about myself for the thing I want to be possible?\n2. What am I most afraid someone would see if I stopped managing how I come across?\n3. Where am I calling something a decision when it's actually a reflex?\n4. What do I need right now that I haven't asked for, and what would asking cost me?\n5. What has someone close to me tried to tell me more than once that I keep setting aside?\n6. If the strategy I built stopped working tomorrow, who would I be?`,
+    invitationToBLN: `Start the fourteen days this week. Put a note in your phone for day 14 so you don't quietly let it go.\n\nAnd watch for that two-week thing I mentioned - the moment you decide none of this was that deep. If it shows up on schedule, you'll know the pattern is real and not just a description you nodded along to.\n\nThen come tell me. Message me on Instagram and let me know whether the type felt right and whether the prediction landed. I read all of them, and it genuinely shapes what I build next.`
   };
 }
 
