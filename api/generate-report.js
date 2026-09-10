@@ -230,17 +230,21 @@ ${outlierBlock}
 
 ${contextBlock}
 
+The report already shows her, separately and visually, her core fear, core desire,
+worldview, gift, vice, instinctual stack, centers of intelligence and her stress and
+growth lines. Do NOT restate any of those as facts. Your job is the part a data panel
+cannot do: what it actually feels like from the inside, and what to do about it.
+
 ${VOICE}
 
 Return ONLY a raw JSON object. No markdown fences, no backticks, no text before or after the braces. Escape all newlines inside strings as \\n.`;
 
   const promptA = `${shared}
 
-Write these six keys:
+Write these four keys:
 
 {
 "patternName": "The PATTERN NAME from the analysis, exactly as written there. Two to four words, Title Case, nothing else. No quotes, no punctuation, no explanation.",
-"whatIsTheEnneagram": "About 90 words. The Enneagram isn't a personality label, it's the strategy she built early to stay safe, get loved, or stay in control - and it's still running. Why knowing the strategy gives her a choice she didn't have before. Don't explain all nine types. Casual and quick, this is the warm-up.",
 "gettingToKnowYourType": "About 200 words. Who Type ${typeNum} actually is, written so she feels caught rather than informed. Then what the ${subtype} subtype specifically does to this type, and name the version of Type ${typeNum} she is NOT so the difference lands. If the analysis says her gap is 4 points or less, say so plainly and describe what being between two types feels like day to day. Introduce the pattern name here for the first time, naturally, as if it's obvious. End with her core fear and core desire, one plain sentence each.",
 "youAsMother": "About 180 words. Where this pattern got built. What it protected her from and what it earned her - it worked, that's why it stuck around. Then the turn: the thing that kept her safe at fifteen is the thing narrowing her options now. Specific to Type ${typeNum} and the ${subtype} subtype. Absolutely no mention of motherhood or children.",
 "yourInnerWorld": "About 200 words. The meta-programs from the analysis, in plain language. Never name them as jargon, never list them mechanically. Walk through one real decision-shaped moment and show how her filters run it before she's consciously decided anything. Land on the one that costs her most. This is the section that should make her stop and read a line twice.",
@@ -249,12 +253,10 @@ Write these six keys:
 
   const promptB = `${shared}
 
-Write these six keys:
+Write these keys:
 
 {
-"yourStrengths": "About 130 words. What Type ${typeNum} with a ${subtype} subtype is genuinely, unusually good at - stated as fact, not encouragement. Include one strength she writes off because it comes easily and she assumes it's easy for everyone.",
 "whereYouGetStuck": "About 190 words. THE STRONGEST SECTION IN THE REPORT.${cleanContext ? ` She wrote this in her own words: \\"${cleanContext}\\". Quote her back to herself EXACTLY, word for word, inside quotation marks, in the first two sentences. Do not clean up her grammar, do not paraphrase, do not summarize. Then show her what's underneath what she wrote.` : ' Open with THE SENTENCE from the analysis, in quotation marks, in her own likely words.'} Then what it's protecting. Then THE REFRAME, also in quotation marks. Make the swap concrete enough to use today. Use the pattern name at least once here.",
-"yourRelationships": "About 130 words. What she gives easily, what she withholds without deciding to, and what she needs and almost never asks for directly. Most of the friction lives in that third one. Keep it general across partners, friends, colleagues, family. Don't assume any specific relationship exists.",
 "yourGrowthEdge": "About 200 words. THE 14-DAY PROTOCOL from the analysis, written as an actual assignment with a start and an end. Name THE TRIGGER first - the exact signal that the pattern has started. Then the thing she does, when she does it, and how she knows she did it. Under two minutes a day, fourteen days. Be specific enough that she could start tomorrow and know by Friday whether she's doing it right. Say plainly that this is small on purpose and that reading about a pattern changes nothing while catching it four or five times changes how she decides. No 'practice self-compassion'. Something she could do on a Tuesday at 3pm.",
 "questionsToSitWith": "Exactly 6 numbered questions as '1. text' each on its own line, separated by \\n. Specific to her data and her pattern name. Uncomfortable in a useful way. No yes/no questions - each should be hard to answer in one sentence.",
 "invitationToBLN": "About 110 words. Do NOT pitch a program, a course, or a price. Tell her the one thing to do this week: start the 14 days, and put a note somewhere for day 14. Then remind her of the prediction and tell her to notice if it comes true, because that's how she'll know the pattern is real and not just a description she agreed with. Close by asking her to message Mariana on Instagram and say whether the type felt right and whether the prediction landed - say that it genuinely shapes what gets built next. Warm, direct, no hard sell."
@@ -262,16 +264,15 @@ Write these six keys:
 
   try {
     const [rawA, rawB] = await Promise.all([
-      callAnthropic(ANTHROPIC_API_KEY, WRITING_MODEL, 2200, promptA),
-      callAnthropic(ANTHROPIC_API_KEY, WRITING_MODEL, 2300, promptB)
+      callAnthropic(ANTHROPIC_API_KEY, WRITING_MODEL, 1700, promptA),
+      callAnthropic(ANTHROPIC_API_KEY, WRITING_MODEL, 1900, promptB)
     ]);
 
     const parsed = { ...extractJson(rawA), ...extractJson(rawB) };
 
     const requiredKeys = [
-      'whatIsTheEnneagram', 'gettingToKnowYourType', 'youAsMother', 'yourInnerWorld',
-      'yourBlindSpots', 'yourStrengths', 'whereYouGetStuck', 'yourRelationships',
-      'yourGrowthEdge', 'questionsToSitWith', 'invitationToBLN'
+      'gettingToKnowYourType', 'youAsMother', 'yourInnerWorld', 'yourBlindSpots',
+      'whereYouGetStuck', 'yourGrowthEdge', 'questionsToSitWith', 'invitationToBLN'
     ];
     const missingKeys = requiredKeys.filter(k => !parsed[k]);
     if (missingKeys.length > 0) {
