@@ -1,14 +1,118 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+// The Shift Profile - report generation
+// Two-pass: analysis (Sonnet) then writing (Haiku, two calls in parallel).
+
+const ANALYSIS_MODEL = 'claude-sonnet-5';
+const WRITING_MODEL  = 'claude-haiku-4-5-20251001';
+
+const TYPE_NAMES = {
+  1: "The Reformer", 2: "The Helper", 3: "The Achiever", 4: "The Individualist",
+  5: "The Investigator", 6: "The Loyalist", 7: "The Enthusiast", 8: "The Challenger", 9: "The Peacemaker"
+};
+
+const TYPE_CONTEXT = {
+  1: "fears being corrupt or wrong, desires integrity, built identity around responsibility",
+  2: "fears being unloved, desires to feel needed, built identity around helping others",
+  3: "fears being worthless without achievement, desires to feel valuable, built identity around success",
+  4: "fears having no identity, desires authentic self-expression, built identity around being unique",
+  5: "fears being overwhelmed, desires competence, built identity around mastery and knowledge",
+  6: "fears having no support, desires security, built identity around loyalty and preparedness",
+  7: "fears being trapped in pain, desires joy and freedom, built identity around excitement",
+  8: "fears being controlled, desires autonomy, built identity around strength and protecting others",
+  9: "fears conflict, desires inner peace, built identity around harmony"
+};
+
+const WINGS = {
+  1: [9, 2], 2: [1, 3], 3: [2, 4], 4: [3, 5], 5: [4, 6],
+  6: [5, 7], 7: [6, 8], 8: [7, 9], 9: [8, 1]
+};
+
+const VOICE = `HOW TO WRITE THIS
+
+You are writing as Mariana. She is a warm, direct, bilingual woman who coaches on identity and
+change. She is not a guru. She talks like a friend who has done the work herself and is not
+going to be precious about it.
+
+Sound like a person talking, not a document.
+- Contractions, always. "You're", "it's", "that's", "you've", "doesn't".
+- Second person, present tense, the whole way through.
+- Short paragraphs. Two to four sentences. Blank line between them.
+- Sentence fragments are fine when that's how someone would actually say it.
+- Short dash (-) for a pause. NEVER a long dash.
+- Name feelings plainly. "You feel behind." Not "you may experience a sense of inadequacy."
+- One good comparison beats three examples. Use a normal, everyday one.
+- Let a hard line sit alone in its own paragraph. Don't rush to soften it.
+- You can be a little funny once, briefly, then move on. Self-aware, never at her expense.
+- You can be warm without being sweet. Say the true thing and trust her to handle it.
+
+BANNED - these are what make writing sound generated. Do not use any of them:
+"here's the thing", "the truth is", "let's be honest", "at the end of the day",
+"it's important to note", "dive into", "journey", "unlock", "navigate", "lean into",
+"powerful", "profound", "transformative", "life-changing", "beautiful", "sacred",
+"you've got this", "believe in yourself", "you are enough", "give yourself grace",
+"and that's okay", "and that's not a bad thing", "hold space", "show up for yourself".
+
+Also banned as structures:
+- "It's not X - it's Y." Once in a whole report at most, and only if it earns it.
+- "X isn't just Y, it's Z."
+- A rhetorical question followed immediately by its own answer.
+- Three-item lists where two would do.
+- Ending a section on an uplifting note that wasn't earned by what came before.
+- Starting a section by restating what the section is about.
+
+NEVER mention motherhood, children, pregnancy, parenting, or "this season of life".
+Do not assume she has a partner, children, or a job. Write to the pattern, not to a demographic.
+
+Test every sentence: would Mariana say this out loud to a smart friend over coffee?
+If it sounds written rather than said, rewrite it.`;
+
+async function callAnthropic(apiKey, model, maxTokens, prompt) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(`${model} error: ${JSON.stringify(data).substring(0, 300)}`);
+  if (!data.content || !data.content[0] || !data.content[0].text) {
+    throw new Error(`${model} returned empty content`);
   }
+  return data.content[0].text.trim();
+}
+
+function extractJson(rawText) {
+  const cleaned = rawText
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+  const first = cleaned.indexOf('{');
+  const last = cleaned.lastIndexOf('}');
+  if (first === -1 || last === -1) throw new Error('No JSON braces found: ' + cleaned.substring(0, 200));
+  return JSON.parse(cleaned.substring(first, last + 1));
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'No API key configured' });
-  }
+  if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'No API key configured' });
 
-  const { typeNum, typeName, subtype, sortedScores, userName } = req.body;
+  const {
+    typeNum, typeName, subtype, sortedScores, userName,
+    subtypeRanking = [],   // full ranking, e.g. ["Social","One-on-One","Self-Preservation"]
+    highOutliers = [],     // statements from OTHER types she rated 5
+    lowOutliers = [],      // statements from HER type she rated 1-2
+    userContext = ''       // her own sentence
+  } = req.body;
+
   if (!typeNum || !userName) {
     return res.status(400).json({ error: 'Missing required fields: typeNum or userName' });
   }
@@ -16,114 +120,174 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'sortedScores must be an array' });
   }
 
-  // Safe fallbacks if sortedScores is incomplete (e.g. return-to-results calls)
-  const secondType = sortedScores[1] || { type: (typeNum % 9) + 1, score: 15 };
-  const thirdType  = sortedScores[2] || { type: ((typeNum + 1) % 9) + 1, score: 12 };
-
-  const TYPE_CONTEXT = {
-    1: "fears being corrupt or wrong, desires integrity, built identity around responsibility",
-    2: "fears being unloved, desires to feel needed, built identity around helping others",
-    3: "fears being worthless without achievement, desires to feel valuable, built identity around success",
-    4: "fears having no identity, desires authentic self-expression, built identity around being unique",
-    5: "fears being overwhelmed, desires competence, built identity around mastery and knowledge",
-    6: "fears having no support, desires security, built identity around loyalty and preparedness",
-    7: "fears being trapped in pain, desires joy and freedom, built identity around excitement",
-    8: "fears being controlled, desires autonomy, built identity around strength and protecting others",
-    9: "fears conflict, desires inner peace, built identity around harmony"
-  };
-
-  const TYPE_NAMES = {
-    1: "The Reformer", 2: "The Helper", 3: "The Achiever", 4: "The Individualist",
-    5: "The Investigator", 6: "The Loyalist", 7: "The Enthusiast", 8: "The Challenger", 9: "The Peacemaker"
-  };
-
-  const WINGS = {
-    1: [9, 2], 2: [1, 3], 3: [2, 4], 4: [3, 5], 5: [4, 6],
-    6: [5, 7], 7: [6, 8], 8: [7, 9], 9: [8, 1]
-  };
+  const hasScores  = sortedScores.length > 0;
+  const secondType = sortedScores[1] || { type: (typeNum % 9) + 1, score: 0 };
+  const thirdType  = sortedScores[2] || { type: ((typeNum + 1) % 9) + 1, score: 0 };
+  const topScore   = sortedScores[0] ? sortedScores[0].score : 0;
+  const gap        = (hasScores && sortedScores[1]) ? topScore - secondType.score : null;
 
   const trueWings = WINGS[typeNum] || [];
-  const secondIsWing = trueWings.includes(secondType.type);
-  const thirdIsWing = trueWings.includes(thirdType.type);
-  const secondLabel = secondIsWing ? `Type ${secondType.type} wing` : `Type ${secondType.type} secondary influence`;
-  const thirdLabel = thirdIsWing ? `Type ${thirdType.type} wing` : `Type ${thirdType.type} secondary influence`;
+  const label = (t) => trueWings.includes(t.type)
+    ? `Type ${t.type} wing (${TYPE_NAMES[t.type]})`
+    : `Type ${t.type} secondary influence (${TYPE_NAMES[t.type]})`;
 
-  const prompt = `Write a personalized Enneagram Shift Profile report for ${userName}.
+  const scoreTable = hasScores
+    ? sortedScores.map(s => `Type ${s.type} ${TYPE_NAMES[s.type]}: ${s.score}/30`).join('\n')
+    : 'Detailed scores are not available for this request. Work from type and subtype only, and do not reference specific numbers or a score gap anywhere in the report.';
 
-Type ${typeNum} — ${typeName}. ${TYPE_CONTEXT[typeNum]}.
-Subtype: ${subtype}.
-Second highest: ${secondLabel} (${TYPE_NAMES[secondType.type]}, score ${secondType.score}/30).
-Third highest: ${thirdLabel} (${TYPE_NAMES[thirdType.type]}, score ${thirdType.score}/30).
+  const gapLine = gap === null
+    ? ''
+    : `Gap between first and second: ${gap} points. A gap of 4 or less means her type is NOT clean-cut and she will feel genuinely torn between the two.`;
 
-Context: ${userName} completed The Shift, a program for mothers in post-motherhood identity transition.
-Tone: Warm, direct, conversational — like a smart friend. Second person. NOT clinical.
-Tense: ALWAYS write in present tense. She IS going through this NOW. Never say 'you were' or 'you felt' or 'motherhood gave you' — say 'you are,' 'you feel,' 'motherhood gives you.' The Shift IS happening, not something that already happened.
-Every section written through the lens of motherhood and identity transition.
+  const outlierBlock = (highOutliers.length || lowOutliers.length)
+    ? [
+        highOutliers.length
+          ? `Statements from OTHER types she strongly agreed with (rated 5/5):\n` +
+            highOutliers.map(o => `- (Type ${o.type}) "${o.text}"`).join('\n')
+          : 'No strong cross-type agreements.',
+        lowOutliers.length
+          ? `Statements from HER OWN type she disagreed with (rated 1-2/5):\n` +
+            lowOutliers.map(o => `- "${o.text}"`).join('\n')
+          : 'No notable disagreements within her own type.'
+      ].join('\n\n')
+    : 'Individual statement data is not available for this request. Do not invent or reference specific statements.';
 
-Return ONLY a JSON object with these exact keys. No markdown, no backticks, nothing outside the JSON braces:
+  const cleanContext = (userContext || '').trim().substring(0, 500);
+  const contextBlock = cleanContext
+    ? `HER OWN WORDS. She was asked what she keeps doing that she wishes she'd stop, and wrote:\n"${cleanContext}"`
+    : 'She skipped the open question. Do not reference it or invent one.';
 
-{"whatIsTheEnneagram":"3 short paragraphs about what the Enneagram is, why it matters, how it differs from other systems. Warm and plain-language.","gettingToKnowYourType":"4 paragraphs deep-diving Type ${typeNum} — core fear, core desire, worldview, how this shaped identity before motherhood.","youAsMother":"4 paragraphs on how becoming a mother specifically disrupted Type ${typeNum}. What broke, what got activated. End with relief.","yourInnerWorld":"3 paragraphs on how Type ${typeNum} with ${subtype} subtype thinks, feels, moves through daily life.","yourBlindSpots":"3 paragraphs on what Type ${typeNum} cannot see about herself. Loving but honest.","yourStrengths":"3 paragraphs on real specific strengths of Type ${typeNum} in this transition.","whereYouGetStuck":"3 paragraphs on the specific loop for Type ${typeNum} in this identity shift.","yourRelationships":"3 paragraphs on how Type ${typeNum} shows up with partner, kids, friends, her own mother.","yourGrowthEdge":"3 paragraphs on what integration looks like for Type ${typeNum} as a mother. End hopefully.","questionsToSitWith":"1. [question]\n2. [question]\n3. [question]\n4. [question]\n5. [question]\n6. [question]","invitationToBLN":"2-3 warm sentences. Acknowledge the self-awareness she just showed by doing this work. Tell her The Shift's 5 videos are where everything she just read comes alive — whether she is about to start them or returning to deepen the work. Then mention Your Best Life Now: do NOT frame it as a motherhood program. It is a complete program to uncover and change the subconscious limiting beliefs keeping her stuck, release negative emotions, and design the best possible life in every area — not just one part of it. Reference it as the next level of deep work, available at marianavaldez.com/your-best-life-now."}`;
+  // ────────────────────────────────────────
+  // PASS 1 - ANALYSIS
+  // ────────────────────────────────────────
+  const analysisPrompt = `You are an expert Enneagram practitioner with NLP training. Analyse this person's assessment data. Do NOT write a report. Produce a tight working analysis another writer will use.
+
+PERSON: ${userName}
+Dominant: Type ${typeNum} ${typeName}. ${TYPE_CONTEXT[typeNum]}.
+Dominant subtype: ${subtype}${subtypeRanking.length === 3 ? ` (full ranking: ${subtypeRanking.join(' > ')})` : ''}
+${hasScores ? `Second: ${label(secondType)} at ${secondType.score}/30\nThird: ${label(thirdType)} at ${thirdType.score}/30\n${gapLine}` : ''}
+
+ALL SCORES:
+${scoreTable}
+
+${outlierBlock}
+
+${contextBlock}
+
+Return plain text, no JSON, under 550 words, using exactly these labels:
+
+PATTERN NAME: two to four words naming HER specific loop, in plain everyday English. It has to be something she could say out loud to a friend and something she could catch herself doing in real time. Title Case. Examples of the right shape, do not reuse them: The Pre-emptive Yes. The Quiet Exit. Proving It Twice. Not clinical, not Enneagram jargon, not a number.
+
+CENTRAL CONTRADICTION: the specific tension in THIS data. Use the outliers, the gap, and her own words. Something a generic Type ${typeNum} description would miss.
+
+META-PROGRAMS: which side she sits on for each, one line each, plus which one costs her most.
+- Toward vs Away-From motivation
+- Internal vs External reference
+- Options vs Procedures
+- Global vs Specific
+
+THE SENTENCE: the literal sentence she says to herself on repeat, in quotes, in her own likely words. If she wrote something in HER OWN WORDS above, build this directly out of what she actually said. Then one line on what that sentence protects her from.
+
+THE REFRAME: a different sentence, in quotes, that's also true and doesn't cost her the same thing.
+
+THE TRIGGER: the exact first signal, physical or mental, that the pattern has started running. Something she can notice in the moment.
+
+THE INTERRUPT: one specific action, under 60 seconds, that breaks it at that signal. Concrete enough that she knows whether she did it. Not "practice self-compassion", not "take a breath and reflect".
+
+THE PREDICTION: what she'll do in the next two to three weeks as this pattern defends itself against being seen. Rules: it must be about the PATTERN, not her circumstances. Never predict external events, other people's behaviour, or anything involving a job, partner, or family member. It should be specific enough to feel uncanny and likely enough to actually happen. Give a rough timeframe. Include the tell - the exact thought she'll have when it starts.
+
+THE 14-DAY PROTOCOL: one repeatable thing, under two minutes a day, built on THE TRIGGER and THE INTERRUPT. State what she does, when she does it, and how she knows she did it. It should be almost embarrassingly small.
+
+WHAT TO NAME DIRECTLY: one or two specifics from her outliers or her own words the report must reference explicitly, so she knows this was written about her.`;
+
+  let analysis;
+  try {
+    analysis = await callAnthropic(ANTHROPIC_API_KEY, ANALYSIS_MODEL, 1100, analysisPrompt);
+  } catch (err) {
+    console.error('Analysis pass failed, continuing without it:', err.message);
+    analysis = `PATTERN NAME: not available - name her loop yourself, two to four plain words, Title Case.\nCENTRAL CONTRADICTION: not available - work from Type ${typeNum}, ${subtype} subtype, and whatever data is above.`;
+  }
+
+  const shared = `You're writing part of a personalized Enneagram profile for ${userName}, Type ${typeNum} (${typeName}), ${subtype} subtype.
+
+WHO SHE IS
+An adult in the middle of an identity shift. She's done some inner work already. She looks successful from outside and quietly suspects she's capable of more than the life she's built. Motherhood is NOT the lens here.
+
+WHAT THIS IS
+Not a personality description. She can get that free online in thirty seconds. Everything here has to be traceable to HER data below. If a paragraph could show up in any free Enneagram description, rewrite it or cut it.
+
+Her ${subtype} subtype changes how Type ${typeNum} actually shows up. Reference it specifically, not as a footnote.
+
+THE PATTERN NAME from the analysis is the spine of this whole report. Use the exact name, capitalized the same way, at least twice in your sections. Never rename it, never paraphrase it, never explain that you're naming it. Just use it like she already knows it.
+
+ANALYSIS OF HER RESULTS - build on this, don't restate it:
+${analysis}
+
+HER RAW DATA:
+${scoreTable}
+
+${outlierBlock}
+
+${contextBlock}
+
+${VOICE}
+
+Return ONLY a raw JSON object. No markdown fences, no backticks, no text before or after the braces. Escape all newlines inside strings as \\n.`;
+
+  const promptA = `${shared}
+
+Write these six keys:
+
+{
+"patternName": "The PATTERN NAME from the analysis, exactly as written there. Two to four words, Title Case, nothing else. No quotes, no punctuation, no explanation.",
+"whatIsTheEnneagram": "About 90 words. The Enneagram isn't a personality label, it's the strategy she built early to stay safe, get loved, or stay in control - and it's still running. Why knowing the strategy gives her a choice she didn't have before. Don't explain all nine types. Casual and quick, this is the warm-up.",
+"gettingToKnowYourType": "About 200 words. Who Type ${typeNum} actually is, written so she feels caught rather than informed. Then what the ${subtype} subtype specifically does to this type, and name the version of Type ${typeNum} she is NOT so the difference lands. If the analysis says her gap is 4 points or less, say so plainly and describe what being between two types feels like day to day. Introduce the pattern name here for the first time, naturally, as if it's obvious. End with her core fear and core desire, one plain sentence each.",
+"youAsMother": "About 180 words. Where this pattern got built. What it protected her from and what it earned her - it worked, that's why it stuck around. Then the turn: the thing that kept her safe at fifteen is the thing narrowing her options now. Specific to Type ${typeNum} and the ${subtype} subtype. Absolutely no mention of motherhood or children.",
+"yourInnerWorld": "About 200 words. The meta-programs from the analysis, in plain language. Never name them as jargon, never list them mechanically. Walk through one real decision-shaped moment and show how her filters run it before she's consciously decided anything. Land on the one that costs her most. This is the section that should make her stop and read a line twice.",
+"yourBlindSpots": "About 190 words. Two parts, no header between them. First, what she can't see because it's the lens and not the view - use the central contradiction, and include one thing people close to her have probably tried to tell her more than once. Direct, not cruel. Then, as the last two or three sentences, THE PREDICTION from the analysis, stated plainly and confidently with its timeframe and its tell. Something like: in about two weeks you're going to start thinking X - that's the pattern defending itself. Do not hedge it, do not add 'maybe' or 'you might'. Say it like you've watched it happen a hundred times."
+}`;
+
+  const promptB = `${shared}
+
+Write these six keys:
+
+{
+"yourStrengths": "About 130 words. What Type ${typeNum} with a ${subtype} subtype is genuinely, unusually good at - stated as fact, not encouragement. Include one strength she writes off because it comes easily and she assumes it's easy for everyone.",
+"whereYouGetStuck": "About 190 words. THE STRONGEST SECTION IN THE REPORT.${cleanContext ? ` She wrote this in her own words: \\"${cleanContext}\\". Quote her back to herself EXACTLY, word for word, inside quotation marks, in the first two sentences. Do not clean up her grammar, do not paraphrase, do not summarize. Then show her what's underneath what she wrote.` : ' Open with THE SENTENCE from the analysis, in quotation marks, in her own likely words.'} Then what it's protecting. Then THE REFRAME, also in quotation marks. Make the swap concrete enough to use today. Use the pattern name at least once here.",
+"yourRelationships": "About 130 words. What she gives easily, what she withholds without deciding to, and what she needs and almost never asks for directly. Most of the friction lives in that third one. Keep it general across partners, friends, colleagues, family. Don't assume any specific relationship exists.",
+"yourGrowthEdge": "About 200 words. THE 14-DAY PROTOCOL from the analysis, written as an actual assignment with a start and an end. Name THE TRIGGER first - the exact signal that the pattern has started. Then the thing she does, when she does it, and how she knows she did it. Under two minutes a day, fourteen days. Be specific enough that she could start tomorrow and know by Friday whether she's doing it right. Say plainly that this is small on purpose and that reading about a pattern changes nothing while catching it four or five times changes how she decides. No 'practice self-compassion'. Something she could do on a Tuesday at 3pm.",
+"questionsToSitWith": "Exactly 6 numbered questions as '1. text' each on its own line, separated by \\n. Specific to her data and her pattern name. Uncomfortable in a useful way. No yes/no questions - each should be hard to answer in one sentence.",
+"invitationToBLN": "About 110 words. Do NOT pitch a program, a course, or a price. Tell her the one thing to do this week: start the 14 days, and put a note somewhere for day 14. Then remind her of the prediction and tell her to notice if it comes true, because that's how she'll know the pattern is real and not just a description she agreed with. Close by asking her to message Mariana on Instagram and say whether the type felt right and whether the prediction landed - say that it genuinely shapes what gets built next. Warm, direct, no hard sell."
+}`;
 
   try {
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3500,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    const [rawA, rawB] = await Promise.all([
+      callAnthropic(ANTHROPIC_API_KEY, WRITING_MODEL, 2200, promptA),
+      callAnthropic(ANTHROPIC_API_KEY, WRITING_MODEL, 2300, promptB)
+    ]);
 
-    const data = await anthropicRes.json();
+    const parsed = { ...extractJson(rawA), ...extractJson(rawB) };
 
-    if (!anthropicRes.ok) {
-      return res.status(500).json({ error: 'Anthropic API error', details: data });
-    }
-
-    if (!data.content || !data.content[0] || !data.content[0].text) {
-      return res.status(500).json({ error: 'Empty response from Anthropic', data });
-    }
-
-    const rawText = data.content[0].text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '');
-    const firstBrace = rawText.indexOf('{');
-    const lastBrace = rawText.lastIndexOf('}');
-
-    if (firstBrace === -1 || lastBrace === -1) {
-      return res.status(500).json({ error: 'No JSON braces found', preview: rawText.substring(0, 300) });
-    }
-
-    const jsonStr = rawText.substring(firstBrace, lastBrace + 1);
-
-    let parsed;
-    try {
-      parsed = JSON.parse(jsonStr);
-    } catch (parseErr) {
-      // JSON parse failed — log it and return a clear error
-      console.error('JSON parse failed:', parseErr.message);
-      console.error('Raw preview:', jsonStr.substring(0, 500));
-      return res.status(500).json({
-        error: 'JSON parse failed',
-        parseError: parseErr.message,
-        preview: jsonStr.substring(0, 300)
-      });
-    }
-
-    // Validate that the response has the minimum required keys
-    const requiredKeys = ['whatIsTheEnneagram', 'gettingToKnowYourType', 'whereYouGetStuck', 'invitationToBLN'];
+    const requiredKeys = [
+      'whatIsTheEnneagram', 'gettingToKnowYourType', 'youAsMother', 'yourInnerWorld',
+      'yourBlindSpots', 'yourStrengths', 'whereYouGetStuck', 'yourRelationships',
+      'yourGrowthEdge', 'questionsToSitWith', 'invitationToBLN'
+    ];
     const missingKeys = requiredKeys.filter(k => !parsed[k]);
     if (missingKeys.length > 0) {
-      console.error('Missing required keys:', missingKeys);
+      console.error('Missing keys:', missingKeys);
       return res.status(500).json({ error: 'Incomplete report', missingKeys });
+    }
+
+    // patternName is optional - never fail the report over it
+    if (parsed.patternName) {
+      parsed.patternName = String(parsed.patternName).replace(/["'.]/g, '').trim().substring(0, 40);
     }
 
     return res.status(200).json(parsed);
 
   } catch (err) {
+    console.error('Writing pass failed:', err.message);
     return res.status(500).json({ error: 'Function error', message: err.message });
   }
 }
