@@ -130,7 +130,15 @@ body { background: var(--cream); color: var(--deep); font-family: 'Montserrat', 
 .question-text { font-family: 'Cormorant Garamond', serif; font-size: clamp(20px, 3vw, 26px); font-weight: 300; line-height: 1.4; margin-bottom: 28px; color: var(--deep); }
 .likert { display: flex; gap: 8px; flex-wrap: wrap; }
 .likert-option { flex: 1; min-width: 80px; }
-.likert-option input[type="radio"] { display: none; }
+.likert-option input[type="radio"] {
+  position: absolute; opacity: 0; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden; white-space: nowrap;
+  clip: rect(0 0 0 0); clip-path: inset(50%); border: 0;
+}
+/* Visible focus ring, since the input itself is invisible */
+.likert-option input[type="radio"]:focus-visible + label {
+  outline: 2px solid var(--terra); outline-offset: 2px;
+}
 .likert-option label { display: block; text-align: center; padding: 10px 8px; border: 1.5px solid var(--rule); border-radius: 3px; cursor: pointer; transition: all 0.15s; font-size: 12px; line-height: 1.3; color: var(--muted); }
 .likert-option input:checked + label { border-color: var(--terra); background: var(--terra-bg); color: var(--terra); font-weight: 500; }
 .likert-option label:hover { border-color: var(--terra-light); color: var(--deep); }
@@ -339,8 +347,7 @@ body { background: var(--cream); color: var(--deep); font-family: 'Montserrat', 
   .quiz-progress-wrap { display: none; }
   .quiz-body { padding: 32px 20px; }
   .question-card { padding: 24px 20px; }
-  .likert { gap: 4px; }
-  .likert-option label { padding: 8px 4px; font-size: 10px; }
+
   .report-content { padding: 32px 20px 60px; }
   .report-header { padding: 36px 24px 32px; }
   .report-box { padding: 24px 20px; }
@@ -884,7 +891,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 }
 
 .wheel-body { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
-.wheel { width: 268px; height: 268px; flex-shrink: 0; }
+.wheel { width: 100%; max-width: 268px; height: auto; aspect-ratio: 1; flex-shrink: 0; }
 .wheel-ring { fill: none; stroke: var(--rule); stroke-width: 1.5; }
 .wheel .node { fill: #EBE9E3; stroke: none; }
 .wheel .node.wing { fill: #fff; stroke: var(--sage-mid); stroke-width: 2; }
@@ -1021,6 +1028,88 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 .ctr-type.is-you { background: var(--type); color: #fff; }
 .center-row { align-items: center; }
 
+
+.wing-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+.wing-num {
+  width: 30px; height: 30px; flex-shrink: 0; border: 1.5px solid var(--type);
+  color: var(--type); display: flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; border-radius: 50%;
+}
+.wing-name {
+  font-family: 'Montserrat', sans-serif; font-size: 14px;
+  font-weight: 600; color: var(--charcoal); margin-bottom: 3px;
+}
+.wing-note {
+  font-family: 'Montserrat', sans-serif; font-size: 14px;
+  line-height: 1.6; color: var(--ink-soft);
+}
+
+
+/* iOS Safari zooms the page when a focused field is under 16px. Bump every
+   input on touch widths so tapping a field doesn't throw the layout around. */
+@media (max-width: 820px) {
+  .intake-form input,
+  .intake-form textarea,
+  #user-context,
+  #user-birthdate { font-size: 16px !important; }
+}
+/* Comfortable tap targets on the answer buttons */
+@media (max-width: 640px) {
+  .likert-option label { min-height: 52px; }
+  .btn-primary, .btn-secondary, .btn-dark { padding: 16px 28px; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   ANSWER SCALE ON PHONES
+   Five options wrapping 3 + 2 read as broken and the targets were
+   tiny. Stacked full-width rows keep the scale order obvious and
+   give every option a proper tap area.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .likert { flex-direction: column; gap: 7px; }
+  .likert-option { flex: none; width: 100%; min-width: 0; }
+  .likert-option label {
+    display: flex; align-items: center; justify-content: flex-start; gap: 13px;
+    text-align: left; padding: 0 16px; min-height: 52px;
+    font-size: 15px; white-space: nowrap;
+  }
+  .likert-option label::before {
+    content: ''; flex-shrink: 0;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid var(--rule); background: #fff;
+  }
+  .likert-option input:checked + label::before {
+    background: var(--terra); border-color: var(--terra);
+    box-shadow: inset 0 0 0 3.5px #fff;
+  }
+  .likert-labels { display: none; }
+}
+
+
+/* ── Reorder controls for the instinct ranking ── */
+.rank-moves { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.rank-move {
+  width: 34px; height: 26px; padding: 0; cursor: pointer;
+  background: #fff; border: 1px solid var(--rule); border-radius: 3px;
+  color: var(--olive); font-size: 11px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s;
+}
+.rank-move:hover:not(:disabled) { background: var(--sage-bg); border-color: var(--olive); }
+.rank-move:disabled { opacity: 0.3; cursor: default; }
+.rank-move:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+@media (max-width: 600px) {
+  .rank-move { width: 44px; height: 34px; font-size: 12px; }
+  .rank-moves { gap: 6px; }
+}
+
+
+@media (max-width: 600px) {
+  /* HTML5 drag never fires on touch, so don't suggest it's available */
+  .rank-item { cursor: default; }
+  .rank-handle { display: none; }
+}
 </style>
 </head>
 <body>
@@ -1031,7 +1120,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 <div id="screen-locked" class="screen">
   <h1 class="locked-title">This profile is for<br><em>buyers only</em></h1>
   <p class="locked-sub">This profile is only for people who've purchased it. If you've already bought access, use the link from your confirmation email.</p>
-  <a href="https://marianavaldez.com/shift-profile" class="btn-primary" style="text-decoration:none;">Get Access</a>
+  <a href="https://marianavaldez.com/#profile" class="btn-primary" style="text-decoration:none;">Get Access</a>
   <div class="locked-link" style="margin-top:24px;">
     Already purchased? <a href="mailto:hello@marianavaldez.com">Contact support</a>
   </div>
@@ -1042,7 +1131,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 ══════════════════════════════════════ -->
 <div id="screen-welcome" class="screen active">
   <span class="welcome-badge" data-product-name></span>
-  <h1 class="welcome-title">Discover who you<br><em>actually are</em></h1>
+  <h1 class="welcome-title">See the pattern<br><em>that's been running you</em></h1>
   <p class="welcome-sub">Not a type and a paragraph. Your actual pattern, named, and one thing to do about it.</p>
   <div class="welcome-meta">
     <div class="welcome-meta-item">
@@ -1063,7 +1152,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
     <input type="text" id="user-name" placeholder="e.g. Sofia" autocomplete="given-name">
     <label>Your Email Address</label>
     <input type="email" id="user-email" placeholder="sofia@example.com" autocomplete="email">
-    <div class="error-msg" id="intake-error">Please enter your name and a valid email address.</div>
+    <div class="error-msg" id="intake-error" role="alert" aria-live="polite">Please enter your name and a valid email address.</div>
   </div>
   <button class="btn-primary" onclick="startQuiz()">Begin My Profile</button>
   <div class="instructions" style="margin-top: 32px;">
@@ -1199,11 +1288,11 @@ const PRODUCT_NAME = 'Enneagram Profile';
 // ══════════════════════════════════════
 const EMAILJS_PUBLIC_KEY  = 'Hbh_HwtgRTKQhMroG';
 const EMAILJS_SERVICE_ID  = 'service_tpldbbn';
-const EMAILJS_TEMPLATE_ID = 'template_um5yh7s';
+const EMAILJS_TEMPLATE_ID = 'template_e2am9qb';
 
-// Second template, for failure alerts to Mariana. Create it in EmailJS and paste
-// the ID here. Until then, alerts are skipped silently and nothing breaks.
-const EMAILJS_ALERT_TEMPLATE_ID = 'YOUR_ALERT_TEMPLATE_ID';
+// Second template, for failure alerts to Mariana. If this is ever blanked out
+// the guard in notifyOwnerOfFailure skips the send silently and nothing breaks.
+const EMAILJS_ALERT_TEMPLATE_ID = 'template_i2jy99v';
 const OWNER_EMAIL = 'hello@marianavaldez.com';
 
 window.addEventListener('load', function() {
@@ -1457,7 +1546,7 @@ function renderBatch(batchIndex) {
     html += `</div></div>`;
   });
   html += `
-    <div class="question-error" id="batch-error">Please answer all statements before continuing.</div>
+    <div class="question-error" id="batch-error" role="alert" aria-live="polite">Please answer all statements before continuing.</div>
     <div class="quiz-nav">
       ${batchIndex > 0 ? `<button class="quiz-nav-back" onclick="goBackBatch()">← Back</button>` : '<div></div>'}
       <button class="btn-primary" onclick="nextBatch()">Continue</button>
@@ -1465,6 +1554,17 @@ function renderBatch(batchIndex) {
   `;
   body.innerHTML = html;
   window.scrollTo(0, 0);
+}
+
+// Reorder by one position. Works on touch, mouse and keyboard, unlike the
+// HTML5 drag API which never fires on phones.
+function moveRank(id, dir) {
+  const i = subtypeRanking.indexOf(id);
+  const j = i + dir;
+  if (i === -1 || j < 0 || j >= subtypeRanking.length) return;
+  subtypeRanking[i] = subtypeRanking[j];
+  subtypeRanking[j] = id;
+  renderSubtypeSection();
 }
 
 function renderSubtypeSection() {
@@ -1479,7 +1579,12 @@ function renderSubtypeSection() {
         ondrop="dropItem(event)" ondragleave="dragLeave(event)">
         <div class="rank-num">${idx + 1}</div>
         <div class="rank-text"><strong>${item.subtype}</strong><br>${item.text}</div>
-        <div class="rank-handle">⠿</div>
+        <div class="rank-moves">
+          <button type="button" class="rank-move" onclick="moveRank('${id}',-1)"
+            ${idx === 0 ? 'disabled' : ''} aria-label="Move ${item.subtype} up">&#9650;</button>
+          <button type="button" class="rank-move" onclick="moveRank('${id}',1)"
+            ${idx === subtypeRanking.length - 1 ? 'disabled' : ''} aria-label="Move ${item.subtype} down">&#9660;</button>
+        </div>
       </div>
     `;
   });
@@ -1487,9 +1592,9 @@ function renderSubtypeSection() {
     <div class="section-intro">
       <span class="eyebrow">Section 2 of 2</span>
       <h2>Which energy drives<br>you most?</h2>
-      <p>Drag these three descriptions into order - most like you at the top, least like you at the bottom. Go with your gut.</p>
+      <p>Put these three in order - most like you at the top, least like you at the bottom. Go with your gut.</p>
     </div>
-    <p class="rank-instructions">Drag to reorder - #1 is most like you</p>
+    <p class="rank-instructions">Use the arrows to reorder. #1 is most like you.</p>
     <div class="rank-items" id="rank-container">${itemsHtml}</div>
     <div class="quiz-nav">
       <button class="quiz-nav-back" onclick="goBackToLastBatch()">← Back</button>
@@ -1537,9 +1642,9 @@ function renderContextQuestion() {
       <p>This is the part no test can guess. Answer in a sentence or two and it gets woven into your results.</p>
     </div>
     <div class="intake-form">
-      <label>What is the thing you keep doing that you wish you would stop?</label>
+      <label for="user-context">What is the thing you keep doing that you wish you would stop?</label>
       <textarea id="user-context" rows="4" style="width:100%;padding:14px;font-family:inherit;font-size:15px;line-height:1.5;border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink);resize:vertical;" placeholder="However it comes out is fine."></textarea>
-      <label style="margin-top:22px;">Your birth date <span style="font-weight:400;color:var(--muted);">- optional, for the astrology section</span></label>
+      <label for="user-birthdate" style="margin-top:22px;">Your birth date <span style="font-weight:400;color:var(--muted);">- optional, for the astrology section</span></label>
       <input type="date" id="user-birthdate" style="width:100%;padding:13px;font-family:inherit;font-size:15px;border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--charcoal);">
     </div>
     <div class="quiz-nav">
@@ -1654,10 +1759,13 @@ async function submitQuiz() {
   runGeneration();
 }
 
+const SUBTYPE_NAMES = { sp: 'Self-Preservation', so: 'Social', sx: 'One-on-One' };
+
 function attemptReport() {
   // On a return visit there are no raw answers, so there are no outliers.
   const outliers = Object.keys(answers).length ? getOutliers(dominantType) : { high: [], low: [] };
-  const fullRanking = subtypeRanking.map(id => ({ sp: 'Self-Preservation', so: 'Social', sx: 'One-on-One' })[id]);
+  const fullRanking = subtypeRanking.map(id => SUBTYPE_NAMES[id]);
+  window.__subtypeStack = fullRanking;
   return generateReportStreaming(
     dominantType, TYPE_NAMES[dominantType], dominantSubtype,
     lastSortedScores, outliers, fullRanking
@@ -1667,7 +1775,7 @@ function attemptReport() {
 // Must match the keys generate-report.js actually returns. If a section is added
 // or removed there, this list has to change with it.
 const REPORT_KEYS = [
-  'gettingToKnowYourType', 'youAsMother', 'yourInnerWorld', 'yourBlindSpots',
+  'gettingToKnowYourType', 'howYouGotHere', 'yourInnerWorld', 'yourBlindSpots',
   'whereYouGetStuck', 'yourGrowthEdge', 'questionsToSitWith', 'invitationToBLN'
 ];
 
@@ -1767,6 +1875,7 @@ async function generateReportStreaming(typeNum, typeName, subtype, sortedScores,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      token: ACCESS_TOKEN,
       typeNum, typeName, subtype, sortedScores, userName,
       subtypeRanking: fullRanking || [],
       sunSign: userSunSign,
@@ -1844,15 +1953,11 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
     type_number:       typeNum,
     type_name:         typeName,
     subtype:           subtype,
-    pattern_name:      report.patternName                || '',
-    what_is_enneagram: report.whatIsTheEnneagram         || '',
     getting_to_know:   report.gettingToKnowYourType      || '',
-    you_as_mother:     report.youAsMother                || '',
+    how_you_got_here:  report.howYouGotHere                || '',
     inner_world:       report.yourInnerWorld             || '',
     blind_spots:       report.yourBlindSpots             || '',
-    strengths:         report.yourStrengths              || '',
     stuck:             report.whereYouGetStuck           || '',
-    relationships:     report.yourRelationships          || '',
     growth_edge:       report.yourGrowthEdge             || '',
     questions:         report.questionsToSitWith         || '',
     invitation:        report.invitationToBLN            || '',
@@ -1950,6 +2055,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
       ${renderSubtypePanel(typeNum, subtype)}
       ${renderSubtypeViz(window.__subtypeStack, subtype)}
       ${renderWheel(typeNum)}
+      ${renderWings(typeNum)}
       ${renderStrengthsWeaknesses(typeNum)}
       ${renderLevels(typeNum)}
     </div>
@@ -1965,7 +2071,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- HOW YOU GOT HERE -->
     <div class="report-section">
       <h2 class="report-section-title">How you got here</h2>
-      <div class="report-section-body">${formatParagraphs(report.youAsMother)}</div>
+      <div class="report-section-body">${formatParagraphs(report.howYouGotHere)}</div>
     </div>
     <hr class="report-divider">
 
@@ -2079,6 +2185,10 @@ function parseReflectionQuestions(text) {
 // PDF DOWNLOAD
 // ══════════════════════════════════════
 function downloadPDF() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("The PDF tool didn't load - an ad blocker or a flaky connection is the usual cause.\n\nYour report is safe on this page. Use your browser's Print option and choose Save as PDF, or email hello@marianavaldez.com and I'll send it over.");
+    return;
+  }
   // This buyer's type colour, used for the cover, headings and bars.
   const _tcHex = (TYPE_PROFILE[dominantType] && TYPE_PROFILE[dominantType].color) || '#3F4B2F';
   const TC = [1,3,5].map(i => parseInt(_tcHex.substr(i,2),16));
@@ -2102,9 +2212,9 @@ function downloadPDF() {
   doc.text(`${userName}'s`, pageW / 2, 100, { align: 'center' });
   doc.text(PRODUCT_NAME, pageW / 2, 116, { align: 'center' });
   doc.setFontSize(14); doc.setTextColor(169, 177, 163);
-  const typeLabel = document.getElementById('report-type-label').textContent;
-  const typeName2 = document.getElementById('report-type-name').textContent;
-  const subtypeLabel = document.getElementById('report-subtype-label').textContent;
+  const typeLabel = document.getElementById('report-type-label')?.textContent || '';
+  const typeName2 = (document.getElementById('report-type-name')?.textContent || '');
+  const subtypeLabel = (document.getElementById('report-subtype-label')?.textContent || '');
   doc.text(`${typeLabel} - ${typeName2}  ·  ${subtypeLabel}`, pageW / 2, 140, { align: 'center' });
   doc.setFontSize(11); doc.setTextColor(169, 177, 163);
   doc.text('marianavaldez.com', pageW / 2, pageH - 20, { align: 'center' });
@@ -2229,11 +2339,29 @@ function downloadPDF() {
     doc.text('WHERE YOU SIT, AND WHERE YOU MOVE', margin, y); y += 6;
     doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
     [
-      'Your wings: ' + tp.wings[0] + ' and ' + tp.wings[1],
       'In growth you move toward ' + tp.growth + ' - ' + TYPE_PROFILE[tp.growth].name,
       'Under strain you move toward ' + tp.stress + ' - ' + TYPE_PROFILE[tp.stress].name
     ].forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
-    y += 12;
+    y += 10;
+
+    // Wings, with what each one actually does
+    const wn = WING_NOTES[dominantType];
+    if (wn) {
+      checkY(24);
+      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
+      doc.text('YOUR TWO WINGS', margin, y); y += 6;
+      tp.wings.forEach(w => {
+        checkY(16);
+        doc.setFontSize(9.5); doc.setTextColor(90, 88, 84); doc.setFont('helvetica', 'bold');
+        doc.text('Type ' + dominantType + ' with a ' + w + ' wing - ' + TYPE_NAMES[w], margin, y); y += 5;
+        doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
+        doc.splitTextToSize(String(wn[w]).replace(/[\u2018\u2019]/g, "'"), contentW)
+           .forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
+        y += 5;
+      });
+      y += 6;
+    }
+    y += 6;
 
     // Strengths and weaknesses
     [['KEY STRENGTHS', tp.strengths], ['WHERE IT COSTS YOU', tp.weaknesses]].forEach(([hd, list]) => {
@@ -2524,6 +2652,69 @@ function renderSubtypePanel(typeNum, subtypeName) {
     </div>`;
 }
 
+
+// Wing descriptions. The report previously named the two adjacent types and
+// said nothing about them, which made the claim on the sales page an overclaim.
+const WING_NOTES = {
+ "1": {
+  "9": "Calmer and more detached. The critic gets quieter, the idealism gets bigger, and you're more willing to let things be than other Ones.",
+  "2": "Warmer and more involved with people. The standards turn outward - you want to improve things for others, and you take it personally when they don't want the help."
+ },
+ "2": {
+  "1": "More principled and dutiful. Helping becomes something closer to obligation, and you're harder on yourself when you fall short of it.",
+  "3": "More ambitious and image-aware. You help in ways that get noticed, and you're more comfortable in a room than other Twos."
+ },
+ "3": {
+  "2": "Warmer and more charming. Success is measured partly in how people feel about you, and relationships matter more than the scoreboard.",
+  "4": "More introspective and creative. You want the achievement to mean something, and you're more aware of the gap between the image and what's underneath."
+ },
+ "4": {
+  "3": "More driven and outwardly successful. You turn the feeling into something you can show, and you care more about how it lands than other Fours.",
+  "5": "More withdrawn and cerebral. The feeling goes inward and gets analysed rather than expressed, and you need a lot more time alone."
+ },
+ "5": {
+  "4": "More emotional and individualistic. The inner world is richer and stranger, and you're more likely to make something out of it.",
+  "6": "More loyal and practical. The thinking gets applied to real problems, and you're more anxious and more useful than other Fives."
+ },
+ "6": {
+  "5": "More private and analytical. You manage fear by understanding things thoroughly, and you keep your circle small.",
+  "7": "More outgoing and scattered. You manage fear by staying in motion and keeping things light, which can look like a Seven from outside."
+ },
+ "7": {
+  "6": "More loyal and grounded. You commit to people in a way other Sevens don't, and the anxiety underneath is closer to the surface.",
+  "8": "More assertive and pragmatic. You go after what you want directly, and you're less interested in being liked while you do it."
+ },
+ "8": {
+  "7": "More energetic and expansive. Bigger appetite, faster moves, more willing to take a risk for the sake of the risk.",
+  "9": "Calmer and steadier. The force is still there but it's quieter, and you're more willing to listen before you decide."
+ },
+ "9": {
+  "8": "More assertive and grounded. You'll push back when it matters, and there's more heat under the calm than other Nines.",
+  "1": "More principled and orderly. You have clearer opinions about how things should be, and you're more self-critical about your own drift."
+ }
+};
+
+function renderWings(typeNum) {
+  const t = TYPE_PROFILE[typeNum];
+  const notes = WING_NOTES[typeNum];
+  if (!t || !notes) return '';
+  return `
+    <div class="panel">
+      <div class="panel-head">Your two wings</div>
+      <div class="panel-body">
+        ${t.wings.map(w => `
+          <div class="wing-row">
+            <div class="wing-num">${w}</div>
+            <div>
+              <div class="wing-name">Type ${typeNum} with a ${w} wing &middot; ${TYPE_NAMES[w]}</div>
+              <div class="wing-note">${notes[w]}</div>
+            </div>
+          </div>`).join('')}
+        <p class="panel-note">Most people lean on one wing more than the other, and which one can change across phases of life. Rather than picking one for you, both are here so you can notice which sounds more like you right now.</p>
+      </div>
+    </div>`;
+}
+
 // ── Strengths and weaknesses, as bullets rather than paragraphs ──
 function renderStrengthsWeaknesses(typeNum) {
   const t = TYPE_PROFILE[typeNum];
@@ -2682,14 +2873,11 @@ function renderWheel(typeNum) {
 
 function getFallbackReport(typeNum, typeName, subtype) {
   return {
-    whatIsTheEnneagram: `The Enneagram isn't a personality label. It's a map of the strategy you built early on to stay safe, to be loved, or to stay in control.\n\nThat strategy worked. That's exactly why it stuck around. It's still running now, quietly, inside decisions you think you're making freely.\n\nKnowing what the strategy is doesn't make it go away. It just gives you a choice you didn't have before.`,
     gettingToKnowYourType: `Type ${typeNum}, ${typeName}, with a ${subtype} subtype.\n\nYour type isn't what you're like. It's what you're afraid of, and what you've quietly organized your whole life around avoiding.\n\nThe subtype matters as much as the number, and most tests skip it entirely. Two people who share your type but not your subtype can be almost unrecognizable to each other.\n\nThis is the pattern sitting underneath the choices you've been calling personality.`,
-    youAsMother: `Somewhere early on, this was the smartest move available to you. It protected you from something and it got you something, and both of those were real.\n\nThat's the part people skip. The strategy isn't a flaw. It's a solution that outlived the problem it was built for.\n\nWhat kept you safe at fifteen is the thing narrowing your options now.`,
+    howYouGotHere: `Somewhere early on, this was the smartest move available to you. It protected you from something and it got you something, and both of those were real.\n\nThat's the part people skip. The strategy isn't a flaw. It's a solution that outlived the problem it was built for.\n\nWhat kept you safe at fifteen is the thing narrowing your options now.`,
     yourInnerWorld: `Between something happening and you responding, there's a set of filters running faster than thought. They decide what you notice, what you write off, and what counts as a good enough reason.\n\nYou experience all of that as instinct. It isn't. It's a pattern, and patterns can change once you can actually see one running.`,
     yourBlindSpots: `Every type has something that's invisible from the inside, because it's the lens and not the view.\n\nThere's probably something the people closest to you have tried to tell you more than once, in slightly different words each time, and you've set it aside every time. That's usually where it lives.\n\nHere's what happens next. In about two or three weeks you're going to decide you were being dramatic about all of this. You'll think something like "it wasn't that deep." That's not perspective. That's the pattern protecting itself from being watched.`,
-    yourStrengths: `Your type comes with real advantages, and they come from the way your mind actually works rather than from effort.\n\nThe one you write off is the one that comes easily. You assume it's easy for everyone. It isn't, and the people around you have probably noticed even if they've never said so.`,
     whereYouGetStuck: `There's a sentence you say to yourself on repeat. You might not have heard it out loud in years, but it's running underneath the decisions you keep making the same way.\n\nThat sentence is protecting something. It isn't stupid and it isn't weakness. It's just expensive.\n\nThe work isn't silencing it. It's finding a sentence that's also true and costs you less.`,
-    yourRelationships: `There's something you give easily, something you hold back without ever deciding to, and something you need and almost never ask for out loud.\n\nMost of the friction in your closest relationships lives in that third one.`,
     yourGrowthEdge: `The pattern has a first signal. Something physical or mental that shows up before the behavior does, every single time.\n\nYou already know what yours is. You've just never treated it as information.\n\nFor the next fourteen days, all you're doing is catching it. When you notice the signal, name it out loud or in your head - just the name, nothing else - and keep going. Don't fix it, don't analyze it, don't journal about it. Two seconds.\n\nIt's small on purpose. Reading about a pattern changes nothing. Catching it four or five times changes how you make decisions.`,
     questionsToSitWith: `1. What would I have to stop believing about myself for the thing I want to be possible?\n2. What am I most afraid someone would see if I stopped managing how I come across?\n3. Where am I calling something a decision when it's actually a reflex?\n4. What do I need right now that I haven't asked for, and what would asking cost me?\n5. What has someone close to me tried to tell me more than once that I keep setting aside?\n6. If the strategy I built stopped working tomorrow, who would I be?`,
     invitationToBLN: `Start the fourteen days this week. Put a note in your phone for day 14 so you don't quietly let it go.\n\nAnd watch for that two-week thing I mentioned - the moment you decide none of this was that deep. If it shows up on schedule, you'll know the pattern is real and not just a description you nodded along to.\n\nThen come tell me. Message me on Instagram and let me know whether the type felt right and whether the prediction landed. I read all of them, and it genuinely shapes what I build next.`
