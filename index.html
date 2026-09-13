@@ -146,15 +146,15 @@ body { background: var(--cream); color: var(--deep); font-family: 'Montserrat', 
 .likert-labels span { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
 
 /* Ranking */
-.rank-instructions { font-size: 13px; color: var(--muted); margin-bottom: 20px; font-style: italic; }
-.rank-items { display: flex; flex-direction: column; gap: 10px; }
-.rank-item { background: var(--cream); border: 1.5px solid var(--rule); border-radius: 3px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: grab; transition: all 0.15s; user-select: none; }
-.rank-item:active { cursor: grabbing; }
-.rank-item.dragging { opacity: 0.5; border-color: var(--terra); }
-.rank-item.drag-over { border-color: var(--terra); background: var(--terra-bg); }
-.rank-num { width: 28px; height: 28px; border-radius: 50%; background: var(--terra); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
-.rank-text { font-size: 15px; line-height: 1.5; color: var(--deep); flex: 1; }
-.rank-handle { color: var(--rule); font-size: 16px; flex-shrink: 0; }
+
+
+
+
+
+
+
+
+
 .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
 .quiz-nav-back { background: none; border: none; color: var(--muted); font-family: 'Montserrat', sans-serif; font-size: 14px; cursor: pointer; padding: 8px 0; }
 .quiz-nav-back:hover { color: var(--deep); }
@@ -430,9 +430,9 @@ body { background: var(--cream); color: var(--deep); }
   box-shadow: 0 2px 14px rgba(58,54,48,0.05);
   padding: 34px 36px;
 }
-.rank-item { background: var(--warm-white); border-radius: 12px; border-color: var(--rule); }
-.rank-item.drag-over, .rank-item.dragging { border-color: var(--sage-mid); background: var(--sage-bg); }
-.rank-num { background: var(--sage-deep); }
+
+
+
 .likert-option label { border-radius: 10px; border-color: var(--rule); }
 .likert-option input:checked + label { border-color: var(--sage); background: var(--sage-bg); color: var(--sage-deep); }
 .likert-option label:hover { border-color: var(--sage-mid); }
@@ -582,10 +582,10 @@ body { background: var(--cream); color: var(--deep); }
 
 .questions-box, .scores-section { background: var(--linen-lift); border-color: var(--rule); }
 .question-card { background: var(--linen-lift); }
-.rank-item { background: var(--linen-lift); }
+
 .likert-option input:checked + label { background: var(--sage-bg); border-color: var(--olive); color: var(--olive); }
 .likert-option label:hover { border-color: var(--sage-mid); }
-.rank-num { background: var(--olive); }
+
 .quiz-progress-fill { background: var(--sage-mid); }
 .loading-step.done .step-dot { background: var(--sage-mid); }
 .welcome-meta-value, .welcome-title, .loading-title { color: #F5F2EB; }
@@ -726,7 +726,7 @@ body { background: var(--cream); color: var(--deep); }
 .report-box.invitation .report-box-body { color: rgba(246,244,240,0.92); }
 .report-box.invitation .report-box-body strong { color: var(--sage-mid); }
 
-.question-card, .rank-item, .questions-box, .scores-section { background: var(--page-lift); }
+.question-card, 
 .thankyou-icon { color: var(--sage-mid); }
 .thankyou-step-num { background: var(--olive); color: var(--page-lift); }
 .btn-secondary { color: var(--charcoal); border-color: var(--rule); }
@@ -807,8 +807,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 
 /* Squared corners read as professional rather than organic */
 .report-box, .questions-box, .scores-section, .question-card,
-.rank-item, .intake-form, .btn-primary, .btn-secondary,
-.bln-callout, .intake-form input, .intake-form textarea { border-radius: 3px; }
+
 .report-header { border-radius: 0; }
 .question-card { box-shadow: none; border: 1px solid var(--rule); }
 .report-box { border-left-width: 3px; }
@@ -1088,27 +1087,42 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 
 
 /* ── Reorder controls for the instinct ranking ── */
-.rank-moves { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-.rank-move {
-  width: 34px; height: 26px; padding: 0; cursor: pointer;
-  background: #fff; border: 1px solid var(--rule); border-radius: 3px;
-  color: var(--olive); font-size: 11px; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  transition: background .15s, border-color .15s;
-}
-.rank-move:hover:not(:disabled) { background: var(--sage-bg); border-color: var(--olive); }
-.rank-move:disabled { opacity: 0.3; cursor: default; }
-.rank-move:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+
+
+
+
+
 @media (max-width: 600px) {
-  .rank-move { width: 44px; height: 34px; font-size: 12px; }
-  .rank-moves { gap: 6px; }
+  
+  
 }
 
 
 @media (max-width: 600px) {
   /* HTML5 drag never fires on touch, so don't suggest it's available */
-  .rank-item { cursor: default; }
-  .rank-handle { display: none; }
+  
+  
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PRINT
+   The report has a Print button. Without these rules it printed the
+   dark header bar, the action buttons and the email notice, and broke
+   panels across page boundaries.
+   ══════════════════════════════════════════════════════════════ */
+@media print {
+  .quiz-header, .report-actions, .email-notice,
+  .welcome-badge, .langbtn, .btn-primary, .btn-secondary { display: none !important; }
+  body, #screen-report, .report-header { background: #fff !important; }
+  .report-header { border-bottom: 1px solid #ccc; padding: 24px 0 18px; }
+  #report-pattern-name, .report-name, .report-type-badge span,
+  .report-type-badge strong { color: #1E2124 !important; }
+  .report-section, .panel, .glance-card, .report-box,
+  .level-row, .wing-row, .questions-box { page-break-inside: avoid; }
+  .report-section-title { page-break-after: avoid; }
+  .panel-head { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .report-content { padding: 0; max-width: 100%; }
+  a[href]:after { content: ""; }
 }
 </style>
 </head>
@@ -1136,7 +1150,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   <div class="welcome-meta">
     <div class="welcome-meta-item">
       <span class="welcome-meta-label">Questions</span>
-      <span class="welcome-meta-value">54</span>
+      <span class="welcome-meta-value">63</span>
     </div>
     <div class="welcome-meta-item">
       <span class="welcome-meta-label">Time</span>
@@ -1286,8 +1300,8 @@ const PRODUCT_NAME = 'Enneagram Profile';
 // ══════════════════════════════════════
 // EMAILJS CONFIG
 // ══════════════════════════════════════
-const EMAILJS_PUBLIC_KEY  = 'Hbh_HwtgRTKQhMroG';
-const EMAILJS_SERVICE_ID  = 'service_tpldbbn';
+const EMAILJS_PUBLIC_KEY  = 'q6WkDZQRhi8GxZ5Uf';
+const EMAILJS_SERVICE_ID  = 'service_3cyi40k';
 const EMAILJS_TEMPLATE_ID = 'template_e2am9qb';
 
 // Second template, for failure alerts to Mariana. If this is ever blanked out
@@ -1381,60 +1395,60 @@ const TYPE_NAMES = {
 };
 
 const SCORED_QUESTIONS = [
-  { id: "1a", type: 1, text: "I have a strong sense of what's right and feel responsible for upholding it - even when it's inconvenient." },
-  { id: "1b", type: 1, text: "I find it genuinely difficult to relax when I know something could be done better." },
-  { id: "1c", type: 1, text: "I hold myself to standards I rarely say out loud - but I feel it when I fall short of them." },
-  { id: "1d", type: 1, text: "I believe there's a right way to do things, and it bothers me when people cut corners." },
-  { id: "1e", type: 1, text: "I want to be good - not just look good. My integrity matters to me more than my image." },
-  { id: "1f", type: 1, text: "A small inner critic often notices what I did wrong before anyone else does." },
-  { id: "2a", type: 2, text: "I feel most like myself when I'm genuinely useful to someone I care about." },
-  { id: "2b", type: 2, text: "I sometimes realize I've spent so much time on others that I don't know what I actually need." },
-  { id: "2c", type: 2, text: "Being loved and being needed feel deeply connected for me." },
-  { id: "2d", type: 2, text: "I can sense what others need before they ask - and it's hard not to respond to that." },
-  { id: "2e", type: 2, text: "I struggle to ask for help because it feels like I should be the one giving it." },
-  { id: "2f", type: 2, text: "My sense of worth is quietly tied to whether the people in my life are okay." },
-  { id: "3a", type: 3, text: "I'm aware of how I'm perceived and adjust naturally - not to be fake, but to succeed." },
-  { id: "3b", type: 3, text: "My identity has been deeply tied to what I achieve and how I'm seen achieving it." },
-  { id: "3c", type: 3, text: "Failure - or even the appearance of it - hits me harder than I usually let on." },
-  { id: "3d", type: 3, text: "I've spent a lot of energy becoming someone impressive. The shift toward 'meaningful' has been disorienting." },
-  { id: "3e", type: 3, text: "I'm efficient, goal-oriented, and uncomfortable when I don't have something to show for my time." },
-  { id: "3f", type: 3, text: "I sometimes wonder if the version of me everyone admires is actually the real me." },
-  { id: "4a", type: 4, text: "I've always felt a little different - like I experience things more intensely than most people around me." },
-  { id: "4b", type: 4, text: "I'd rather be authentic than well-liked. Fitting in at the cost of my truth feels like a kind of death." },
-  { id: "4c", type: 4, text: "There's a recurring sense that something essential is missing in me that others seem to have naturally." },
-  { id: "4d", type: 4, text: "My emotional life is rich and complex - I feel things deeply and often need space to process them." },
-  { id: "4e", type: 4, text: "I envy those who seem content. I want depth and meaning, but it often comes with a quiet ache." },
-  { id: "4f", type: 4, text: "I want to be truly seen - not for what I do, but for who I actually am underneath all of it." },
-  { id: "5a", type: 5, text: "I need time and space to think before I'm ready to engage - with people, decisions, or emotions." },
-  { id: "5b", type: 5, text: "Being around people for too long drains me. Solitude isn't loneliness - it's where I restore." },
-  { id: "5c", type: 5, text: "I want to understand things deeply before I commit to them or talk about them." },
-  { id: "5d", type: 5, text: "I can feel anxious about having enough - enough time, energy, privacy, resources - to function well." },
-  { id: "5e", type: 5, text: "I tend to observe more than I participate, and I'm more comfortable with knowledge than with feelings." },
-  { id: "5f", type: 5, text: "I protect my inner world carefully - not everyone earns the right to know what I really think." },
-  { id: "6a", type: 6, text: "I scan for what could go wrong - not because I'm negative, but because being prepared feels safe." },
-  { id: "6b", type: 6, text: "I value loyalty above almost everything. When trust is broken, it's hard to rebuild." },
-  { id: "6c", type: 6, text: "I've noticed I can be skeptical of things that seem too good - I look for the catch." },
-  { id: "6d", type: 6, text: "Before big decisions, I tend to overthink and seek reassurance from people I trust." },
-  { id: "6e", type: 6, text: "Feeling supported and knowing others have my back matters more to me than most people realize." },
-  { id: "6f", type: 6, text: "I've questioned my own judgment enough times that I sometimes doubt myself more than I should." },
-  { id: "7a", type: 7, text: "I move toward what's exciting and tend to reframe difficulty into opportunity - sometimes too quickly." },
-  { id: "7b", type: 7, text: "Staying with painful emotions for too long feels like a kind of trap I need to escape." },
-  { id: "7c", type: 7, text: "I can start more things than I finish because the beginning of something always feels the most alive." },
-  { id: "7d", type: 7, text: "Boredom, repetition, and limitation feel genuinely suffocating to me." },
-  { id: "7e", type: 7, text: "I want my life to feel expansive - full of possibility, experience, and joy." },
-  { id: "7f", type: 7, text: "The version of myself I most resist is the one who has to sit still and face what hurts." },
-  { id: "8a", type: 8, text: "I lead instinctively - not because I seek power, but because someone has to and I trust myself to do it." },
-  { id: "8b", type: 8, text: "Vulnerability feels dangerous. I protect myself by staying strong, even when I'm not." },
-  { id: "8c", type: 8, text: "I have little patience for weakness, injustice, or being controlled by others." },
-  { id: "8d", type: 8, text: "I can be too much for some people - too direct, too intense - and I've learned to live with that." },
-  { id: "8e", type: 8, text: "My anger comes up fast and signals when something feels wrong or when someone is being treated unfairly." },
-  { id: "8f", type: 8, text: "What I want more than almost anything is to be respected - and to never be seen as weak." },
-  { id: "9a", type: 9, text: "I go along with what others want more often than I speak up - and I tell myself it's because I don't mind." },
-  { id: "9b", type: 9, text: "I struggle to know what I really want, especially when it might create tension with someone I love." },
-  { id: "9c", type: 9, text: "Conflict feels like such a threat to connection that I'll absorb a lot of discomfort to avoid it." },
-  { id: "9d", type: 9, text: "I can numb out or distract myself when things get too hard to face directly." },
-  { id: "9e", type: 9, text: "People describe me as calming to be around - but inside I'm often more uncertain than I appear." },
-  { id: "9f", type: 9, text: "My needs have a habit of going last - not because I'm selfless, but because asserting them feels risky." },
+  { id: "1a", type: 1, text: "When something is wrong, I feel responsible for fixing it, even when it isn't mine to fix." },
+  { id: "1b", type: 1, text: "There's usually a right way to do something, and shortcuts or careless work bother me." },
+  { id: "1c", type: 1, text: "I notice the one flaw in something before I notice what's good about it." },
+  { id: "1d", type: 1, text: "I often notice irritation in myself and try to correct it before I express it." },
+  { id: "1e", type: 1, text: "It's hard for me to relax while something is unfinished or below standard." },
+  { id: "1f", type: 1, text: "Even when nobody would ever know, I feel it when I've done something the easy way instead of the right way." },
+  { id: "2a", type: 2, text: "I look for ways to be useful to people I care about, often before they ask." },
+  { id: "2b", type: 2, text: "Being needed and being loved feel close to the same thing to me." },
+  { id: "2c", type: 2, text: "When someone I care about is struggling, I find it hard to focus on anything else until they're okay." },
+  { id: "2d", type: 2, text: "I adjust myself to fit what a particular person seems to need from me." },
+  { id: "2e", type: 2, text: "I can go a long time without noticing I haven't asked for anything for myself." },
+  { id: "2f", type: 2, text: "It's easier for me to give support than to admit I need it." },
+  { id: "3a", type: 3, text: "I read a room quickly and adjust how I come across, often without thinking about it." },
+  { id: "3b", type: 3, text: "I pay close attention to what counts as success and how well I'm doing against it." },
+  { id: "3c", type: 3, text: "I find it hard to stop working until I have something to show for the day." },
+  { id: "3d", type: 3, text: "I keep working on something after the interest has gone, because stopping would look like failing." },
+  { id: "3e", type: 3, text: "I can lose track of what I actually want when there's a goal in front of me." },
+  { id: "3f", type: 3, text: "When there's nothing to achieve or prove, I have a harder time knowing who I am." },
+  { id: "4a", type: 4, text: "It's easy for me to notice what's missing in my life, even when things are objectively fine." },
+  { id: "4b", type: 4, text: "I can become preoccupied with qualities or experiences I feel other people have that I don't." },
+  { id: "4c", type: 4, text: "When fitting in means hiding something true about me, I'd rather not fit in." },
+  { id: "4d", type: 4, text: "I don't want to move on from a feeling before I've understood what it's about." },
+  { id: "4e", type: 4, text: "I'd rather be understood than admired." },
+  { id: "4f", type: 4, text: "An ordinary, settled life sounds to me a little like disappearing." },
+  { id: "5a", type: 5, text: "When too much is being asked of me, my first instinct is to pull back and conserve my energy." },
+  { id: "5b", type: 5, text: "I prefer to understand something well enough to rely on my own knowledge before I commit or speak." },
+  { id: "5c", type: 5, text: "I'd rather watch how something works before joining in." },
+  { id: "5d", type: 5, text: "I keep most of what I think to myself, even with people I like." },
+  { id: "5e", type: 5, text: "I check out of conversations that feel superficial or ask for energy I'd rather keep." },
+  { id: "5f", type: 5, text: "I keep part of myself back even from people I'm close to." },
+  { id: "6a", type: 6, text: "When I'm uncertain, I look for someone whose judgement I trust more than my own." },
+  { id: "6b", type: 6, text: "I notice what could go wrong before I notice what could go right." },
+  { id: "6c", type: 6, text: "I'm sceptical of things that seem too good, and I look for the catch." },
+  { id: "6d", type: 6, text: "When something frightens me, I sometimes move straight at it rather than back away." },
+  { id: "6e", type: 6, text: "Once I've decided something, I go back over it looking for what I missed." },
+  { id: "6f", type: 6, text: "I've trusted someone and been wrong, and part of me is still braced for that." },
+  { id: "7a", type: 7, text: "When something starts to feel heavy or restrictive, I get very interested in what else is possible." },
+  { id: "7b", type: 7, text: "I keep my options open longer than I probably need to." },
+  { id: "7c", type: 7, text: "I turn difficult things into opportunities quickly, sometimes before I've really felt them." },
+  { id: "7d", type: 7, text: "I start more than I finish, because the beginning is the best part." },
+  { id: "7e", type: 7, text: "Staying with something painful feels like a trap I need to get out of." },
+  { id: "7f", type: 7, text: "The version of me I avoid most is the one with nothing planned." },
+  { id: "8a", type: 8, text: "When I don't trust someone to handle something, I'd rather take it over than leave it with them." },
+  { id: "8b", type: 8, text: "When someone tries to limit what I can do, my reaction is immediate and strong." },
+  { id: "8c", type: 8, text: "I say the thing other people are avoiding saying." },
+  { id: "8d", type: 8, text: "I lose patience quickly with excuses." },
+  { id: "8e", type: 8, text: "People tell me I come on stronger than I realise." },
+  { id: "8f", type: 8, text: "Letting someone see me at my weakest feels more dangerous than almost anything else." },
+  { id: "9a", type: 9, text: "I can spend so long considering what everyone else wants that my own preference gets hard to find." },
+  { id: "9b", type: 9, text: "I'll choose peace over rocking the boat, even when the issue genuinely matters to me." },
+  { id: "9c", type: 9, text: "I go along with a plan I don't love rather than make it an issue." },
+  { id: "9d", type: 9, text: "I can become absorbed in small tasks or routines when I know there is something more important I should face." },
+  { id: "9e", type: 9, text: "I can have trouble getting myself moving on things that matter to me, even when I know what needs to happen." },
+  { id: "9f", type: 9, text: "I've agreed to things I didn't want, and only felt the resentment much later." },
 ];
 
 function shuffleArray(arr) {
@@ -1446,6 +1460,18 @@ function shuffleArray(arr) {
   return a;
 }
 const SHUFFLED_QUESTIONS = shuffleArray(SCORED_QUESTIONS);
+
+const INSTINCT_QUESTIONS = [
+  { id: "i1", instinct: "sp", text: "I keep track of my reserves - energy, money, time - and feel unsettled when they run low." },
+  { id: "i2", instinct: "sp", text: "I like my environment and routines set up so I don't have to think about them." },
+  { id: "i3", instinct: "sp", text: "When I'm under stress, my attention goes to practical things: the bills, the house, my health." },
+  { id: "i4", instinct: "so", text: "I keep track of where I stand in a group, even one I'm comfortable in." },
+  { id: "i5", instinct: "so", text: "Being excluded from a group would bother me more than a conflict with one person." },
+  { id: "i6", instinct: "so", text: "I pick up quickly on who has influence in a group and how people are positioned." },
+  { id: "i7", instinct: "sx", text: "I focus my energy on one specific person at a time, and my mood tends to follow the state of that connection." },
+  { id: "i8", instinct: "sx", text: "I'd rather be close to a few people intensely than friendly with many." },
+  { id: "i9", instinct: "sx", text: "I'm drawn to intensity, and easy, pleasant company can leave me restless." },
+];
 
 const SUBTYPE_ITEMS = [
   { id: "sp", subtype: "Self-Preservation", text: "My energy goes most toward securing my personal safety, health, comfort, and resources - I need my foundations to feel stable before I can give fully to anything else." },
@@ -1556,52 +1582,70 @@ function renderBatch(batchIndex) {
   window.scrollTo(0, 0);
 }
 
-// Reorder by one position. Works on touch, mouse and keyboard, unlike the
-// HTML5 drag API which never fires on phones.
-function moveRank(id, dir) {
-  const i = subtypeRanking.indexOf(id);
-  const j = i + dir;
-  if (i === -1 || j < 0 || j >= subtypeRanking.length) return;
-  subtypeRanking[i] = subtypeRanking[j];
-  subtypeRanking[j] = id;
-  renderSubtypeSection();
-}
 
 function renderSubtypeSection() {
   updateProgress();
   const body = document.getElementById('quiz-body');
+  const shuffled = window.__instinctOrder || (window.__instinctOrder = shuffleArray(INSTINCT_QUESTIONS));
   let itemsHtml = '';
-  subtypeRanking.forEach((id, idx) => {
-    const item = SUBTYPE_ITEMS.find(s => s.id === id);
+  shuffled.forEach((q, idx) => {
     itemsHtml += `
-      <div class="rank-item" draggable="true" data-id="${id}"
-        ondragstart="dragStart(event)" ondragover="dragOver(event)"
-        ondrop="dropItem(event)" ondragleave="dragLeave(event)">
-        <div class="rank-num">${idx + 1}</div>
-        <div class="rank-text"><strong>${item.subtype}</strong><br>${item.text}</div>
-        <div class="rank-moves">
-          <button type="button" class="rank-move" onclick="moveRank('${id}',-1)"
-            ${idx === 0 ? 'disabled' : ''} aria-label="Move ${item.subtype} up">&#9650;</button>
-          <button type="button" class="rank-move" onclick="moveRank('${id}',1)"
-            ${idx === subtypeRanking.length - 1 ? 'disabled' : ''} aria-label="Move ${item.subtype} down">&#9660;</button>
+      <div class="question-card" id="card-${q.id}">
+        <span class="question-num">Statement ${idx + 1} of ${INSTINCT_QUESTIONS.length}</span>
+        <div class="question-text">"${q.text}"</div>
+        <div class="likert">
+          ${LIKERT_OPTIONS.map(opt => `
+            <div class="likert-option">
+              <input type="radio" name="q_${q.id}" id="q_${q.id}_${opt.value}" value="${opt.value}"
+                ${answers[q.id] === opt.value ? 'checked' : ''} onchange="setAnswer('${q.id}', ${opt.value})">
+              <label for="q_${q.id}_${opt.value}">${opt.label}</label>
+            </div>`).join('')}
         </div>
-      </div>
-    `;
+      </div>`;
   });
   body.innerHTML = `
     <div class="section-intro">
       <span class="eyebrow">Section 2 of 2</span>
-      <h2>Which energy drives<br>you most?</h2>
-      <p>Put these three in order - most like you at the top, least like you at the bottom. Go with your gut.</p>
+      <h2>Where does your<br>energy actually go?</h2>
+      <p>These aren't about your type. They're about instinct - the drive underneath it. Same scale, same instruction: go with what's true most of the time.</p>
     </div>
-    <p class="rank-instructions">Use the arrows to reorder. #1 is most like you.</p>
-    <div class="rank-items" id="rank-container">${itemsHtml}</div>
+    ${itemsHtml}
+    <div id="instinct-error" class="question-error" role="alert" aria-live="polite" style="display:none;">
+      Please answer every statement before continuing.
+    </div>
     <div class="quiz-nav">
-      <button class="quiz-nav-back" onclick="goBackToLastBatch()">← Back</button>
-      <button class="btn-primary" onclick="renderContextQuestion()">Continue</button>
+      <button class="quiz-nav-back" onclick="goBackBatch()">Back</button>
+      <button class="btn-primary" onclick="finishInstincts()">Continue</button>
     </div>
   `;
   window.scrollTo(0, 0);
+}
+
+// Score the instincts and turn them into the ranked stack the rest of the
+// app already expects. Replaces the old drag-to-rank screen.
+function finishInstincts() {
+  const missing = INSTINCT_QUESTIONS.filter(q => !answers[q.id]);
+  if (missing.length) {
+    const err = document.getElementById('instinct-error');
+    if (err) err.style.display = 'block';
+    const first = document.getElementById('card-' + missing[0].id);
+    if (first) first.scrollIntoView({ block: 'center' });
+    return;
+  }
+  const totals = { sp: 0, so: 0, sx: 0 };
+  const peaks  = { sp: 0, so: 0, sx: 0 };
+  INSTINCT_QUESTIONS.forEach(q => {
+    const v = answers[q.id];
+    totals[q.instinct] += v;
+    if (v > peaks[q.instinct]) peaks[q.instinct] = v;
+  });
+  // Ties broken by the strongest single response, then by a fixed order so
+  // the result is never random.
+  const order = ['sp', 'so', 'sx'];
+  subtypeRanking = order.slice().sort((a, b) =>
+    (totals[b] - totals[a]) || (peaks[b] - peaks[a]) || (order.indexOf(a) - order.indexOf(b))
+  );
+  renderContextQuestion();
 }
 
 
@@ -1699,23 +1743,6 @@ function goBackToLastBatch() {
 // ══════════════════════════════════════
 // DRAG & DROP
 // ══════════════════════════════════════
-let draggedId = null;
-function dragStart(e) { draggedId = e.currentTarget.dataset.id; e.currentTarget.classList.add('dragging'); }
-function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
-function dropItem(e) {
-  e.preventDefault();
-  const targetId = e.currentTarget.dataset.id;
-  e.currentTarget.classList.remove('drag-over');
-  if (draggedId && draggedId !== targetId) {
-    const dragIdx = subtypeRanking.indexOf(draggedId);
-    const targetIdx = subtypeRanking.indexOf(targetId);
-    subtypeRanking.splice(dragIdx, 1);
-    subtypeRanking.splice(targetIdx, 0, draggedId);
-    renderSubtypeSection();
-  }
-  draggedId = null;
-}
 
 // ══════════════════════════════════════
 // SCORING
@@ -2191,7 +2218,13 @@ function downloadPDF() {
   }
   // This buyer's type colour, used for the cover, headings and bars.
   const _tcHex = (TYPE_PROFILE[dominantType] && TYPE_PROFILE[dominantType].color) || '#3F4B2F';
-  const TC = [1,3,5].map(i => parseInt(_tcHex.substr(i,2),16));
+  const TC = (function (hex) {
+    let c = String(hex || '').replace('#', '');
+    if (c.length === 3) c = c.split('').map(x => x + x).join('');
+    const n = parseInt(c, 16);
+    return (c.length !== 6 || isNaN(n)) ? [63, 75, 47]
+      : [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  })(_tcHex);
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
@@ -2838,7 +2871,7 @@ function renderWheel(typeNum) {
   if (!t) return '';
   const cx = 150, cy = 150, r = 108;
   const pos = n => {
-    const deg = (n === 9) ? -90 : -90 + (n * 40);
+    const deg = -90 + ((n % 9) * 40);
     const rad = deg * Math.PI / 180;
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
   };
