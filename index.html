@@ -2189,7 +2189,10 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
 
 function formatParagraphs(text) {
   if (!text) return '';
-  return text.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+  // Models occasionally emit a literal backslash-n rather than a real newline.
+  // Without this the whole section renders as one paragraph with visible \n.
+  const normalised = String(text).replace(/\\r\\n|\\n/g, '\n');
+  return normalised.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
 }
 
 function parseReflectionQuestions(text) {
