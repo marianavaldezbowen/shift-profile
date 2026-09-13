@@ -147,6 +147,18 @@ export default async function handler(req, res) {
     ? sortedScores.map(s => `Type ${s.type} ${TYPE_NAMES[s.type]}: ${s.score}/30`).join('\n')
     : 'Detailed scores are not available for this request. Work from type and subtype only, and do not reference specific numbers or a score gap anywhere in the report.';
 
+  // Types bunched within a point of each other just below the top are the
+  // reason two people of the same type look nothing alike. The prompt could
+  // only see the top-two gap before this.
+  let clusterLine = '';
+  if (hasScores && sortedScores.length > 3) {
+    const rest = sortedScores.slice(1);
+    const cluster = rest.filter(x => rest[0].score - x.score <= 1);
+    if (cluster.length >= 2) {
+      clusterLine = `SECONDARY CLUSTER: types ${cluster.map(c => c.type).join(', ')} all scored within a point of each other (${cluster[cluster.length-1].score}-${cluster[0].score}). Say what that particular mix does to how her Type ${typeNum} actually shows up - it is the reason she will not look like the textbook version. One or two sentences, in the type section.`;
+    }
+  }
+
   const gapLine = gap === null
     ? ''
     : `Gap between first and second: ${gap} points. A gap of 4 or less means her type is NOT clean-cut and she will feel genuinely torn between the two.`;
@@ -189,7 +201,8 @@ ${safeContext}
 PERSON: ${userName}
 Dominant: Type ${typeNum} ${typeName}. ${TYPE_CONTEXT[typeNum]}.
 Dominant subtype: ${subtype}${subtypeRanking.length === 3 ? ` (full ranking: ${subtypeRanking.join(' > ')})` : ''}
-${hasScores ? `Second: ${label(secondType)} at ${secondType.score}/30\nThird: ${label(thirdType)} at ${thirdType.score}/30\n${gapLine}` : ''}
+${hasScores ? `Second: ${label(secondType)} at ${secondType.score}/30\nThird: ${label(thirdType)} at ${thirdType.score}/30\n${gapLine}
+${clusterLine}` : ''}
 
 ALL SCORES:
 ${scoreTable}
@@ -219,7 +232,7 @@ THE INTERRUPT: one specific action, under 60 seconds, that breaks it at that sig
 
 THE PREDICTION: what she'll do in the next two to three weeks as this pattern defends itself against being seen. Rules: it must be about the PATTERN, not her circumstances. Never predict external events, other people's behaviour, or anything involving a job, partner, or family member. It should be specific enough to feel uncanny and likely enough to actually happen. Give a rough timeframe. Include the tell - the exact thought she'll have when it starts.
 
-THE 14-DAY PROTOCOL: one repeatable thing, under two minutes a day, built on THE TRIGGER and THE INTERRUPT. State what she does, when she does it, and how she knows she did it. It should be almost embarrassingly small.
+THE 14-DAY PROTOCOL: one repeatable thing, under two minutes a day, in two steps. CATCH - name the trigger the moment it fires, in her own words. CHOOSE - one small alternative action or question available to her right then. Noticing alone trains her to observe the pattern without changing a single decision; the second step is what turns it into a choice. State when she does it and how she knows she did it. Almost embarrassingly small.
 
 WHAT TO NAME DIRECTLY: one or two specifics from her outliers or her own words the report must reference explicitly, so she knows this was written about her.`;
 
@@ -238,7 +251,7 @@ WHAT TO NAME DIRECTLY: one or two specifics from her outliers or her own words t
       `THE TRIGGER: the first physical or mental signal that her type's pattern has started running.`,
       `THE INTERRUPT: one concrete action under 60 seconds that breaks it at that signal.`,
       `THE PREDICTION: what she will do in the next two to three weeks as the pattern defends itself against being seen. About the pattern, never about her circumstances.`,
-      `THE 14-DAY PROTOCOL: one repeatable thing under two minutes a day built on the trigger and the interrupt. Almost embarrassingly small.`,
+      `THE 14-DAY PROTOCOL: one repeatable thing under two minutes a day, in two steps. CATCH - name the trigger the moment it fires, in her own words. CHOOSE - one small alternative action or question available to her right then, in that moment. Awareness alone changes nothing; the second step is what turns noticing into a decision. Almost embarrassingly small.`,
       `WHAT TO NAME DIRECTLY: nothing specific is available - do not invent details about her.`
     ].join('\n');
   }
@@ -252,6 +265,14 @@ WHAT THIS IS
 Not a personality description. She can get that free online in thirty seconds. Everything here has to be traceable to HER data below. If a paragraph could show up in any free Enneagram description, rewrite it or cut it.
 
 Her ${subtype} subtype colours how Type ${typeNum} shows up, but the type is the subject. Reference the subtype only where it changes something real.
+
+EVIDENCE DENSITY
+Do not make a psychological claim you could not trace back to something in her
+data - her score pattern, an outlier answer, her own written words, her subtype
+or her instinct stack. If a sentence would be equally true of anyone with this
+type, it is padding. Cut it or ground it. Be confident about the pattern and
+humble about the interpretation: "your answers point to" beats "this is what is
+happening", and neither needs a hedge like "maybe" or "perhaps".
 
 BALANCE - THIS MATTERS
 Type ${typeNum} is the spine of this report. Write about the type first and foremost.
@@ -290,10 +311,10 @@ Write exactly the keys listed below, and no others:
 "gettingToKnowYourType": "About 200 words. Who Type ${typeNum} actually is, written so she feels caught rather than informed. Then what the ${subtype} subtype specifically does to this type, and name the version of Type ${typeNum} she is NOT so the difference lands. MANDATORY IF APPLICABLE: if the gap between her top two types is 4 points or less, you
 MUST open this section by naming both types and their scores, and describing what living
 between the two feels like day to day. Do not bury it later in the paragraph. A near-tie is
-the single most useful thing on the page and skipping it makes the whole report feel generic. Name her subtype keyword once here, naturally, as if she already knows it. Do not restate her core fear or core desire - they are already on the page in the panel above.",
-"howYouGotHere": "About 180 words. Where this pattern got built. What it protected her from and what it earned her - it worked, that's why it stuck around. Then the turn: the thing that kept her safe at fifteen is the thing narrowing her options now. Specific to Type ${typeNum} and the ${subtype} subtype. Absolutely no mention of motherhood or children.",
+the single most useful thing on the page and skipping it makes the whole report feel generic. ALSO MANDATORY IF PRESENT: if the analysis notes a SECONDARY CLUSTER, spend one or two sentences on what that specific combination does to her Type ${typeNum} drive. It is the reason she will not look like the textbook version, and it is the most personal thing in her score pattern. Name her subtype keyword once here, naturally, as if she already knows it. Do not restate her core fear or core desire - they are already on the page in the panel above.",
+"howYouGotHere": "About 180 words. TITLE SHOWN: 'Why this pattern makes sense'. You know nothing about her childhood or her history, so do not invent any. No 'at some point you learned', no 'when you were fifteen', no origin story. Instead: what the pattern actually does for her, why that would be an intelligent strategy for anyone, what it reliably gives her, and what it costs once it runs without being chosen. End by inviting her to decide whether that reads as true, rather than asserting that it is.",
 "yourInnerWorld": "About 200 words. The meta-programs from the analysis, in plain language. Never name them as jargon, never list them mechanically. Walk through one real decision-shaped moment and show how her filters run it before she's consciously decided anything. Land on the one that costs her most. This is the section that should make her stop and read a line twice.",
-"yourBlindSpots": "About 190 words. Two parts, no header between them. First, what she can't see because it's the lens and not the view - use the central contradiction, and include one thing people close to her have probably tried to tell her more than once. Direct, not cruel. Then, as the last two or three sentences, THE PREDICTION from the analysis, stated plainly and confidently with its timeframe and its tell. Something like: in about two weeks you're going to start thinking X - that's the pattern defending itself. Do not hedge it, do not add 'maybe' or 'you might'. Say it like you've watched it happen a hundred times."
+"yourBlindSpots": "About 190 words. Two parts, no header between them. First, what she can't see because it's the lens and not the view - use the central contradiction from the analysis, grounded in her actual answers rather than in assumed relationships. Direct, not cruel. You do not know what anyone has said to her, so never write 'people close to you have told you' or anything like it. Then, as the last two or three sentences, THE PREDICTION from the analysis, framed as something to watch for rather than a prophecy. Give the trigger, the automatic thought, and what she'll do next - concrete enough to test. Something like: over the next two or three weeks, watch for the moment X happens; your mind will produce the thought 'Y', and then you'll Z. Close with one line telling her that if it happens, it isn't proof the report was right - it's something worth examining. That single line is what separates this from pseudo-psychic certainty, and it makes the whole thing more credible, not less."
 }`;
 
   const promptB = `${shared}
@@ -302,12 +323,12 @@ Write exactly the keys listed below, and no others:
 
 {
 "whereYouGetStuck": "About 190 words. THE STRONGEST SECTION IN THE REPORT.${cleanContext ? ` Her own words are in the <user_reflection> tags above. Quote her back to herself EXACTLY, word for word, inside quotation marks, in the first two sentences. Do not clean up her grammar, do not paraphrase, do not summarize. Then show her what's underneath what she wrote.` : ' Open with THE SENTENCE from the analysis, in quotation marks, in her own likely words.'} Then what it's protecting. Then THE REFRAME, also in quotation marks. Make the swap concrete enough to use today.",
-"yourGrowthEdge": "About 200 words. THE 14-DAY PROTOCOL from the analysis, written as an actual assignment with a start and an end. Name THE TRIGGER first - the exact signal that the pattern has started. Then the thing she does, when she does it, and how she knows she did it. Under two minutes a day, fourteen days. Be specific enough that she could start tomorrow and know by Friday whether she's doing it right. Say plainly that this is small on purpose and that reading about a pattern changes nothing while catching it four or five times changes how she decides. No 'practice self-compassion'. Something she could do on a Tuesday at 3pm.",
+"yourGrowthEdge": "About 200 words. THE 14-DAY PROTOCOL from the analysis, written as an actual assignment with a start and an end. Name THE TRIGGER first - the exact signal that the pattern has started. Then both steps, clearly separated: CATCH, where she names it in her own words, and CHOOSE, one small different thing available to her in that same moment. Then when she does it and how she knows she did it. Under two minutes a day, fourteen days. Be specific enough that she could start tomorrow and know by Friday whether she's doing it right. Say plainly that this is small on purpose and that reading about a pattern changes nothing while catching it four or five times changes how she decides. No 'practice self-compassion'. Something she could do on a Tuesday at 3pm.",
 "questionsToSitWith": "Exactly 6 numbered questions as '1. text' each on its own line, separated by \\n. Specific to her data, her type and her subtype. Uncomfortable in a useful way. No yes/no questions - each should be hard to answer in one sentence.",
 ${sunSign ? `"zodiacBlend": "About 230 words. Type ${typeNum} with a ${sunSign} sun. This is a bonus section and it should read as one - lighter, more playful, curious rather than clinical. Do NOT treat astrology as measurement and do not claim it explains her. Frame it as a second lens laid over the first. Find the genuine TENSION between the two: where the Enneagram drive and the ${sunSign} archetype pull in different directions, and where they amplify each other into something specific. Be concrete about what that combination looks like on an ordinary Tuesday. End on the question the combination raises for her. No horoscope voice, no predictions about events, no 'the stars say'.",` : ''}
 "invitationToBLN": "About 110 words. Do NOT pitch a program, a course, or a price. Tell her the one thing to do this week: start the 14 days, and put a note somewhere for day 14. Then refer to the prediction WITHOUT restating it - you were not given its wording and
 must not invent a different one. Say something like 'the thing I said you'd catch yourself
-doing in the next few weeks' and tell her to notice if it comes true, because that's how she'll know the pattern is real and not just a description she agreed with. Close by asking her to message Mariana on Instagram and say whether the type felt right and whether the prediction landed - say that it genuinely shapes what gets built next. Warm, direct, no hard sell."
+doing in the next few weeks' and tell her to notice if it comes true, because that's how she'll know the pattern is real and not just a description she agreed with. Close by asking her to message Mariana on Instagram and say whether the type felt right and whether the prediction landed - say that it genuinely shapes what gets built next. Warm, direct, no hard sell. Close like this, in your own words: don't decide yet whether this was accurate - do the fourteen days, notice what happens, then read this again. If she catches the pattern in real life she'll know more than any report could tell her."
 }`;
 
   try {
