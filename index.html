@@ -2082,7 +2082,7 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
     + '&rname='    + encodeURIComponent(userName)
     + '&remail='   + encodeURIComponent(userEmail)
     + (scoreString ? '&rscores=' + encodeURIComponent(scoreString) : '')
-    + (userContext ? '&rctx=' + encodeURIComponent(userContext.substring(0, 300)) : '')
+    + (userContext ? '&rctx=' + encodeURIComponent(userContext.substring(0, 500)) : '')
     + (userSunSign ? '&rsign=' + encodeURIComponent(userSunSign) : '');
 
   const templateParams = {
