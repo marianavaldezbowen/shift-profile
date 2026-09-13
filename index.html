@@ -24,7 +24,6 @@ src="https://www.facebook.com/tr?id=1309711794380173&ev=PageView&noscript=1"
 <!-- End Meta Pixel -->
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root {
@@ -1124,6 +1123,108 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   .report-content { padding: 0; max-width: 100%; }
   a[href]:after { content: ""; }
 }
+
+/* ── The same pattern in three arenas ── */
+.arena { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 20px; }
+.arena-name {
+  width: 110px; flex-shrink: 0; font-family: 'Montserrat', sans-serif;
+  font-size: 14px; font-weight: 600; color: var(--type); padding-top: 1px;
+}
+.arena-lines { flex: 1; }
+.arena-is, .arena-trap {
+  font-family: 'Montserrat', sans-serif; font-size: 14.5px;
+  line-height: 1.6; color: var(--charcoal);
+}
+.arena-is { margin-bottom: 7px; }
+.arena-is span, .arena-trap span {
+  display: block; font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 2px;
+}
+.arena-is span { color: #3E7A52; }
+.arena-trap span { color: var(--terra); }
+@media (max-width: 600px) {
+  .arena { flex-direction: column; gap: 6px; }
+  .arena-name { width: auto; }
+}
+
+
+.arena-q {
+  font-family: 'Cormorant Garamond', serif; font-size: 17px; line-height: 1.4;
+  color: var(--type); margin-top: 9px; padding-left: 13px;
+  border-left: 2px solid var(--rule); font-style: italic;
+}
+.arena { margin-bottom: 26px; }
+
+
+/* ── Evidence panel ── */
+.evidence-list { list-style: none; margin: 0; padding: 0; }
+.evidence-list li {
+  font-family: 'Montserrat', sans-serif; font-size: 14.5px; line-height: 1.65;
+  color: var(--ink-soft); padding-left: 26px; position: relative; margin-bottom: 15px;
+}
+.evidence-list li:last-child { margin-bottom: 0; }
+.evidence-list li::before {
+  content: ''; position: absolute; left: 0; top: 9px;
+  width: 11px; height: 2px; background: var(--type);
+}
+.evidence-list strong { color: var(--charcoal); font-weight: 600; }
+
+
+/* ── Falsification panel ── */
+.falsify-intro {
+  font-family: 'Montserrat', sans-serif; font-size: 14.5px; line-height: 1.65;
+  color: var(--ink-soft); margin-bottom: 16px;
+}
+.falsify-list { list-style: none; margin: 0 0 4px; padding: 0; }
+.falsify-list li {
+  font-family: 'Montserrat', sans-serif; font-size: 14.5px; line-height: 1.6;
+  color: var(--charcoal); padding-left: 24px; position: relative; margin-bottom: 12px;
+}
+.falsify-list li::before {
+  content: '?'; position: absolute; left: 0; top: 0;
+  color: var(--terra); font-weight: 600;
+}
+
+
+/* ── Print hardening ──
+   Both modern break-* and the legacy page-break-* properties, because engines
+   still disagree. Grids flatten to one column: Chrome and WebKit can clip a
+   grid item that crosses a page boundary instead of pushing it over. ── */
+@media print {
+  /* Keep the small units whole; let tall panels split rather than push a
+     half-page of whitespace ahead of them. */
+  .glance-card, .level-row, .wing-row, .arena, .score-row,
+  .center-row, .stack-row, .evidence-list li, .falsify-list li {
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .panel, .report-section, .report-box, .zodiac-box {
+    break-inside: auto; page-break-inside: auto;
+  }
+  /* A panel header should never be the last thing on a page */
+  .panel-head { break-after: avoid; page-break-after: avoid; }
+  .report-header { padding-bottom: 20px; }
+  .report-section-title, .panel-head {
+    break-after: avoid; page-break-after: avoid;
+  }
+  .glance-grid, .sw-grid, .offer ul, .cert ul {
+    display: block !important; columns: 1 !important;
+  }
+  .glance-card { margin-bottom: 10px; }
+  .arena { display: block; }
+  .arena-name { width: auto; margin-bottom: 4px; }
+  .wheel { width: 268px !important; max-width: 268px !important; height: 268px !important; }
+  .print-help, #print-help { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
+.print-help {
+  font-family: 'Montserrat', sans-serif; font-size: 13.5px; line-height: 1.6;
+  color: var(--charcoal); background: var(--terra-bg);
+  border: 1px solid var(--terra-light); border-left: 4px solid var(--terra);
+  padding: 15px 18px;
+  margin: 16px auto 0; max-width: 560px; border-radius: 3px;
+}
+
 </style>
 </head>
 <body>
@@ -1350,6 +1451,17 @@ function checkAccess() {
     // Same generation path as a first-time run - retries, honest failure screen,
     // no duplicate email, no second conversion event.
     isReturnVisit = true;
+
+    const rawStack = params.get('rstack');
+    if (rawStack) {
+      const ids = decodeURIComponent(rawStack).split(',').filter(x => ['sp','so','sx'].includes(x));
+      if (ids.length === 3 && new Set(ids).size === 3) subtypeRanking = ids;
+    } else {
+      // Older links carry no stack. Put the known dominant instinct first so
+      // the panel can never contradict the subtype in the header.
+      const back = { 'Self-Preservation': 'sp', 'Social': 'so', 'One-on-One': 'sx' }[dominantSubtype];
+      if (back) subtypeRanking = [back, ...subtypeRanking.filter(x => x !== back)];
+    }
 
     const rawScores = params.get('rscores');
     if (rawScores) {
@@ -1844,7 +1956,6 @@ async function runGeneration() {
     return;
   }
 
-  window.__pdfScores = lastSortedScores;
   displayReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype, lastSortedScores, report, null);
 
   // Return visits already converted and already got their email.
@@ -1858,7 +1969,6 @@ async function runGeneration() {
 
 // She asked for the template knowingly. It's labelled as such, no email, no pixel.
 function showGeneralVersion() {
-  window.__pdfScores = lastSortedScores;
   const report = getFallbackReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype);
   displayReport(dominantType, TYPE_NAMES[dominantType], dominantSubtype, lastSortedScores, report, true);
   showScreen('screen-report');
@@ -1968,6 +2078,7 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
     + '?token=shiftprofile2024'
     + '&rtype='    + encodeURIComponent(typeNum)
     + '&rsubtype=' + encodeURIComponent(subtype)
+    + '&rstack=' + encodeURIComponent(subtypeRanking.join(','))
     + '&rname='    + encodeURIComponent(userName)
     + '&remail='   + encodeURIComponent(userEmail)
     + (scoreString ? '&rscores=' + encodeURIComponent(scoreString) : '')
@@ -1999,6 +2110,10 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
 // ══════════════════════════════════════
 function displayReport(typeNum, typeName, subtype, sortedScores, report, reportError) {
   document.getElementById('report-name').textContent = `${userName}'s Profile`;
+  // Browsers use document.title as the default filename when saving to PDF
+  document.title = userName
+    ? `Enneagram Profile - ${String(userName).trim().replace(/\s+/g, '-')}`
+    : 'Enneagram Profile';
 
   const topScore = sortedScores[0] ? sortedScores[0].score : 0;
   const tiedTypes = sortedScores.filter(s => s.score === topScore);
@@ -2073,6 +2188,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     <!-- YOUR RESULTS -->
     <div class="report-section">
       <h2 class="report-section-title">Your results</h2>
+      ${renderEvidence(typeNum, sortedScores)}
       ${sortedScores.length ? `
       <div class="panel">
         <div class="panel-head">How you scored across all nine</div>
@@ -2082,9 +2198,11 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
       ${renderSubtypePanel(typeNum, subtype)}
       ${renderSubtypeViz(window.__subtypeStack, subtype)}
       ${renderWheel(typeNum)}
+      ${renderFalsify(typeNum, sortedScores)}
       ${renderWings(typeNum)}
       ${renderStrengthsWeaknesses(typeNum)}
       ${renderLevels(typeNum)}
+      ${renderRealLife(typeNum)}
     </div>
     <hr class="report-divider">
 
@@ -2097,7 +2215,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
 
     <!-- HOW YOU GOT HERE -->
     <div class="report-section">
-      <h2 class="report-section-title">How you got here</h2>
+      <h2 class="report-section-title">Why this pattern makes sense</h2>
       <div class="report-section-body">${formatParagraphs(report.howYouGotHere)}</div>
     </div>
     <hr class="report-divider">
@@ -2169,10 +2287,11 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
     </div>
 
     <div class="report-actions">
-      <button class="btn-primary" onclick="downloadPDF()">Download PDF</button>
-      <button class="btn-dark" onclick="window.print()">Print</button>
+      <button class="btn-primary" onclick="saveReportPdf()">Save as PDF</button>
+      
       <button class="btn-secondary" style="border-color:var(--rule);color:var(--muted);" onclick="goToThankYou()">I'm Done Reading</button>
     </div>
+      <p id="print-help" class="print-help" style="display:none;"></p>
   `;
 
   showScreen('screen-report');
@@ -2214,273 +2333,6 @@ function parseReflectionQuestions(text) {
 // ══════════════════════════════════════
 // PDF DOWNLOAD
 // ══════════════════════════════════════
-function downloadPDF() {
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("The PDF tool didn't load - an ad blocker or a flaky connection is the usual cause.\n\nYour report is safe on this page. Use your browser's Print option and choose Save as PDF, or email hello@marianavaldez.com and I'll send it over.");
-    return;
-  }
-  // This buyer's type colour, used for the cover, headings and bars.
-  const _tcHex = (TYPE_PROFILE[dominantType] && TYPE_PROFILE[dominantType].color) || '#3F4B2F';
-  const TC = (function (hex) {
-    let c = String(hex || '').replace('#', '');
-    if (c.length === 3) c = c.split('').map(x => x + x).join('');
-    const n = parseInt(c, 16);
-    return (c.length !== 6 || isNaN(n)) ? [63, 75, 47]
-      : [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  })(_tcHex);
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  const margin = 20;
-  const contentW = pageW - margin * 2;
-  let y = 0;
-
-  function addPage() { doc.addPage(); y = margin; }
-  function checkY(needed = 10) { if (y + needed > pageH - margin) addPage(); }
-
-  // Cover
-  doc.setFillColor(TC[0], TC[1], TC[2]);
-  doc.rect(0, 0, pageW, pageH, 'F');
-  doc.setFontSize(10); doc.setTextColor(169, 177, 163);
-  doc.text(PRODUCT_NAME.toUpperCase(), pageW / 2, 70, { align: 'center', charSpace: 2 });
-  doc.setFontSize(32); doc.setTextColor(245, 242, 235);
-  doc.text(`${userName}'s`, pageW / 2, 100, { align: 'center' });
-  doc.text(PRODUCT_NAME, pageW / 2, 116, { align: 'center' });
-  doc.setFontSize(14); doc.setTextColor(169, 177, 163);
-  const typeLabel = document.getElementById('report-type-label')?.textContent || '';
-  const typeName2 = (document.getElementById('report-type-name')?.textContent || '');
-  const subtypeLabel = (document.getElementById('report-subtype-label')?.textContent || '');
-  doc.text(`${typeLabel} - ${typeName2}  ·  ${subtypeLabel}`, pageW / 2, 140, { align: 'center' });
-  doc.setFontSize(11); doc.setTextColor(169, 177, 163);
-  doc.text('marianavaldez.com', pageW / 2, pageH - 20, { align: 'center' });
-
-  addPage();
-
-  // ── SCORE BARS in PDF ──
-  // Ranked ramp derived from this buyer's type colour, fading toward neutral
-  const pdfBarColors = Array.from({length:9}, (_, i) => {
-    const f = i / 8;
-    return TC.map(c => Math.round(c + (222 - c) * f * 0.92));
-  });
-
-  const scoreRows = document.querySelectorAll('.score-row');
-  if (scoreRows.length) {
-    doc.setFontSize(8); doc.setTextColor(138, 126, 116); doc.setFont('helvetica', 'bold');
-    doc.text('YOUR TYPE SCORES - OUT OF 30', margin, y); y += 8;
-  }
-  let barColorIdx = 0;
-  scoreRows.forEach(row => {
-    const labelEl = row.querySelector('.score-label');
-    const numEl   = row.querySelector('.score-num');
-    if (!labelEl || !numEl) return;
-
-    const label = labelEl.textContent.trim();
-    const score = parseInt(numEl.textContent.trim()) || 0;
-    const pct   = score / 30;
-
-    checkY(10);
-
-    // Label
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(90, 88, 84);
-    doc.text(label, margin, y);
-
-    // Bar background
-    const barX = margin + 52;
-    const barW = contentW - 62;
-    const barH = 4;
-    doc.setFillColor(216, 210, 198);
-    doc.roundedRect(barX, y - 3.5, barW, barH, 1, 1, 'F');
-
-    // Bar fill - use hardcoded colors matching the on-screen version
-    const [r, g, b] = pdfBarColors[barColorIdx] || [196, 113, 74];
-    doc.setFillColor(r, g, b);
-    doc.roundedRect(barX, y - 3.5, barW * pct, barH, 1, 1, 'F');
-    barColorIdx++;
-
-    // Score number
-    doc.setFontSize(9); doc.setTextColor(90, 88, 84);
-    doc.text(String(score), pageW - margin, y, { align: 'right' });
-
-    y += 9;
-  });
-
-  y += 8;
-  doc.setDrawColor(216, 210, 198);
-  doc.line(margin, y, pageW - margin, y);
-  y += 10;
-  // ── END SCORE BARS ──
-
-  // ── Profile panels: these live in .panel / .glance-grid, which the section
-  // loop below doesn't read, so they'd be missing from the PDF otherwise. ──
-  const tp = TYPE_PROFILE[dominantType];
-  if (tp) {
-    checkY(30);
-    doc.setFontSize(16); doc.setTextColor(47, 49, 51); doc.setFont('helvetica', 'bold');
-    doc.text('Type ' + dominantType + ' at a glance', margin, y); y += 8;
-    const _st = getSubtype(dominantType, dominantSubtype);
-    if (_st) {
-      doc.setFontSize(10); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'normal');
-      doc.text(dominantSubtype + ' subtype: ' + _st.keyword + (_st.counter ? '  (countertype)' : ''), margin, y); y += 8;
-    } else { y += 2; }
-    doc.setFont('helvetica', 'normal');
-
-    const pairs = [
-      ['Worldview', tp.worldview], ['Focus of attention', tp.focus],
-      ['Core fear', tp.fear], ['Core desire', tp.desire],
-      ['The sentence underneath', tp.selfTalk],
-      ['Your gift', tp.gift], ['Your vice', tp.vice]
-    ];
-    pairs.forEach(([k, v]) => {
-      checkY(14);
-      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-      doc.text(k.toUpperCase(), margin, y); y += 5;
-      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-      const lines = doc.splitTextToSize(String(v).replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"'), contentW);
-      lines.forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
-      y += 4;
-    });
-    y += 4;
-
-    // Centres: membership only, for the reason noted in renderCenters.
-    checkY(20);
-    doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-    doc.text('CENTRES OF INTELLIGENCE', margin, y); y += 6;
-    doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-    Object.keys(CENTER_INFO).forEach(c => {
-      checkY(6);
-      doc.text(c + ' (types ' + CENTER_INFO[c].types.join(', ') + ')' + (c === tp.center ? '  - yours' : ''), margin, y);
-      y += 5.5;
-    });
-    y += 8;
-
-    // Instinctual stack
-    const stack = window.__subtypeStack || [];
-    if (stack.length === 3) {
-      checkY(24);
-      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-      doc.text('YOUR INSTINCTUAL STACK', margin, y); y += 6;
-      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-      stack.forEach((n, i) => {
-        checkY(6);
-        doc.text((i + 1) + '.  ' + n + (i === 0 ? '  (dominant)' : ''), margin, y);
-        y += 5.5;
-      });
-      y += 8;
-    }
-
-    // Wings and lines
-    checkY(24);
-    doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-    doc.text('WHERE YOU SIT, AND WHERE YOU MOVE', margin, y); y += 6;
-    doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-    [
-      'In growth you move toward ' + tp.growth + ' - ' + TYPE_PROFILE[tp.growth].name,
-      'Under strain you move toward ' + tp.stress + ' - ' + TYPE_PROFILE[tp.stress].name
-    ].forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
-    y += 10;
-
-    // Wings, with what each one actually does
-    const wn = WING_NOTES[dominantType];
-    if (wn) {
-      checkY(24);
-      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-      doc.text('YOUR TWO WINGS', margin, y); y += 6;
-      tp.wings.forEach(w => {
-        checkY(16);
-        doc.setFontSize(9.5); doc.setTextColor(90, 88, 84); doc.setFont('helvetica', 'bold');
-        doc.text('Type ' + dominantType + ' with a ' + w + ' wing - ' + TYPE_NAMES[w], margin, y); y += 5;
-        doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-        doc.splitTextToSize(String(wn[w]).replace(/[\u2018\u2019]/g, "'"), contentW)
-           .forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
-        y += 5;
-      });
-      y += 6;
-    }
-    y += 6;
-
-    // Strengths and weaknesses
-    [['KEY STRENGTHS', tp.strengths], ['WHERE IT COSTS YOU', tp.weaknesses]].forEach(([hd, list]) => {
-      checkY(24);
-      doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-      doc.text(hd, margin, y); y += 6;
-      doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-      list.forEach(item => {
-        const lines = doc.splitTextToSize('- ' + item, contentW - 4);
-        checkY(lines.length * 6);
-        lines.forEach(l => { doc.text(l, margin + 2, y); y += 5.5; });
-      });
-      y += 7;
-    });
-
-    // The three levels
-    checkY(24);
-    doc.setFontSize(8); doc.setTextColor(TC[0], TC[1], TC[2]); doc.setFont('helvetica', 'bold');
-    doc.text('THE THREE VERSIONS OF TYPE ' + dominantType, margin, y); y += 6;
-    [['At your best', tp.healthy], ['Most of the time', tp.average], ['Under real strain', tp.unhealthy]]
-      .forEach(([lab, txt]) => {
-        checkY(16);
-        doc.setFontSize(9); doc.setTextColor(90, 88, 84); doc.setFont('helvetica', 'bold');
-        doc.text(lab, margin, y); y += 5;
-        doc.setFontSize(10); doc.setTextColor(58, 58, 60); doc.setFont('helvetica', 'normal');
-        const lines = doc.splitTextToSize(String(txt).replace(/[\u2018\u2019]/g, "'"), contentW);
-        lines.forEach(l => { checkY(6); doc.text(l, margin, y); y += 5.5; });
-        y += 5;
-      });
-    y += 8;
-
-    doc.setDrawColor(216, 210, 198);
-    checkY(10); doc.line(margin, y, margin + contentW, y); y += 12;
-  }
-
-  const sections = document.querySelectorAll('.report-section');
-  sections.forEach((section, idx) => {
-    const label = section.querySelector('.report-section-label')?.textContent || '';
-    const title = section.querySelector('.report-section-title')?.textContent || '';
-    const body = section.querySelector('.report-section-body, .report-box-body, .zodiac-box .report-box-body');
-    const questionsBox = section.querySelector('.questions-box');
-    let bodyText = '';
-    if (questionsBox) {
-      const items = questionsBox.querySelectorAll('.question-item');
-      if (items.length > 0) {
-        bodyText = Array.from(items).map((item, i) => {
-          const q = item.querySelector('.question-text-display')?.textContent || '';
-          return (i + 1) + '. ' + q;
-        }).join('\n');
-      } else {
-        bodyText = questionsBox.innerText;
-      }
-    } else if (body) {
-      bodyText = body.innerText;
-    }
-    if (!bodyText) return;
-
-    checkY(30);
-    if (label) {
-      doc.setFontSize(8); doc.setTextColor(198, 123, 92); doc.setFont('helvetica', 'bold');
-      doc.text(label.toUpperCase(), margin, y); y += 6;
-    }
-    if (title) {
-      doc.setFontSize(16); doc.setTextColor(47, 49, 51);
-      const titleLines = doc.splitTextToSize(title, contentW);
-      checkY(titleLines.length * 8 + 4);
-      doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
-    }
-    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(58, 58, 60);
-    const cleanBodyText = bodyText.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/[\u2014]/g, '--').replace(/[\u2013]/g, '-');
-    const bodyLines = doc.splitTextToSize(cleanBodyText, contentW);
-    bodyLines.forEach(line => { checkY(6); doc.text(line, margin, y); y += 5.5; });
-    y += 10;
-    if (idx < sections.length - 1) {
-      checkY(4);
-      doc.setDrawColor(216, 210, 198);
-      doc.line(margin, y, pageW - margin, y);
-      y += 10;
-    }
-  });
-
-  doc.save(`Shift-Profile-${userName.replace(/\s+/g, '-')}.pdf`);
-}
 
 // ══════════════════════════════════════
 // FALLBACK REPORT
@@ -2751,6 +2603,411 @@ function renderWings(typeNum) {
     </div>`;
 }
 
+
+// ══════════════════════════════════════
+// THE SAME PATTERN IN THREE ARENAS
+// Deliberately shallow. Enough for someone to recognise themselves and
+// want more, not a full treatment of each domain.
+// ══════════════════════════════════════
+const REAL_LIFE = {
+ "1": {
+  "Money": [
+   "Careful and responsible with it. You'd rather go without than be wasteful.",
+   "Spending on yourself starts to feel like a small moral failure.",
+   "If no one could ever call the decision irresponsible, what would I spend on?"
+  ],
+  "Health": [
+   "Discipline comes easily, and you keep the routine when nobody's watching.",
+   "The routine becomes one more standard to fall short of, and rest has to be earned.",
+   "If my body didn't have to earn rest, what would I do differently this week?"
+  ],
+  "Relationships": [
+   "Loyal and fair. You hold up your end without being asked.",
+   "The corrections are small and constant, and the irritation underneath stays unsaid.",
+   "What have I been correcting that I could simply let be?"
+  ],
+  "Work": [
+   "Conscientious and thorough. People trust what you hand over.",
+   "The work is never quite finished, and 'good enough' feels like a compromise you can't make.",
+   "What would I make if it didn't have to be right the first time?"
+  ]
+ },
+ "2": {
+  "Money": [
+   "Generous. You'll spend on people you love before you spend on yourself.",
+   "Giving becomes how you hold the relationship, and you stop tracking what it costs you.",
+   "What would I buy for myself if nobody ever found out?"
+  ],
+  "Health": [
+   "You look after other people's wellbeing with real attention.",
+   "Your own needs wait until your body makes them impossible to ignore.",
+   "What do I need right now that I'd give someone else without hesitating?"
+  ],
+  "Relationships": [
+   "You make people feel genuinely seen. You're the one they call.",
+   "You give what you'd like to receive, then feel unappreciated when it doesn't come back.",
+   "What would I ask for if I were certain it wouldn't cost me the relationship?"
+  ],
+  "Work": [
+   "You make teams work. You see what people need and you supply it.",
+   "Your contribution runs through other people, and your own ambition stays unnamed.",
+   "What do I want that I've never said out loud at work?"
+  ]
+ },
+ "3": {
+  "Money": [
+   "You earn well, and you're good at turning effort into results.",
+   "Income becomes the scoreboard, and the number after the goal lands strangely flat.",
+   "If nobody knew what I earned, what financial goal would I still want?"
+  ],
+  "Health": [
+   "Disciplined. You'll hold a plan that works.",
+   "The body becomes another metric, and rest reads as falling behind.",
+   "If there were no visible result to show anyone, how would I take care of my body?"
+  ],
+  "Relationships": [
+   "You bring energy and competence, and people rely on you.",
+   "You solve instead of reveal, and being impressive gets in the way of being known.",
+   "Where am I trying to be impressive when what I want is to be known?"
+  ],
+  "Work": [
+   "You deliver. You turn ambiguity into progress faster than almost anyone.",
+   "The role becomes the identity, and you can't tell whether you want the next thing or just need to win it.",
+   "What would I work on if it could never go on my CV?"
+  ]
+ },
+ "4": {
+  "Money": [
+   "You spend on what has meaning and won't fake enthusiasm for what doesn't.",
+   "Money stands in for what's missing, and comparison makes the gap louder.",
+   "What would I spend on if I weren't comparing my life to anyone else's?"
+  ],
+  "Health": [
+   "Attuned to your body. You notice what's off before other people would.",
+   "Mood decides consistency, and you wait to feel like it before you start.",
+   "What would I do for my body on a day I don't feel like it?"
+  ],
+  "Relationships": [
+   "You go deep quickly, and you're honest when everyone else is being polite.",
+   "Intensity gets mistaken for closeness, and what's absent feels louder than what's here.",
+   "What's already here that I've been treating as not enough?"
+  ],
+  "Work": [
+   "You bring originality and you won't produce work you don't believe in.",
+   "Ordinary work feels like a betrayal, and the meaning has to be there before you can start.",
+   "What could I finish if it didn't have to be extraordinary?"
+  ]
+ },
+ "5": {
+  "Money": [
+   "You need very little, and you dislike being financially dependent on anyone.",
+   "Spending less on your own life becomes another way of needing less from the world.",
+   "What would I spend on if I trusted there would be more?"
+  ],
+  "Health": [
+   "You'll research it properly and follow a protocol you actually understand.",
+   "The body comes last because the head comes first, and depletion arrives quietly.",
+   "What does my body need that I've been treating as a distraction?"
+  ],
+  "Relationships": [
+   "Loyal, low-drama, and you mean what you say.",
+   "You ration your availability, and people feel a distance you never intended.",
+   "Who would I let closer if I believed it wouldn't drain me?"
+  ],
+  "Work": [
+   "Deep expertise. You know things properly rather than approximately.",
+   "You keep preparing past the point of readiness, and the work stays private longer than it should.",
+   "What could I share now, at the stage it's actually at?"
+  ]
+ },
+ "6": {
+  "Money": [
+   "You plan for what could go wrong, and you're rarely caught out.",
+   "Security never quite arrives. No amount saved feels like enough.",
+   "What would 'enough' actually look like, in a number?"
+  ],
+  "Health": [
+   "You take symptoms seriously and follow through on what you're told.",
+   "Vigilance about the body becomes its own source of stress.",
+   "What would I stop monitoring if I trusted my body to tell me?"
+  ],
+  "Relationships": [
+   "Loyal in a way that's genuinely rare. You stay when it's hard.",
+   "You test people before you trust them, often without meaning to.",
+   "Who have I been testing instead of trusting?"
+  ],
+  "Work": [
+   "You spot the risk everyone else missed, and you make things dependable.",
+   "You look for permission you don't need, and certainty arrives after the window has closed.",
+   "What would I decide today if no one else's approval were available?"
+  ]
+ },
+ "7": {
+  "Money": [
+   "You back yourself, you'll take the risk, and you're good at creating options.",
+   "Spending buys possibility, and a budget feels like a cage rather than a plan.",
+   "What would I keep if I couldn't buy my way to another option?"
+  ],
+  "Health": [
+   "Real enthusiasm for anything new you try.",
+   "Consistency loses to novelty, and discomfort gets outrun instead of treated.",
+   "What would change if I stayed with the boring version for a month?"
+  ],
+  "Relationships": [
+   "Generous, funny, genuinely interested in people.",
+   "When it turns heavy, you find somewhere else to be.",
+   "What conversation have I been outrunning?"
+  ],
+  "Work": [
+   "Ideas, energy, momentum. You see the possibility before anyone else does.",
+   "You're gone by the unglamorous middle, and the finishing falls to somebody else.",
+   "What's the one thing I'd finish if I couldn't start anything new?"
+  ]
+ },
+ "8": {
+  "Money": [
+   "Decisive with it. You'll back yourself when other people hesitate.",
+   "Money is leverage, and depending on anyone else's is close to intolerable.",
+   "What would I risk differently if I didn't have to be the one in control?"
+  ],
+  "Health": [
+   "You push through, and you have real physical stamina.",
+   "You override the signals until something forces you to stop.",
+   "What signal have I been overriding?"
+  ],
+  "Relationships": [
+   "You protect your people and you say the true thing.",
+   "Your intensity lands harder than you think, and softness feels like exposure.",
+   "Who could I let see me before I've got it handled?"
+  ],
+  "Work": [
+   "You make decisions other people avoid and you carry the weight of them.",
+   "Delegating feels like risk, and you end up holding more than one person should.",
+   "What could I hand over and genuinely leave alone?"
+  ]
+ },
+ "9": {
+  "Money": [
+   "Steady with it. You don't need much to be content.",
+   "Decisions get postponed, and the drift costs more than a wrong choice would have.",
+   "What decision have I been postponing that's costing me more than a wrong answer would?"
+  ],
+  "Health": [
+   "Consistent once a routine is actually in place.",
+   "Comfort does the soothing, and starting is the part that doesn't happen.",
+   "What would I begin today if I didn't wait to feel ready?"
+  ],
+  "Relationships": [
+   "Easy to be around. People relax near you.",
+   "You agree to keep the peace, and the resentment turns up much later.",
+   "What have I agreed to that I didn't actually want?"
+  ],
+  "Work": [
+   "Steady, collaborative, and genuinely easy to work alongside.",
+   "Your own agenda goes unstated, and you end up serving everyone else's priorities.",
+   "What do I want here, before I find out what anyone else wants?"
+  ]
+ }
+};
+
+function renderRealLife(typeNum) {
+  const d = REAL_LIFE[typeNum];
+  if (!d) return '';
+  return `
+    <div class="panel">
+      <div class="panel-head">The same pattern in three places</div>
+      <div class="panel-body">
+        ${Object.keys(d).map(area => `
+          <div class="arena">
+            <div class="arena-name">${area === "Work" ? "Work &amp; purpose" : area}</div>
+            <div class="arena-lines">
+              <div class="arena-is"><span>Usually</span>${d[area][0]}</div>
+              <div class="arena-trap"><span>When it takes over</span>${d[area][1]}</div>
+              <div class="arena-q">${d[area][2]}</div>
+            </div>
+          </div>`).join('')}
+        <p class="panel-note">You don't have one pattern at work and a different personality everywhere else. It's the same strategy, showing up wherever there's something to protect or prove.</p>
+      </div>
+    </div>`;
+}
+
+
+// ══════════════════════════════════════
+// WHY WE THINK THIS IS YOUR TYPE
+// Built from the actual numbers and her actual words, not generated. It
+// cannot invent anything, and it shows the buyer how the result was reached
+// instead of only asserting it.
+// ══════════════════════════════════════
+// Anything a buyer typed that ends up in innerHTML has to go through this.
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function renderEvidence(typeNum, scores) {
+  if (!scores || scores.length < 3) return '';
+  const top = scores[0];
+  const gap = top.score - scores[1].score;
+
+  const bullets = [];
+
+  // 1. How clear the result is
+  if (gap >= 4) {
+    bullets.push(`<strong>Your Type ${typeNum} score was ${top.score} out of 30</strong>, ${gap} points clear of anything else. That's a decisive result.`);
+  } else if (gap === 0) {
+    bullets.push(`<strong>Type ${typeNum} and Type ${scores[1].type} tied at ${top.score} out of 30.</strong> The report leads with Type ${typeNum}, but read the Type ${scores[1].type} material too - you may be living between them.`);
+  } else {
+    bullets.push(`<strong>Your Type ${typeNum} score was ${top.score} out of 30</strong>, only ${gap} ${gap === 1 ? 'point' : 'points'} above Type ${scores[1].type}. That's close enough that both are worth reading.`);
+  }
+
+  // 2. Secondary cluster - types bunched just below the top
+  const rest = scores.slice(1);
+  const clusterTop = rest[0].score;
+  const cluster = rest.filter(x => clusterTop - x.score <= 1);
+  if (cluster.length >= 2) {
+    const nums = cluster.map(c => c.type);
+    const list = nums.slice(0, -1).join(', ') + ' and ' + nums[nums.length - 1];
+    bullets.push(`<strong>Types ${list} all landed within a point of each other</strong>, at ${cluster[cluster.length-1].score}-${clusterTop}. That mix is part of why your Type ${typeNum} won't look like the textbook version.`);
+  }
+
+  // 3. Her own words, quoted exactly
+  if (userContext && userContext.trim()) {
+    const q = userContext.trim();
+    const shown = q.length > 140 ? q.substring(0, 140).trim() + '...' : q;
+    bullets.push(`<strong>You wrote: "${escapeHtml(shown)}"</strong> That's in your own words, and it shapes several sections below.`);
+  }
+
+  if (!bullets.length) return '';
+  return `
+    <div class="panel evidence">
+      <div class="panel-head">Why we think this is your type</div>
+      <div class="panel-body">
+        <ul class="evidence-list">${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+      </div>
+    </div>`;
+}
+
+
+const MISTYPE = {
+ "1": {
+  "6": "If the drive is really about staying safe from getting it wrong rather than about getting it right, look harder at Type 6.",
+  "8": "If the anger comes out rather than staying in, and control matters more than correctness, look harder at Type 8.",
+  "3": "If what matters is the result rather than the standard, look harder at Type 3."
+ },
+ "2": {
+  "9": "If you go along with people to keep the peace rather than to be needed by them, look harder at Type 9.",
+  "6": "If the loyalty is about safety rather than about being someone's person, look harder at Type 6.",
+  "4": "If the focus is on what you feel rather than on what others need, look harder at Type 4."
+ },
+ "3": {
+  "1": "If the drive is about being right rather than about succeeding, look harder at Type 1.",
+  "7": "If you're chasing stimulation and possibility rather than value through achievement, look harder at Type 7.",
+  "8": "If it's about power and control rather than about recognition, look harder at Type 8."
+ },
+ "4": {
+  "5": "If you withdraw to conserve energy rather than to stay with the feeling, look harder at Type 5.",
+  "6": "If the self-doubt is about danger rather than about identity, look harder at Type 6.",
+  "2": "If the emotional focus lands on other people rather than on yourself, look harder at Type 2."
+ },
+ "5": {
+  "9": "If the withdrawal is about avoiding friction rather than about conserving energy, look harder at Type 9.",
+  "6": "If the thinking is driven by what could go wrong rather than by wanting to understand, look harder at Type 6.",
+  "4": "If the private inner world is about identity rather than about competence, look harder at Type 4."
+ },
+ "6": {
+  "1": "If the vigilance is about standards rather than about safety, look harder at Type 1.",
+  "9": "If decisions stall from not minding rather than from not trusting, look harder at Type 9.",
+  "5": "If you gather information to understand rather than to feel secure, look harder at Type 5."
+ },
+ "7": {
+  "3": "If the busyness is about achieving rather than about keeping options open, look harder at Type 3.",
+  "8": "If the forward motion is about control rather than about possibility, look harder at Type 8.",
+  "9": "If you avoid discomfort by going quiet rather than by moving toward something better, look harder at Type 9."
+ },
+ "8": {
+  "3": "If it's about being seen to win rather than about not being controlled, look harder at Type 3.",
+  "6": "If the confrontation comes from fear you're running at rather than from strength, look harder at a counterphobic Type 6.",
+  "1": "If the anger is about things being wrong rather than about someone having power over you, look harder at Type 1."
+ },
+ "9": {
+  "2": "If you accommodate to be needed rather than to keep the peace, look harder at Type 2.",
+  "5": "If the withdrawal is about protecting energy rather than about avoiding friction, look harder at Type 5.",
+  "6": "If the hesitation is about danger rather than about not minding either way, look harder at Type 6."
+ }
+};
+
+// ══════════════════════════════════════
+// WHAT WOULD MAKE THIS RESULT WRONG
+// The Enneagram has a self-confirmation problem: almost anyone can read
+// almost any type description and find themselves in it. Naming what would
+// falsify the result is what separates an assessment from a horoscope.
+// ══════════════════════════════════════
+function renderFalsify(typeNum, scores) {
+  const alts = MISTYPE[typeNum];
+  if (!alts) return '';
+  // Lead with whichever alternatives actually scored near the top for her
+  const near = (scores || []).slice(1, 5).map(x => x.type).filter(t => alts[t]);
+  const order = [...new Set([...near, ...Object.keys(alts).map(Number)])].slice(0, 3);
+  return `
+    <div class="panel">
+      <div class="panel-head">Before you decide this is you</div>
+      <div class="panel-body">
+        <p class="falsify-intro">Almost anyone can read almost any type and find themselves in it. So here is what would make us question a Type ${typeNum} result. If one of these lands harder than the report does, read that type instead.</p>
+        <ul class="falsify-list">${order.map(t => `<li>${alts[t]}</li>`).join('')}</ul>
+        <p class="panel-note">This isn't a diagnosis, and it isn't a box to fit yourself into. If something here doesn't fit, don't force it. The useful part is whatever makes you recognise yourself in a way that changes a decision.</p>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// SAVING THE REPORT
+// The report prints itself rather than being redrawn into a second
+// document. Three things have to be handled:
+//   - web fonts must be loaded or the print snapshot uses fallbacks
+//   - Instagram and Facebook in-app browsers handle print() unreliably
+//   - iOS needs telling how to get from the share sheet to a file
+// ══════════════════════════════════════
+function isInAppBrowser() {
+  const ua = navigator.userAgent || '';
+  return /Instagram|FBAN|FBAV|FB_IAB|Line\/|Twitter|Snapchat|Pinterest|LinkedInApp/i.test(ua);
+}
+
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent || '')
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+
+async function saveReportPdf() {
+  // In-app browsers either ignore print() or open a share sheet with no
+  // route to a file. Send people to a real browser instead of failing.
+  if (isInAppBrowser()) {
+    const note = document.getElementById('print-help');
+    if (note) {
+      note.innerHTML = 'Saving a PDF doesn\'t work inside the Instagram browser. '
+        + 'Tap the <strong>&hellip;</strong> menu at the top and choose '
+        + '<strong>Open in browser</strong>, then try again. '
+        + 'Your link works every time, so nothing is lost.';
+      note.style.display = 'block';
+      note.scrollIntoView({ block: 'center' });
+    }
+    return;
+  }
+
+  const note = document.getElementById('print-help');
+  if (note && isIOS()) {
+    note.innerHTML = 'In the share sheet that opens, choose <strong>Print</strong>, '
+      + 'then pinch outwards on the preview and tap the share icon to save it to Files.';
+    note.style.display = 'block';
+  }
+
+  // Without this the snapshot can fire before Cormorant and Montserrat load,
+  // and the PDF comes out in fallback fonts.
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
+  window.print();
+}
+
 // ── Strengths and weaknesses, as bullets rather than paragraphs ──
 function renderStrengthsWeaknesses(typeNum) {
   const t = TYPE_PROFILE[typeNum];
@@ -2863,7 +3120,7 @@ function renderSubtypeViz(ranking, dominant) {
               <div class="stack-note">${meta[name] || ''}</div>
             </div>
           </div>`).join('')}
-        <p class="panel-note">Two people who share your type but not your stack can be almost unrecognisable to each other. There are 27 combinations, not 9.</p>
+        <p class="panel-note">Your dominant instinct - the one at the top - is what combines with your type to give your subtype above. The other two still shape where your attention goes day to day. Two people who share a type but not a stack can be almost unrecognisable to each other.</p>
       </div>
     </div>`;
 }
@@ -2891,7 +3148,7 @@ function renderWheel(typeNum) {
     <div class="panel">
       <div class="panel-head">Where you sit, and where you move</div>
       <div class="panel-body wheel-body">
-        <svg viewBox="0 0 300 300" class="wheel" role="img" aria-label="Enneagram wheel showing type ${typeNum}">
+        <svg viewBox="0 0 300 300" width="268" height="268" class="wheel" role="img" aria-label="Enneagram wheel showing type ${typeNum}">
           <circle cx="${cx}" cy="${cy}" r="${r}" class="wheel-ring"></circle>
           <line class="line-growth" x1="${me.x}" y1="${me.y}" x2="${gr.x}" y2="${gr.y}"></line>
           <line class="line-stress" x1="${me.x}" y1="${me.y}" x2="${st.x}" y2="${st.y}"></line>
