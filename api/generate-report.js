@@ -7,7 +7,7 @@ const WRITING_MODEL  = 'claude-haiku-4-5-20251001';
 const TYPE_NAMES = {
   // iEQ9 (Integrative Enneagram) type names, to match the certification.
   1: "Strict Perfectionist", 2: "Considerate Helper", 3: "Competitive Achiever",
-  4: "Intense Creative", 5: "Quiet Specialist", 6: "Loyal Sceptic",
+  4: "Intense Creative", 5: "Quiet Specialist", 6: "Loyal Skeptic",
   7: "Enthusiastic Visionary", 8: "Active Controller", 9: "Adaptive Peacemaker"
 };
 
@@ -196,7 +196,7 @@ ${safeContext}
   // ────────────────────────────────────────
   // PASS 1 - ANALYSIS
   // ────────────────────────────────────────
-  const analysisPrompt = `You are an expert Enneagram practitioner with NLP training. Analyse this person's assessment data. Do NOT write a report. Produce a tight working analysis another writer will use.
+  const analysisPrompt = `You are an expert Enneagram practitioner with NLP training. Analyze this person's assessment data. Do NOT write a report. Produce a tight working analysis another writer will use.
 
 PERSON: ${userName}
 Dominant: Type ${typeNum} ${typeName}. ${TYPE_CONTEXT[typeNum]}.
@@ -230,7 +230,7 @@ THE TRIGGER: the exact first signal, physical or mental, that the pattern has st
 
 THE INTERRUPT: one specific action, under 60 seconds, that breaks it at that signal. Concrete enough that she knows whether she did it. Not "practice self-compassion", not "take a breath and reflect".
 
-THE PREDICTION: what she'll do in the next two to three weeks as this pattern defends itself against being seen. Rules: it must be about the PATTERN, not her circumstances. Never predict external events, other people's behaviour, or anything involving a job, partner, or family member. It should be specific enough to feel uncanny and likely enough to actually happen. Give a rough timeframe. Include the tell - the exact thought she'll have when it starts.
+THE PREDICTION: what she'll do in the next two to three weeks as this pattern defends itself against being seen. Rules: it must be about the PATTERN, not her circumstances. Never predict external events, other people's behavior, or anything involving a job, partner, or family member. It should be specific enough to feel uncanny and likely enough to actually happen. Give a rough timeframe. Include the tell - the exact thought she'll have when it starts.
 
 THE 14-DAY PROTOCOL: one repeatable thing, under two minutes a day, in two steps. CATCH - name the trigger the moment it fires, in her own words. CHOOSE - one small alternative action or question available to her right then. Noticing alone trains her to observe the pattern without changing a single decision; the second step is what turns it into a choice. State when she does it and how she knows she did it. Almost embarrassingly small.
 
@@ -252,6 +252,7 @@ WHAT TO NAME DIRECTLY: one or two specifics from her outliers or her own words t
       `THE INTERRUPT: one concrete action under 60 seconds that breaks it at that signal.`,
       `THE PREDICTION: what she will do in the next two to three weeks as the pattern defends itself against being seen. About the pattern, never about her circumstances.`,
       `THE 14-DAY PROTOCOL: one repeatable thing under two minutes a day, in two steps. CATCH - name the trigger the moment it fires, in her own words. CHOOSE - one small alternative action or question available to her right then, in that moment. Awareness alone changes nothing; the second step is what turns noticing into a decision. Almost embarrassingly small.`,
+      `THE EMAIL TEASER: tease the tension of Type ${typeNum} without giving away the reframe, and end on one uncomfortable question about her own situation.`,
       `WHAT TO NAME DIRECTLY: nothing specific is available - do not invent details about her.`
     ].join('\n');
   }
@@ -264,7 +265,21 @@ An adult in the middle of an identity shift. She's done some inner work already.
 WHAT THIS IS
 Not a personality description. She can get that free online in thirty seconds. Everything here has to be traceable to HER data below. If a paragraph could show up in any free Enneagram description, rewrite it or cut it.
 
-Her ${subtype} subtype colours how Type ${typeNum} shows up, but the type is the subject. Reference the subtype only where it changes something real.
+Her ${subtype} subtype colors how Type ${typeNum} shows up, but the type is the subject. Reference the subtype only where it changes something real.
+
+YOU ARE MARIANA, WRITING TO HER
+First person throughout. "I", "me", "my" - never "Mariana", never "the author",
+never "your coach". You are not describing someone else's report to her; you are
+the person who wrote it, talking to her directly. The moment a third person
+appears, it stops sounding like a human and starts sounding like software.
+
+NEVER QUOTE THIS BRIEF
+The only words you may put in quotation marks as hers are the ones inside
+<user_reflection>. Everything else in these instructions - the description of who
+she is, the audience notes, any phrasing about looking successful or suspecting
+she's capable of more - is background for you and was never written by her.
+Quoting it back reads as a hallucination, because to her it is one. Never write
+about her in the third person either; these sections are addressed to her.
 
 EVIDENCE DENSITY
 Do not make a psychological claim you could not trace back to something in her
@@ -273,6 +288,11 @@ or her instinct stack. If a sentence would be equally true of anyone with this
 type, it is padding. Cut it or ground it. Be confident about the pattern and
 humble about the interpretation: "your answers point to" beats "this is what is
 happening", and neither needs a hedge like "maybe" or "perhaps".
+
+INSTINCT NAMING
+The three instincts are Self-Preservation, Social and One-on-One. Never write
+"sexual instinct" or "sexual subtype" - the report labels it One-on-One
+everywhere else and the mismatch is jarring.
 
 BALANCE - THIS MATTERS
 Type ${typeNum} is the spine of this report. Write about the type first and foremost.
@@ -323,12 +343,13 @@ Write exactly the keys listed below, and no others:
 
 {
 "whereYouGetStuck": "About 190 words. THE STRONGEST SECTION IN THE REPORT.${cleanContext ? ` Her own words are in the <user_reflection> tags above. Quote her back to herself EXACTLY, word for word, inside quotation marks, in the first two sentences. Do not clean up her grammar, do not paraphrase, do not summarize. Then show her what's underneath what she wrote.` : ' Open with THE SENTENCE from the analysis, in quotation marks, in her own likely words.'} Then what it's protecting. Then THE REFRAME, also in quotation marks. Make the swap concrete enough to use today.",
-"yourGrowthEdge": "About 200 words. THE 14-DAY PROTOCOL from the analysis, written as an actual assignment with a start and an end. Name THE TRIGGER first - the exact signal that the pattern has started. Then both steps, clearly separated: CATCH, where she names it in her own words, and CHOOSE, one small different thing available to her in that same moment. Then when she does it and how she knows she did it. Under two minutes a day, fourteen days. Be specific enough that she could start tomorrow and know by Friday whether she's doing it right. Say plainly that this is small on purpose and that reading about a pattern changes nothing while catching it four or five times changes how she decides. No 'practice self-compassion'. Something she could do on a Tuesday at 3pm.",
+"yourGrowthEdge": "About 200 words. THE 14-DAY PROTOCOL from the analysis, written as an actual assignment with a start and an end. Name THE TRIGGER first - the exact signal that the pattern has started. Then both steps, each on its own line, labelled in capitals exactly as written here with nothing added or abbreviated - CATCH: then what she names, and CHOOSE: then the one small different thing available to her in that same moment. Then when she does it and how she knows she did it. Under two minutes a day, fourteen days. Be specific enough that she could start tomorrow and know by Friday whether she's doing it right. Say plainly that this is small on purpose and that reading about a pattern changes nothing while catching it four or five times changes how she decides. No 'practice self-compassion'. Something she could do on a Tuesday at 3pm.",
 "questionsToSitWith": "Exactly 6 numbered questions as '1. text' each on its own line, separated by \\n. Specific to her data, her type and her subtype. Uncomfortable in a useful way. No yes/no questions - each should be hard to answer in one sentence.",
 ${sunSign ? `"zodiacBlend": "About 230 words. Type ${typeNum} with a ${sunSign} sun. This is a bonus section and it should read as one - lighter, more playful, curious rather than clinical. Do NOT treat astrology as measurement and do not claim it explains her. Frame it as a second lens laid over the first. Find the genuine TENSION between the two: where the Enneagram drive and the ${sunSign} archetype pull in different directions, and where they amplify each other into something specific. Be concrete about what that combination looks like on an ordinary Tuesday. End on the question the combination raises for her. No horoscope voice, no predictions about events, no 'the stars say'.",` : ''}
+"emailTeaser": "THREE OR FOUR SENTENCES, no more. This is not part of the report - it goes in the email that tells her the report is ready, and its only job is to make her want to open it. Open with the tension you found, not with a conclusion. If she wrote something in <user_reflection>, build it from that. The FINAL sentence must be a specific question about her own situation that she cannot answer from the email alone. 'Does that resonate?' or 'Sound familiar?' are failures - they are answerable without the report and they sound like marketing. Tease the tension that leads to THE REFRAME but never state the reframe itself; that is the payoff inside the report and giving it away here wastes it. Never summarise, never list what the report contains, never say 'the rest is waiting'. No greeting, no sign-off, no link - those are added around it.",
 "invitationToBLN": "About 110 words. Do NOT pitch a program, a course, or a price. Tell her the one thing to do this week: start the 14 days, and put a note somewhere for day 14. Then refer to the prediction WITHOUT restating it - you were not given its wording and
 must not invent a different one. Say something like 'the thing I said you'd catch yourself
-doing in the next few weeks' and tell her to notice if it comes true, because that's how she'll know the pattern is real and not just a description she agreed with. Close by asking her to message Mariana on Instagram and say whether the type felt right and whether the prediction landed - say that it genuinely shapes what gets built next. Warm, direct, no hard sell. Close like this, in your own words: don't decide yet whether this was accurate - do the fourteen days, notice what happens, then read this again. If she catches the pattern in real life she'll know more than any report could tell her."
+doing in the next few weeks' and tell her to notice if it comes true, because that's how she'll know the pattern is real and not just a description she agreed with. Close by asking her to message me on Instagram and tell me whether the type felt right and whether the prediction landed - and say that what she tells me genuinely shapes what gets built next. First person throughout: me, I, not 'Mariana' and not 'the author'. Warm, direct, no hard sell. Close like this, in your own words: don't decide yet whether this was accurate - do the fourteen days, notice what happens, then read this again. If she catches the pattern in real life she'll know more than any report could tell her."
 }`;
 
   try {
