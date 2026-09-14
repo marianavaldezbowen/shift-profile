@@ -1243,6 +1243,16 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   color: var(--muted); margin: 2px 0 0;
 }
 
+
+.inapp-warning {
+  font-family: 'Montserrat', sans-serif; font-size: 14px; line-height: 1.6;
+  color: var(--charcoal); background: var(--terra-bg);
+  border: 1px solid var(--terra-light); border-left: 4px solid var(--terra);
+  padding: 16px 18px; border-radius: 3px;
+  max-width: 520px; margin: 0 auto 30px; text-align: left;
+}
+.inapp-warning strong { font-weight: 600; }
+
 </style>
 </head>
 <body>
@@ -1264,6 +1274,13 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 ══════════════════════════════════════ -->
 <div id="screen-welcome" class="screen active">
   <span class="welcome-badge" data-product-name></span>
+  <div id="inapp-warning" class="inapp-warning" style="display:none;">
+    <strong>Open this in your browser first.</strong>
+    You're in the Instagram browser, and it tends to drop long connections -
+    which means you could answer everything and lose it at the last step.
+    Tap the <strong>&hellip;</strong> menu at the top and choose
+    <strong>Open in browser</strong>. Your link works there too.
+  </div>
   <h1 class="welcome-title">You know what you do.<br><em>Let's find out why.</em></h1>
   <p class="welcome-sub">This goes past your Enneagram type to the pattern underneath your answers - what drives it, where it helps you, and where it's been getting in your way.</p>
   <div class="welcome-meta">
@@ -1341,6 +1358,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   <div class="instructions" style="margin-top:28px;">
     <p>Try again in a moment - it usually works the second time. If it doesn't, your access link still works, so you can come back later today and pick up right here.</p>
     <p style="margin-top:10px;">I've been notified either way, and I'll follow up if it's still broken.</p>
+    <p id="fail-inapp" style="display:none; margin-top:14px;">One very likely cause: you're in the Instagram browser, which tends to drop long connections. Tap the <strong>&hellip;</strong> menu at the top, choose <strong>Open in browser</strong>, and use your access link again there.</p>
   </div>
   <button class="btn-primary" style="margin-top:28px;" onclick="runGeneration()">Try Again</button>
   <div class="locked-link" style="margin-top:22px;">
@@ -1446,6 +1464,15 @@ window.addEventListener('load', function() {
 const ACCESS_TOKEN = 'shiftprofile2024';
 
 function checkAccess() {
+  // In-app browsers kill the long generation request. Warn before she invests
+  // ten minutes, not after. This is why the first real buyer lost her answers.
+  try {
+    if (isInAppBrowser()) {
+      const w = document.getElementById('inapp-warning');
+      if (w) w.style.display = 'block';
+    }
+  } catch (e) {}
+
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
 
@@ -1972,6 +1999,10 @@ async function runGeneration() {
 
   if (lastError) {
     notifyOwnerOfFailure(lastError);
+    try {
+      const fi = document.getElementById('fail-inapp');
+      if (fi && isInAppBrowser()) fi.style.display = 'block';
+    } catch (e) {}
     showScreen('screen-failed');
     window.scrollTo(0, 0);
     return;
