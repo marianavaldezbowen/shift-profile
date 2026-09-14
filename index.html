@@ -27,7 +27,7 @@ src="https://www.facebook.com/tr?id=1309711794380173&ev=PageView&noscript=1"
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root {
-  /* White page, near-black text, squared corners. Colour is an accent only. */
+  /* White page, near-black text, squared corners. Color is an accent only. */
   --page:        #FFFFFF;
   --page-lift:   #F6F5F2;
   --charcoal:    #1E2124;   /* body text - near black */
@@ -342,6 +342,8 @@ body { background: var(--cream); color: var(--deep); font-family: 'Montserrat', 
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
+  .welcome-meta-value { font-size: 15px; line-height: 1.3; }
+  .welcome-meta { gap: 14px; }
   .quiz-header { padding: 16px 20px; }
   .quiz-progress-wrap { display: none; }
   .quiz-body { padding: 32px 20px; }
@@ -358,11 +360,11 @@ body { background: var(--cream); color: var(--deep); font-family: 'Montserrat', 
 
 /* ══════════════════════════════════════════════════════════════
    LIGHT PASS
-   Reference: warm off-white page, sage colour blocks, a blush band,
+   Reference: warm off-white page, sage color blocks, a blush band,
    serif headings, soft rounded cards, one small terracotta button.
    ══════════════════════════════════════════════════════════════ */
 
-/* --deep is now a text colour, so every surface that used it as a
+/* --deep is now a text color, so every surface that used it as a
    background moves to sage. */
 #screen-welcome,
 #screen-loading,
@@ -1149,9 +1151,14 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 
 
 .arena-q {
-  font-family: 'Cormorant Garamond', serif; font-size: 17px; line-height: 1.4;
-  color: var(--type); margin-top: 9px; padding-left: 13px;
-  border-left: 2px solid var(--rule); font-style: italic;
+  font-family: 'Cormorant Garamond', serif; font-size: 17.5px; line-height: 1.4;
+  color: var(--type); margin-top: 11px; padding-left: 14px;
+  border-left: 2px solid var(--type); font-style: italic;
+}
+.arena-q span {
+  display: block; font-family: 'Montserrat', sans-serif; font-style: normal;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--terra); margin-bottom: 3px;
 }
 .arena { margin-bottom: 26px; }
 
@@ -1213,6 +1220,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   .arena { display: block; }
   .arena-name { width: auto; margin-bottom: 4px; }
   .wheel { width: 268px !important; max-width: 268px !important; height: 268px !important; }
+  .zodiac-section { break-before: page; page-break-before: always; }
   .print-help, #print-help { display: none !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
@@ -1223,6 +1231,16 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   border: 1px solid var(--terra-light); border-left: 4px solid var(--terra);
   padding: 15px 18px;
   margin: 16px auto 0; max-width: 560px; border-radius: 3px;
+}
+
+
+.intake-why {
+  font-family: 'Montserrat', sans-serif; font-size: 15.5px; font-weight: 500;
+  color: var(--charcoal); margin: 0 0 18px;
+}
+.intake-note {
+  font-family: 'Montserrat', sans-serif; font-size: 13px; line-height: 1.55;
+  color: var(--muted); margin: 2px 0 0;
 }
 
 </style>
@@ -1246,11 +1264,11 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 ══════════════════════════════════════ -->
 <div id="screen-welcome" class="screen active">
   <span class="welcome-badge" data-product-name></span>
-  <h1 class="welcome-title">See the pattern<br><em>that's been running you</em></h1>
-  <p class="welcome-sub">Not a type and a paragraph. Your actual pattern, named, and one thing to do about it.</p>
+  <h1 class="welcome-title">You know what you do.<br><em>Let's find out why.</em></h1>
+  <p class="welcome-sub">This goes past your Enneagram type to the pattern underneath your answers - what drives it, where it helps you, and where it's been getting in your way.</p>
   <div class="welcome-meta">
     <div class="welcome-meta-item">
-      <span class="welcome-meta-label">Questions</span>
+      <span class="welcome-meta-label">Statements</span>
       <span class="welcome-meta-value">63</span>
     </div>
     <div class="welcome-meta-item">
@@ -1259,17 +1277,19 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
     </div>
     <div class="welcome-meta-item">
       <span class="welcome-meta-label">Result</span>
-      <span class="welcome-meta-value">Instant Report</span>
+      <span class="welcome-meta-value">Personalized profile</span>
     </div>
   </div>
   <div class="intake-form">
-    <label>Your First Name</label>
+    <p class="intake-why">First, where should I send your profile?</p>
+    <label for="user-name">Your first name</label>
     <input type="text" id="user-name" placeholder="e.g. Sofia" autocomplete="given-name">
-    <label>Your Email Address</label>
+    <label for="user-email">Your email address</label>
     <input type="email" id="user-email" placeholder="sofia@example.com" autocomplete="email">
+    <p class="intake-note">Your profile appears on screen the moment you finish. The email is so you have a link back to it whenever you want.</p>
     <div class="error-msg" id="intake-error" role="alert" aria-live="polite">Please enter your name and a valid email address.</div>
   </div>
-  <button class="btn-primary" onclick="startQuiz()">Begin My Profile</button>
+  <button class="btn-primary" onclick="startQuiz()">Begin the assessment</button>
   <div class="instructions" style="margin-top: 32px;">
     <p>As you read each statement, go with your first instinct - the answer that feels most true to who you are <em>most of the time</em>, not just on your best day.</p>
     <p style="margin-top: 8px;">There are no right or wrong answers. No type is better than another. This is about awareness, not judgment.</p>
@@ -1439,12 +1459,13 @@ function checkAccess() {
   const returnType    = params.get('rtype');
   const returnSubtype = params.get('rsubtype');
   const returnName    = params.get('rname');
-  const returnEmail   = params.get('remail');
 
   if (returnType && returnSubtype && returnName) {
     // Valid return link - skip the quiz, regenerate report immediately
     userName        = decodeURIComponent(returnName);
-    userEmail       = returnEmail ? decodeURIComponent(returnEmail) : '';
+    // Deliberately not carried in the link - see resultsUrl. No email is
+    // sent on a return visit, so nothing needs it.
+    userEmail       = '';
     dominantType    = parseInt(returnType);
     dominantSubtype = decodeURIComponent(returnSubtype);
 
@@ -1502,7 +1523,7 @@ const LIKERT_OPTIONS = [
 const TYPE_NAMES = {
   // iEQ9 (Integrative Enneagram) type names, to match the certification.
   1: "Strict Perfectionist", 2: "Considerate Helper", 3: "Competitive Achiever",
-  4: "Intense Creative", 5: "Quiet Specialist", 6: "Loyal Sceptic",
+  4: "Intense Creative", 5: "Quiet Specialist", 6: "Loyal Skeptic",
   7: "Enthusiastic Visionary", 8: "Active Controller", 9: "Adaptive Peacemaker"
 };
 
@@ -1537,9 +1558,9 @@ const SCORED_QUESTIONS = [
   { id: "5d", type: 5, text: "I keep most of what I think to myself, even with people I like." },
   { id: "5e", type: 5, text: "I check out of conversations that feel superficial or ask for energy I'd rather keep." },
   { id: "5f", type: 5, text: "I keep part of myself back even from people I'm close to." },
-  { id: "6a", type: 6, text: "When I'm uncertain, I look for someone whose judgement I trust more than my own." },
+  { id: "6a", type: 6, text: "When I'm uncertain, I look for someone whose judgment I trust more than my own." },
   { id: "6b", type: 6, text: "I notice what could go wrong before I notice what could go right." },
-  { id: "6c", type: 6, text: "I'm sceptical of things that seem too good, and I look for the catch." },
+  { id: "6c", type: 6, text: "I'm skeptical of things that seem too good, and I look for the catch." },
   { id: "6d", type: 6, text: "When something frightens me, I sometimes move straight at it rather than back away." },
   { id: "6e", type: 6, text: "Once I've decided something, I go back over it looking for what I missed." },
   { id: "6f", type: 6, text: "I've trusted someone and been wrong, and part of me is still braced for that." },
@@ -1553,7 +1574,7 @@ const SCORED_QUESTIONS = [
   { id: "8b", type: 8, text: "When someone tries to limit what I can do, my reaction is immediate and strong." },
   { id: "8c", type: 8, text: "I say the thing other people are avoiding saying." },
   { id: "8d", type: 8, text: "I lose patience quickly with excuses." },
-  { id: "8e", type: 8, text: "People tell me I come on stronger than I realise." },
+  { id: "8e", type: 8, text: "People tell me I come on stronger than I realize." },
   { id: "8f", type: 8, text: "Letting someone see me at my weakest feels more dangerous than almost anything else." },
   { id: "9a", type: 9, text: "I can spend so long considering what everyone else wants that my own preference gets hard to find." },
   { id: "9b", type: 9, text: "I'll choose peace over rocking the boat, even when the issue genuinely matters to me." },
@@ -2064,6 +2085,19 @@ function animateLoadingSteps() {
 // ══════════════════════════════════════
 // EMAIL - FIXED: all 11 sections + results_url
 // ══════════════════════════════════════
+// The teaser is optional on purpose: making it required would mean a missing
+// three-sentence hook fails the whole report, which is a far worse outcome than
+// a slightly long email. If it's absent, take the opening of the stuck section
+// rather than the whole 190-word essay.
+function emailTeaserOrFallback(report) {
+  const t = (report.emailTeaser || '').trim();
+  if (t) return t;
+  const src = (report.whereYouGetStuck || '').trim();
+  if (!src) return '';
+  const sentences = src.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+/g) || [src];
+  return sentences.slice(0, 3).join(' ').replace(/\s{2,}/g, ' ').trim();
+}
+
 async function sendReportEmail(typeNum, typeName, subtype, report) {
   if (typeof emailjs === 'undefined' || EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') return;
 
@@ -2080,7 +2114,6 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
     + '&rsubtype=' + encodeURIComponent(subtype)
     + '&rstack=' + encodeURIComponent(subtypeRanking.join(','))
     + '&rname='    + encodeURIComponent(userName)
-    + '&remail='   + encodeURIComponent(userEmail)
     + (scoreString ? '&rscores=' + encodeURIComponent(scoreString) : '')
     + (userContext ? '&rctx=' + encodeURIComponent(userContext.substring(0, 500)) : '')
     + (userSunSign ? '&rsign=' + encodeURIComponent(userSunSign) : '');
@@ -2096,6 +2129,7 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
     inner_world:       report.yourInnerWorld             || '',
     blind_spots:       report.yourBlindSpots             || '',
     stuck:             report.whereYouGetStuck           || '',
+    teaser:            emailTeaserOrFallback(report),
     growth_edge:       report.yourGrowthEdge             || '',
     questions:         report.questionsToSitWith         || '',
     invitation:        report.invitationToBLN            || '',
@@ -2109,6 +2143,13 @@ async function sendReportEmail(typeNum, typeName, subtype, report) {
 // DISPLAY REPORT
 // ══════════════════════════════════════
 function displayReport(typeNum, typeName, subtype, sortedScores, report, reportError) {
+  // The stack is normally set in attemptReport. showGeneralVersion and any
+  // future caller reach here without going through it, and a refactor has
+  // already dropped this assignment once before.
+  if ((!window.__subtypeStack || !window.__subtypeStack.length)
+      && subtypeRanking && subtypeRanking.length) {
+    window.__subtypeStack = subtypeRanking.map(id => SUBTYPE_NAMES[id]).filter(Boolean);
+  }
   document.getElementById('report-name').textContent = `${userName}'s Profile`;
   // Browsers use document.title as the default filename when saving to PDF
   document.title = userName
@@ -2128,7 +2169,7 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
   }
   document.getElementById('report-subtype-label').textContent = `${subtype} Subtype`;
 
-  // Each type carries its own accent colour through the whole report.
+  // Each type carries its own accent color through the whole report.
   const typeColor = (TYPE_PROFILE[typeNum] && TYPE_PROFILE[typeNum].color) || '#3F4B2F';
   document.getElementById('screen-report').style.setProperty('--type', typeColor);
 
@@ -2310,8 +2351,8 @@ function formatParagraphs(text) {
   if (!text) return '';
   // Models occasionally emit a literal backslash-n rather than a real newline.
   // Without this the whole section renders as one paragraph with visible \n.
-  const normalised = String(text).replace(/\\r\\n|\\n/g, '\n');
-  return normalised.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+  const normalized = String(text).replace(/\\r\\n|\\n/g, '\n');
+  return normalized.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
 }
 
 function parseReflectionQuestions(text) {
@@ -2369,7 +2410,7 @@ const TYPE_PROFILE = {
        color:'#8B701B',
        strengths:["Reads what someone needs before they've said it", "Makes people feel genuinely seen and safe", "Generous with time, energy and attention in a way people remember"],
        weaknesses:["Your own needs go unnamed until they come out as resentment", "Help is sometimes given to be needed, not because it was wanted", "You struggle to accept care without immediately repaying it"],
-       healthy:"You give freely and receive freely. You know what you need and you say it out loud without apologising.",
+       healthy:"You give freely and receive freely. You know what you need and you say it out loud without apologizing.",
        average:"You give in order to be needed. Help is offered before it's asked for, and unmet needs turn quietly into keeping score.",
        unhealthy:"You feel used and unappreciated, become intrusive or manipulative, and insist you want nothing while needing a great deal." },
   3: { name:TYPE_NAMES[3], center:'Heart', wings:[2,4], stress:9, growth:6,
@@ -2410,7 +2451,7 @@ const TYPE_PROFILE = {
        vice:'Avarice - not of money, but of your time, energy and inner privacy.',
        color:'#397A9D',
        strengths:["Sees whole systems while other people react to fragments", "Calm and clear-headed in situations that panic everyone else", "Says only what you actually think is true"],
-       weaknesses:["You withdraw to conserve rather than engage and refuel", "Feelings get analysed instead of felt", "People experience distance you didn't intend"],
+       weaknesses:["You withdraw to conserve rather than engage and refuel", "Feelings get analyzed instead of felt", "People experience distance you didn't intend"],
        healthy:"You engage instead of observing. Non-attachment - you can give your knowledge, time and presence without feeling drained.",
        average:"You retreat to think. Knowledge is stockpiled, energy is guarded, and connection happens at a measured distance.",
        unhealthy:"You isolate completely, become contemptuous of people who need things, and mistake avoidance for independence." },
@@ -2418,15 +2459,15 @@ const TYPE_PROFILE = {
        worldview:'The world is unpredictable, so being prepared is the responsible thing to do.',
        focus:'What could go wrong, and who can actually be trusted.',
        fear:'Being without support or guidance when it counts.',
-       desire:'Security, and the ability to trust your own judgement.',
+       desire:'Security, and the ability to trust your own judgment.',
        selfTalk:'"But what if. Let me think this through one more time."',
        gift:'Loyalty and foresight. You spot the risk everyone else talked themselves out of.',
        vice:'Fear, which you often experience as thinking rather than as feeling.',
        color:'#6B5FA8',
        strengths:["Spots the risk everyone else talked themselves out of", "Genuinely loyal - you stay when things get hard", "Asks the question in the room nobody wanted to ask"],
-       weaknesses:["Doubt gets aimed at your own judgement first", "Preparation can become a way of never starting", "Trust is slow to give and quick to withdraw"],
+       weaknesses:["Doubt gets aimed at your own judgment first", "Preparation can become a way of never starting", "Trust is slow to give and quick to withdraw"],
        healthy:"You trust your own read. Courage - you act while afraid instead of waiting for the fear to pass.",
-       average:"You scan, prepare and test. Reassurance helps briefly. Certainty about your own judgement stays out of reach.",
+       average:"You scan, prepare and test. Reassurance helps briefly. Certainty about your own judgment stays out of reach.",
        unhealthy:"Anxiety runs the show. You become suspicious and reactive, or you overcorrect into recklessness to prove you're not afraid." },
   7: { name:TYPE_NAMES[7], center:'Head', wings:[6,8], stress:1, growth:5,
        worldview:'Life is full of possibility, and pain is something to move through quickly.',
@@ -2452,7 +2493,7 @@ const TYPE_PROFILE = {
        vice:'Excess - too much intensity, too much force, too much of everything.',
        color:'#BC523F',
        strengths:["Says the thing everyone was thinking and nobody would say", "Protects the people who can't protect themselves", "Decides fast and carries the weight of it"],
-       weaknesses:["Vulnerability reads as danger, so it stays hidden", "Intensity lands harder on people than you realise", "Control gets taken before it's offered"],
+       weaknesses:["Vulnerability reads as danger, so it stays hidden", "Intensity lands harder on people than you realize", "Control gets taken before it's offered"],
        healthy:"You lead with strength and let people in. Innocence - you can be soft without believing it will cost you.",
        average:"You take charge and push. Directness is a shield, and you test people to see who can handle you.",
        unhealthy:"You dominate and intimidate, see betrayal everywhere, and destroy things rather than appear weak." },
@@ -2465,7 +2506,7 @@ const TYPE_PROFILE = {
        gift:'Steadiness. You hold every side at once and people relax around you.',
        vice:'Self-forgetting - not laziness, but falling asleep to your own priorities.',
        color:'#9C5A3C',
-       strengths:["Holds every side at once and people relax around you", "Steady when everything else is loud", "Genuinely non-judgemental in a way that is rare"],
+       strengths:["Holds every side at once and people relax around you", "Steady when everything else is loud", "Genuinely non-judgmental in a way that is rare"],
        weaknesses:["Your own priorities go last and eventually go missing", "Agreement is given when disagreement was true", "Anger comes out as delay rather than words"],
        healthy:"You know what you want and you say it. Right action - you show up for your own life with the energy you give everyone else.",
        average:"You merge with what's around you. Comfort and routine absorb the friction, and your own agenda stays vague.",
@@ -2558,7 +2599,7 @@ const WING_NOTES = {
  },
  "4": {
   "3": "More driven and outwardly successful. You turn the feeling into something you can show, and you care more about how it lands than other Fours.",
-  "5": "More withdrawn and cerebral. The feeling goes inward and gets analysed rather than expressed, and you need a lot more time alone."
+  "5": "More withdrawn and cerebral. The feeling goes inward and gets analyzed rather than expressed, and you need a lot more time alone."
  },
  "5": {
   "4": "More emotional and individualistic. The inner world is richer and stranger, and you're more likely to make something out of it.",
@@ -2606,7 +2647,7 @@ function renderWings(typeNum) {
 
 // ══════════════════════════════════════
 // THE SAME PATTERN IN THREE ARENAS
-// Deliberately shallow. Enough for someone to recognise themselves and
+// Deliberately shallow. Enough for someone to recognize themselves and
 // want more, not a full treatment of each domain.
 // ══════════════════════════════════════
 const REAL_LIFE = {
@@ -2815,15 +2856,15 @@ function renderRealLife(typeNum) {
   if (!d) return '';
   return `
     <div class="panel">
-      <div class="panel-head">The same pattern in three places</div>
+      <div class="panel-head">The same pattern across your life</div>
       <div class="panel-body">
         ${Object.keys(d).map(area => `
           <div class="arena">
-            <div class="arena-name">${area === "Work" ? "Work &amp; purpose" : area}</div>
+            <div class="arena-name">${area}</div>
             <div class="arena-lines">
-              <div class="arena-is"><span>Usually</span>${d[area][0]}</div>
-              <div class="arena-trap"><span>When it takes over</span>${d[area][1]}</div>
-              <div class="arena-q">${d[area][2]}</div>
+              <div class="arena-is"><span>When you're driving it</span>${d[area][0]}</div>
+              <div class="arena-trap"><span>When it's driving you</span>${d[area][1]}</div>
+              <div class="arena-q"><span>Try this</span>${d[area][2]}</div>
             </div>
           </div>`).join('')}
         <p class="panel-note">You don't have one pattern at work and a different personality everywhere else. It's the same strategy, showing up wherever there's something to protect or prove.</p>
@@ -2854,7 +2895,7 @@ function renderEvidence(typeNum, scores) {
 
   // 1. How clear the result is
   if (gap >= 4) {
-    bullets.push(`<strong>Your Type ${typeNum} score was ${top.score} out of 30</strong>, ${gap} points clear of anything else. That's a decisive result.`);
+    bullets.push(`<strong>Your Type ${typeNum} score was ${top.score} out of 30</strong>, ${gap} points above your next-highest score. That's a decisive result.`);
   } else if (gap === 0) {
     bullets.push(`<strong>Type ${typeNum} and Type ${scores[1].type} tied at ${top.score} out of 30.</strong> The report leads with Type ${typeNum}, but read the Type ${scores[1].type} material too - you may be living between them.`);
   } else {
@@ -2868,7 +2909,11 @@ function renderEvidence(typeNum, scores) {
   if (cluster.length >= 2) {
     const nums = cluster.map(c => c.type);
     const list = nums.slice(0, -1).join(', ') + ' and ' + nums[nums.length - 1];
-    bullets.push(`<strong>Types ${list} all landed within a point of each other</strong>, at ${cluster[cluster.length-1].score}-${clusterTop}. That mix is part of why your Type ${typeNum} won't look like the textbook version.`);
+    const qualifier = cluster.length === 2 ? 'both' : 'all';
+    const span = cluster[cluster.length-1].score === clusterTop
+      ? `at ${clusterTop}`
+      : `at ${cluster[cluster.length-1].score} and ${clusterTop}`;
+    bullets.push(`<strong>Types ${list} ${qualifier} landed within a point of each other</strong>, ${span}. That mix is part of why your Type ${typeNum} won't look like the textbook version.`);
   }
 
   // 3. Her own words, quoted exactly
@@ -2955,7 +3000,7 @@ function renderFalsify(typeNum, scores) {
       <div class="panel-body">
         <p class="falsify-intro">Almost anyone can read almost any type and find themselves in it. So here is what would make us question a Type ${typeNum} result. If one of these lands harder than the report does, read that type instead.</p>
         <ul class="falsify-list">${order.map(t => `<li>${alts[t]}</li>`).join('')}</ul>
-        <p class="panel-note">This isn't a diagnosis, and it isn't a box to fit yourself into. If something here doesn't fit, don't force it. The useful part is whatever makes you recognise yourself in a way that changes a decision.</p>
+        <p class="panel-note">This isn't a diagnosis, and it isn't a box to fit yourself into. If something here doesn't fit, don't force it. The useful part is whatever makes you recognize yourself in a way that changes a decision.</p>
       </div>
     </div>`;
 }
@@ -3034,7 +3079,7 @@ function renderLevels(typeNum) {
   if (!t) return '';
   const rows = [
     ['healthy',   'At your best',    t.healthy],
-    ['average',   'Most of the time', t.average],
+    ['average',   'When the pattern runs the show', t.average],
     ['unhealthy', 'Under real strain', t.unhealthy]
   ];
   return `
@@ -3073,8 +3118,8 @@ function renderAtAGlance(typeNum) {
 
 // ── Centers of intelligence, computed from her actual answers ──
 function renderCenters(scores, typeNum) {
-  // Each centre holds 3 of the 9 types, so a share-of-total always lands near
-  // 33% and can show a buyer's home centre as her lowest. Membership only.
+  // Each center holds 3 of the 9 types, so a share-of-total always lands near
+  // 33% and can show a buyer's home center as her lowest. Membership only.
   const home = TYPE_PROFILE[typeNum] ? TYPE_PROFILE[typeNum].center : null;
   if (!home) return '';
   const byType = {};
@@ -3092,10 +3137,10 @@ function renderCenters(scores, typeNum) {
   }).join('');
   return `
     <div class="panel">
-      <div class="panel-head">Centres of intelligence</div>
+      <div class="panel-head">Centers of intelligence</div>
       <div class="panel-body">
         ${rows}
-        <p class="panel-note">${CENTER_INFO[home].blurb} The nine types group into three centres and yours sits in ${home}, regardless of how you scored on the other two types in that group.</p>
+        <p class="panel-note">${CENTER_INFO[home].blurb} The nine types group into three centers and yours sits in ${home}, regardless of how you scored on the other two types in that group.</p>
       </div>
     </div>`;
 }
@@ -3120,7 +3165,7 @@ function renderSubtypeViz(ranking, dominant) {
               <div class="stack-note">${meta[name] || ''}</div>
             </div>
           </div>`).join('')}
-        <p class="panel-note">Your dominant instinct - the one at the top - is what combines with your type to give your subtype above. The other two still shape where your attention goes day to day. Two people who share a type but not a stack can be almost unrecognisable to each other.</p>
+        <p class="panel-note">Your dominant instinct - the one at the top - is what combines with your type to give your subtype above. The other two still shape where your attention goes day to day. Two people who share a type but not a stack can be almost unrecognizable to each other.</p>
       </div>
     </div>`;
 }
