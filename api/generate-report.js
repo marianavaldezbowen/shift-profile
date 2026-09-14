@@ -1,7 +1,14 @@
 // The Shift Profile - report generation
 // Two-pass: analysis (Sonnet) then writing (Haiku, two calls in parallel).
 
-const ANALYSIS_MODEL = 'claude-sonnet-5';
+// This was 'claude-sonnet-5', which this account's API rejected on every single
+// request - see the Vercel logs for 14 Sep. Every report ran on generic
+// defaults as a result. Pointing it at the model the writing pass already uses
+// successfully, because a working analysis beats a better one that never runs.
+// To upgrade: check console.anthropic.com for the exact model IDs this account
+// can call, change this line, and confirm in the logs that the failure message
+// stops appearing.
+const ANALYSIS_MODEL = 'claude-haiku-4-5-20251001';
 const WRITING_MODEL  = 'claude-haiku-4-5-20251001';
 
 const TYPE_NAMES = {
