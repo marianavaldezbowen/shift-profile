@@ -240,7 +240,19 @@ WHAT TO NAME DIRECTLY: one or two specifics from her outliers or her own words t
   try {
     analysis = await callAnthropic(ANTHROPIC_API_KEY, ANALYSIS_MODEL, 900, analysisPrompt);
   } catch (err) {
-    console.error('Analysis pass failed, continuing without it:', err.message);
+    console.error('Analysis pass failed on ' + ANALYSIS_MODEL + ':', err.message);
+    // Before falling back to generic defaults, retry on the writing model.
+    // It is the same call with a different model string, and that model is
+    // known to work because the report itself depends on it.
+    try {
+      analysis = await callAnthropic(ANTHROPIC_API_KEY, WRITING_MODEL, 900, analysisPrompt);
+      console.warn('Analysis recovered on ' + WRITING_MODEL);
+    } catch (err2) {
+      console.error('Analysis also failed on ' + WRITING_MODEL + ':', err2.message);
+    }
+  }
+
+  if (!analysis) {
     // Every label promptB depends on has to exist, or those sections come out
     // empty or invented. These are type-level defaults, not personalised.
     analysis = [
