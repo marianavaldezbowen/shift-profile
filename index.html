@@ -1253,6 +1253,31 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
 }
 .inapp-warning strong { font-weight: 600; }
 
+
+.loading-warn {
+  font-family: 'Montserrat', sans-serif; font-size: 13.5px; line-height: 1.55;
+  color: var(--charcoal); background: var(--terra-bg);
+  border: 1px solid var(--terra-light); border-left: 4px solid var(--terra);
+  padding: 12px 15px; border-radius: 3px;
+  max-width: 400px; margin: 18px auto 0;
+}
+
+
+.resume-box {
+  font-family: 'Montserrat', sans-serif; font-size: 14px; line-height: 1.6;
+  color: var(--charcoal); background: var(--sage-bg);
+  border: 1px solid var(--olive); border-left: 4px solid var(--olive);
+  padding: 16px 18px; border-radius: 3px;
+  max-width: 520px; margin: 0 auto 24px; text-align: left;
+}
+.resume-btn {
+  display: block; margin-top: 10px; cursor: pointer;
+  background: var(--olive); color: #fff; border: none; border-radius: 3px;
+  font-family: 'Montserrat', sans-serif; font-size: 13.5px; font-weight: 500;
+  padding: 10px 18px;
+}
+.resume-btn:hover { background: var(--olive-soft, #4C5A39); }
+
 </style>
 </head>
 <body>
@@ -1280,6 +1305,11 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
     which means you could answer everything and lose it at the last step.
     Tap the <strong>&hellip;</strong> menu at the top and choose
     <strong>Open in browser</strong>. Your link works there too.
+  </div>
+  <div id="resume-box" class="resume-box" style="display:none;">
+    <strong>You have an assessment in progress.</strong>
+    You answered <span id="resume-count">0</span> statements in this browser.
+    <button type="button" class="resume-btn" onclick="resumeQuiz()">Pick up where I left off</button>
   </div>
   <h1 class="welcome-title">You know what you do.<br><em>Let's find out why.</em></h1>
   <p class="welcome-sub">This goes past your Enneagram type to the pattern underneath your answers - what drives it, where it helps you, and where it's been getting in your way.</p>
@@ -1339,6 +1369,7 @@ body, #screen-report, #screen-quiz, #screen-thankyou,
   <div class="loading-icon"></div>
   <div class="loading-title">Building your profile...</div>
   <div class="loading-sub">We're reading your answers and writing something just for you.</div>
+  <div class="loading-warn">Keep this screen open for about 40 seconds. If your phone locks or you switch apps, the connection drops and you'll have to start again.</div>
   <div class="loading-steps">
     <div class="loading-step active" id="step-1"><div class="step-dot"></div><span>Calculating your Enneagram type</span></div>
     <div class="loading-step" id="step-2"><div class="step-dot"></div><span>Identifying your subtype</span></div>
@@ -1472,6 +1503,7 @@ function checkAccess() {
       if (w) w.style.display = 'block';
     }
   } catch (e) {}
+  try { offerResume(); } catch (e) {}
 
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
@@ -1662,6 +1694,28 @@ const TOTAL_BATCHES = 9;
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// If a previous sitting in this tab was interrupted, offer to resume rather
+// than making someone answer 63 statements again.
+function offerResume() {
+  const d = loadProgress();
+  if (!d || !d.answers) return;
+  const count = Object.keys(d.answers).length;
+  if (count < 6) return;
+  const box = document.getElementById('resume-box');
+  if (!box) return;
+  document.getElementById('resume-count').textContent = count;
+  box.style.display = 'block';
+}
+
+function resumeQuiz() {
+  if (!restoreProgress()) return;
+  const n = document.getElementById('user-name'); if (n && userName) n.value = userName;
+  const e = document.getElementById('user-email'); if (e && userEmail) e.value = userEmail;
+  showScreen('screen-quiz');
+  renderBatch();
   window.scrollTo(0, 0);
 }
 
@@ -1873,7 +1927,7 @@ function getOutliers(dominant) {
   return { high: high.slice(0, 4), low: low.slice(0, 3) };
 }
 
-function setAnswer(qId, value) { answers[qId] = value; }
+function setAnswer(qId, value) { answers[qId] = value; saveProgress(); }
 
 function nextBatch() {
   const start = currentBatch * BATCH_SIZE;
@@ -1930,7 +1984,54 @@ function getSubtypeName(ranking) {
 // ══════════════════════════════════════
 // SUBMIT & GENERATE
 // ══════════════════════════════════════
+// Answers live only in memory, so a dropped connection or an accidental reload
+// used to destroy ten minutes of work. Kept in sessionStorage: same tab only,
+// gone when it closes, never sent anywhere.
+const BACKUP_KEY = 'ep_progress_v1';
+
+function saveProgress() {
+  try {
+    sessionStorage.setItem(BACKUP_KEY, JSON.stringify({
+      answers, subtypeRanking, userName, userEmail,
+      userContext, userSunSign, currentBatch, savedAt: Date.now()
+    }));
+  } catch (e) { /* private mode or full - not fatal */ }
+}
+
+function loadProgress() {
+  try {
+    const raw = sessionStorage.getItem(BACKUP_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    // Anything older than three hours is a different sitting.
+    if (!d || !d.savedAt || Date.now() - d.savedAt > 3 * 60 * 60 * 1000) return null;
+    return d;
+  } catch (e) { return null; }
+}
+
+function restoreProgress() {
+  const d = loadProgress();
+  if (!d || !d.answers || !Object.keys(d.answers).length) return false;
+  answers        = d.answers;
+  subtypeRanking = (d.subtypeRanking && d.subtypeRanking.length === 3) ? d.subtypeRanking : subtypeRanking;
+  userName       = d.userName || userName;
+  userEmail      = d.userEmail || userEmail;
+  userContext    = d.userContext || '';
+  userSunSign    = d.userSunSign || '';
+  currentBatch   = typeof d.currentBatch === 'number' ? d.currentBatch : 0;
+  return true;
+}
+
+function clearProgress() {
+  try { sessionStorage.removeItem(BACKUP_KEY); } catch (e) {}
+}
+
 async function submitQuiz() {
+  // Requested here, synchronously inside the tap, because WebKit only grants a
+  // wake lock during transient user activation. Asking for it later - after the
+  // scoring and a few awaits - is silently refused, which defeats the point.
+  keepScreenAwake();
+
   const ctxEl = document.getElementById('user-context');
   if (ctxEl) userContext = ctxEl.value.trim().substring(0, 500);
   const bdEl = document.getElementById('user-birthdate');
@@ -2050,6 +2151,7 @@ function notifyOwnerOfFailure(errorMessage) {
       subtype: dominantSubtype || '?',
       error_message: String(errorMessage).substring(0, 300)
         + ' | phase: ' + (window.__lastPhase || 'unknown')
+        + (window.__wasHidden ? ' | SCREEN LOCKED OR BACKGROUNDED DURING REQUEST' : '')
         + ' | ua: ' + String(navigator.userAgent).substring(0, 120),
       when: new Date().toISOString()
     }).catch(e => console.warn('Owner alert failed:', e));
@@ -2071,9 +2173,40 @@ function fetchWithTimeout(url, opts, ms) {
     .finally(() => clearTimeout(timer));
 }
 
+// Screen lock during a 30-40 second request silently kills it on iOS. This
+// asks the device to stay awake for the duration. Unsupported browsers just
+// carry on - the warning on the loading screen is the fallback.
+let wakeLock = null;
+
+async function keepScreenAwake() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      // iOS drops the lock when the tab is hidden; take it again on return.
+      document.addEventListener('visibilitychange', reacquireWakeLock);
+    }
+  } catch (e) { /* not supported, or refused - not fatal */ }
+}
+
+async function reacquireWakeLock() {
+  if (document.visibilityState === 'visible' && wakeLock === null) {
+    try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+  }
+}
+
+function releaseScreenAwake() {
+  try {
+    document.removeEventListener('visibilitychange', reacquireWakeLock);
+    if (wakeLock) { wakeLock.release(); wakeLock = null; }
+  } catch (e) {}
+}
+
 async function generateReportStreaming(typeNum, typeName, subtype, sortedScores, outliers, fullRanking) {
   const startedAt = Date.now();
   window.__lastPhase = 'sending request';
+  window.__wasHidden = false;
+  const hiddenWatch = () => { if (document.visibilityState === 'hidden') window.__wasHidden = true; };
+  document.addEventListener('visibilitychange', hiddenWatch);
   const response = await fetchWithTimeout('/api/generate-report', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -2088,8 +2221,12 @@ async function generateReportStreaming(typeNum, typeName, subtype, sortedScores,
       lowOutliers: (outliers && outliers.low) || [],
       userContext
     })
-  }, 90000);
-  window.__lastPhase = 'reading response after ' + Math.round((Date.now() - startedAt) / 1000) + 's';
+  }, 90000).finally(() => {
+    document.removeEventListener('visibilitychange', hiddenWatch);
+    releaseScreenAwake();
+  });
+  window.__lastPhase = 'reading response after ' + Math.round((Date.now() - startedAt) / 1000) + 's'
+    + (window.__wasHidden ? ' (SCREEN WAS LOCKED OR APP BACKGROUNDED)' : '');
 
   if (!response.ok) {
     const err = await response.text();
@@ -2381,6 +2518,8 @@ function displayReport(typeNum, typeName, subtype, sortedScores, report, reportE
       <p id="print-help" class="print-help" style="display:none;"></p>
   `;
 
+  // The report exists now, so the in-progress backup has done its job.
+  clearProgress();
   showScreen('screen-report');
 
   // Animate score bars
